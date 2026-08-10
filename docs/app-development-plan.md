@@ -8,7 +8,7 @@ Iterative Flutter plan to build Strata’s five mockup screens (Onboarding → H
 |-----------|--------|
 | 0 — Foundation | Completed |
 | 1 — Onboarding | Completed |
-| 2 — Home shell | Pending |
+| 2 — Home shell | Completed |
 | 3 — Identify mock | Pending |
 | 4 — ID Result | Pending |
 | 5 — Paleo Translate | Pending |
@@ -17,7 +17,7 @@ Iterative Flutter plan to build Strata’s five mockup screens (Onboarding → H
 
 ## Current state
 
-[`dino_app`](../dino_app) started as a stock Flutter counter app. Iterations 0–1 replaced it with Strata theming, `go_router`, shared widgets, and a full-bleed onboarding screen. Home is still a stub until Iteration 2.
+[`dino_app`](../dino_app) started as a stock Flutter counter app. Iterations 0–2 delivered theming, routing, onboarding, the Home field hub, mock recent/near-you data, and a bottom-nav shell (Home / Map / Scan FAB / Time / Museums). Identify, Translate, and deeper tab content remain stub/placeholder until later iterations.
 
 **Scope for this plan:** the five mockups (Onboarding, Home, Identify, ID Result, Paleo Translate), plus a bottom-nav shell so they connect. Dig Map, Deep Time, Museums, and At Risk get **placeholder routes** only (tappable from Home, simple “Coming soon” screens). Backend stays **local mock JSON + repository interfaces** so real APIs can swap in later without rewriting screens.
 
@@ -87,7 +87,7 @@ Match mock: full-bleed dino/desert hero, Strata logo lockup, “THE PALEONTOLOGY
 
 **Done when:** screen looks like the mock on phone/web; Get Started opens Home.
 
-### Iteration 2 — Home + bottom nav shell
+### Iteration 2 — Home + bottom nav shell — completed
 
 Match mock: greeting, AI Identify hero card, 5-tool icon row, Recently identified horizontal list, Near You card, custom bottom bar (Home / Map / **Scan FAB** / Time / Museums).
 

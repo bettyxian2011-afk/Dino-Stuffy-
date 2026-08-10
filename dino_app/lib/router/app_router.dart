@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../screens/home/home_screen.dart';
+import '../screens/home/recent_matches_screen.dart';
 import '../screens/onboarding/onboarding_screen.dart';
 import '../screens/placeholders/placeholder_screen.dart';
+import '../screens/placeholders/shell_placeholder_tab.dart';
+import '../screens/shell/main_shell.dart';
 
 GoRouter createAppRouter() {
   return GoRouter(
@@ -13,9 +16,61 @@ GoRouter createAppRouter() {
         path: '/onboarding',
         builder: (context, state) => const OnboardingScreen(),
       ),
-      GoRoute(
-        path: '/home',
-        builder: (context, state) => const HomeScreen(),
+      StatefulShellRoute.indexedStack(
+        builder: (context, state, navigationShell) {
+          return MainShell(navigationShell: navigationShell);
+        },
+        branches: [
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/home',
+                builder: (context, state) => const HomeScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/map',
+                builder: (context, state) => const ShellPlaceholderTab(
+                  title: 'Dig Map',
+                  subtitle:
+                      'Public fossil-hunting sites with permits, terrain '
+                      'notes, and Camp Prep checklists.',
+                  icon: Icons.public_outlined,
+                ),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/timeline',
+                builder: (context, state) => const ShellPlaceholderTab(
+                  title: 'Deep Time',
+                  subtitle:
+                      'Geological eras from Cambrian to Holocene with '
+                      'iconic species per period.',
+                  icon: Icons.history,
+                ),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/museums',
+                builder: (context, state) => const ShellPlaceholderTab(
+                  title: 'Museums',
+                  subtitle:
+                      'Find exhibits and specimens on display near you.',
+                  icon: Icons.account_balance_outlined,
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
       GoRoute(
         path: '/identify',
@@ -39,32 +94,15 @@ GoRouter createAppRouter() {
         ),
       ),
       GoRoute(
-        path: '/map',
-        builder: (context, state) => const PlaceholderScreen(
-          title: 'Dig Map',
-          subtitle: 'Public fossil sites — coming soon.',
-        ),
-      ),
-      GoRoute(
-        path: '/timeline',
-        builder: (context, state) => const PlaceholderScreen(
-          title: 'Deep Time',
-          subtitle: 'Geological timeline — coming soon.',
-        ),
-      ),
-      GoRoute(
-        path: '/museums',
-        builder: (context, state) => const PlaceholderScreen(
-          title: 'Museums',
-          subtitle: 'Exhibits near you — coming soon.',
-        ),
-      ),
-      GoRoute(
         path: '/at-risk',
         builder: (context, state) => const PlaceholderScreen(
           title: 'At Risk',
           subtitle: 'Endangered species — coming soon.',
         ),
+      ),
+      GoRoute(
+        path: '/recent',
+        builder: (context, state) => const RecentMatchesScreen(),
       ),
     ],
     errorBuilder: (context, state) => Scaffold(

@@ -12,22 +12,36 @@ class OnboardingScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFF1A0E08),
       body: Stack(
         fit: StackFit.expand,
         children: [
-          Image.asset(
-            'assets/images/onboarding_hero.png',
-            fit: BoxFit.cover,
-            errorBuilder: (_, _, _) => Container(
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Color(0xFFE8913A),
-                    Color(0xFF5C2E12),
-                    Color(0xFF1A0E08),
-                  ],
+          // Zoom out + shift down so the dinosaur head stays in frame
+          ClipRect(
+            child: Transform.translate(
+              offset: const Offset(0, 72),
+              child: Transform.scale(
+                scale: 0.98,
+                alignment: Alignment.topCenter,
+                child: Image.asset(
+                  'assets/images/onboarding_hero.png',
+                  fit: BoxFit.cover,
+                  alignment: const Alignment(0, -0.45),
+                  width: double.infinity,
+                  height: double.infinity,
+                  errorBuilder: (_, _, _) => Container(
+                    decoration: const BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Color(0xFFE8913A),
+                          Color(0xFF5C2E12),
+                          Color(0xFF1A0E08),
+                        ],
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -177,7 +191,7 @@ class _FeatureChips extends StatelessWidget {
           child: _FeatureChip(
             icon: Icons.public_outlined,
             label: 'Dig Map',
-            onTap: () => context.push('/map'),
+            onTap: () => context.go('/map'),
           ),
         ),
         const SizedBox(width: 8),
@@ -185,7 +199,7 @@ class _FeatureChips extends StatelessWidget {
           child: _FeatureChip(
             icon: Icons.history_outlined,
             label: 'Deep Time',
-            onTap: () => context.push('/timeline'),
+            onTap: () => context.go('/timeline'),
           ),
         ),
       ],
