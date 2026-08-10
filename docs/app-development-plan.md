@@ -9,15 +9,15 @@ Iterative Flutter plan to build Strata’s five mockup screens (Onboarding → H
 | 0 — Foundation | Completed |
 | 1 — Onboarding | Completed |
 | 2 — Home shell | Completed |
-| 3 — Identify mock | Pending |
-| 4 — ID Result | Pending |
-| 5 — Paleo Translate | Pending |
+| 3 — Identify mock | Completed |
+| 4 — ID Result | Completed |
+| 5 — Paleo Translate | Completed |
 | 6 — Capture wiring | Pending |
 | 7 — Real services | Pending |
 
 ## Current state
 
-[`dino_app`](../dino_app) started as a stock Flutter counter app. Iterations 0–2 delivered theming, routing, onboarding, the Home field hub, mock recent/near-you data, and a bottom-nav shell (Home / Map / Scan FAB / Time / Museums). Identify, Translate, and deeper tab content remain stub/placeholder until later iterations.
+[`dino_app`](../dino_app) started as a stock Flutter counter app. Iterations 0–5 delivered theming, routing, onboarding, Home shell, Identify + ID Result, and Paleo Translate (mock repository with glossary). Capture wiring and real APIs remain for later iterations.
 
 **Scope for this plan:** the five mockups (Onboarding, Home, Identify, ID Result, Paleo Translate), plus a bottom-nav shell so they connect. Dig Map, Deep Time, Museums, and At Risk get **placeholder routes** only (tappable from Home, simple “Coming soon” screens). Backend stays **local mock JSON + repository interfaces** so real APIs can swap in later without rewriting screens.
 
@@ -97,7 +97,7 @@ Match mock: greeting, AI Identify hero card, 5-tool icon row, Recently identifie
 
 **Done when:** Home matches composition; nav and primary CTAs navigate correctly with mock content.
 
-### Iteration 3 — Identify camera mock UI
+### Iteration 3 — Identify camera mock UI — completed
 
 Dark full-screen overlay: close, title pill, flash, orange focus brackets + scan line, status badges, Library / Photo / Live ID mode selector, gallery thumb, shutter, flip.
 
@@ -107,7 +107,7 @@ Dark full-screen overlay: close, title pill, flash, orange focus brackets + scan
 
 **Done when:** Identify looks like the mock and shutter opens ID Result.
 
-### Iteration 4 — ID Result mock → mock data
+### Iteration 4 — ID Result mock → mock data — completed
 
 Header specimen image, overlapping result card (confidence, genus, progress bar), alternatives, AI tip callout, taxonomy chips, quick-facts row, **View full profile** + bookmark.
 
@@ -117,7 +117,7 @@ Header specimen image, overlapping result card (confidence, genus, progress bar)
 
 **Done when:** Result screen is data-driven from JSON; changing JSON updates the UI without layout rewrites.
 
-### Iteration 5 — Paleo Translate mock → mock data
+### Iteration 5 — Paleo Translate mock → mock data — completed
 
 Header, language swap card, source abstract, teal **Translate (Paleo mode)** button, result with highlighted terms, glossary cards.
 

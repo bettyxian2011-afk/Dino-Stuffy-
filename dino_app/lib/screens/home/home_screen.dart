@@ -164,7 +164,7 @@ class HomeScreen extends StatelessWidget {
                     final match = recent[index];
                     return RecentMatchCard(
                       match: match,
-                      onTap: () => context.push('/id-result'),
+                      onTap: () => context.push('/id-result?id=${match.id}'),
                     );
                   },
                 ),

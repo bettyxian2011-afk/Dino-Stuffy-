@@ -38,7 +38,7 @@ class RecentMatchesScreen extends StatelessWidget {
             children: [
               RecentMatchCard(
                 match: match,
-                onTap: () => context.push('/id-result'),
+                onTap: () => context.push('/id-result?id=${match.id}'),
               ),
               const SizedBox(width: 16),
               Expanded(

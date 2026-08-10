@@ -3,10 +3,14 @@ import 'package:go_router/go_router.dart';
 
 import '../screens/home/home_screen.dart';
 import '../screens/home/recent_matches_screen.dart';
+import '../screens/id_result/id_result_screen.dart';
+import '../screens/id_result/species_profile_screen.dart';
+import '../screens/identify/identify_screen.dart';
 import '../screens/onboarding/onboarding_screen.dart';
 import '../screens/placeholders/placeholder_screen.dart';
 import '../screens/placeholders/shell_placeholder_tab.dart';
 import '../screens/shell/main_shell.dart';
+import '../screens/translate/translate_screen.dart';
 
 GoRouter createAppRouter() {
   return GoRouter(
@@ -74,24 +78,29 @@ GoRouter createAppRouter() {
       ),
       GoRoute(
         path: '/identify',
-        builder: (context, state) => const PlaceholderScreen(
-          title: 'Identify',
-          subtitle: 'Camera identify arrives in Iteration 3.',
-        ),
+        builder: (context, state) => const IdentifyScreen(),
       ),
       GoRoute(
         path: '/id-result',
-        builder: (context, state) => const PlaceholderScreen(
-          title: 'ID Result',
-          subtitle: 'Identification results arrive in Iteration 4.',
-        ),
+        builder: (context, state) {
+          final id = state.uri.queryParameters['id'] ?? 'dact-1';
+          return IdResultScreen(specimenId: id);
+        },
+      ),
+      GoRoute(
+        path: '/species/:genus',
+        builder: (context, state) {
+          final genus = state.pathParameters['genus'] ?? 'Unknown';
+          return SpeciesProfileScreen(
+            genus: Uri.decodeComponent(genus),
+            commonGroup: state.uri.queryParameters['group'],
+            family: state.uri.queryParameters['family'],
+          );
+        },
       ),
       GoRoute(
         path: '/translate',
-        builder: (context, state) => const PlaceholderScreen(
-          title: 'Paleo Translate',
-          subtitle: 'Translate arrives in Iteration 5.',
-        ),
+        builder: (context, state) => const TranslateScreen(),
       ),
       GoRoute(
         path: '/at-risk',

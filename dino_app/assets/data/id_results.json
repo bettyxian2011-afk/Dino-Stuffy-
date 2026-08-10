@@ -1,0 +1,104 @@
+{
+  "dact-1": {
+    "id": "dact-1",
+    "specimenImage": "assets/images/fossil_ammonite.png",
+    "confidenceLabel": "HIGH CONFIDENCE",
+    "matchLabel": "Best match · likely genus",
+    "tip": "Species-level ID needs suture detail. Add a close-up of the shell ridges to sharpen the result.",
+    "taxonomy": ["Mollusca", "Cephalopoda", "Ammonoidea"],
+    "candidates": [
+      {
+        "genus": "Dactylioceras",
+        "commonGroup": "Ammonite",
+        "family": "Dactylioceratidae",
+        "confidence": 92,
+        "thumbnail": "assets/images/fossil_ammonite.png",
+        "isBestMatch": true
+      },
+      {
+        "genus": "Harpoceras",
+        "commonGroup": "Ammonite",
+        "family": "Hildoceratidae",
+        "confidence": 61,
+        "thumbnail": "assets/images/fossil_ammonite.png",
+        "isBestMatch": false
+      },
+      {
+        "genus": "Hildoceras",
+        "commonGroup": "Ammonite",
+        "family": "Hildoceratidae",
+        "confidence": 34,
+        "thumbnail": "assets/images/fossil_trilobite.png",
+        "isBestMatch": false
+      }
+    ],
+    "facts": [
+      {
+        "icon": "schedule",
+        "value": "180Ma",
+        "label": "Early Jurassic"
+      },
+      {
+        "icon": "straighten",
+        "value": "4–6cm",
+        "label": "Diameter"
+      },
+      {
+        "icon": "public",
+        "value": "Global",
+        "label": "Marine shale"
+      }
+    ]
+  },
+  "velo-1": {
+    "id": "velo-1",
+    "specimenImage": "assets/images/fossil_velociraptor.png",
+    "confidenceLabel": "HIGH CONFIDENCE",
+    "matchLabel": "Best match · likely genus",
+    "tip": "Add a clear view of the sickle claw and skull proportions to refine species-level ID.",
+    "taxonomy": ["Chordata", "Dinosauria", "Theropoda"],
+    "candidates": [
+      {
+        "genus": "Velociraptor",
+        "commonGroup": "Dromaeosaurid",
+        "family": "Dromaeosauridae",
+        "confidence": 92,
+        "thumbnail": "assets/images/fossil_velociraptor.png",
+        "isBestMatch": true
+      },
+      {
+        "genus": "Deinonychus",
+        "commonGroup": "Dromaeosaurid",
+        "family": "Dromaeosauridae",
+        "confidence": 58,
+        "thumbnail": "assets/images/fossil_velociraptor.png",
+        "isBestMatch": false
+      },
+      {
+        "genus": "Utahraptor",
+        "commonGroup": "Dromaeosaurid",
+        "family": "Dromaeosauridae",
+        "confidence": 31,
+        "thumbnail": "assets/images/fossil_velociraptor.png",
+        "isBestMatch": false
+      }
+    ],
+    "facts": [
+      {
+        "icon": "schedule",
+        "value": "75Ma",
+        "label": "Late Cretaceous"
+      },
+      {
+        "icon": "straighten",
+        "value": "~2m",
+        "label": "Body length"
+      },
+      {
+        "icon": "public",
+        "value": "Mongolia",
+        "label": "Djadochta Fm"
+      }
+    ]
+  }
+}
