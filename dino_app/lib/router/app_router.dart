@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../models/captured_specimen.dart';
 import '../screens/home/home_screen.dart';
 import '../screens/home/recent_matches_screen.dart';
 import '../screens/id_result/id_result_screen.dart';
@@ -83,6 +84,10 @@ GoRouter createAppRouter() {
       GoRoute(
         path: '/id-result',
         builder: (context, state) {
+          final captured = state.extra;
+          if (captured is CapturedSpecimen) {
+            return IdResultScreen(captured: captured);
+          }
           final id = state.uri.queryParameters['id'] ?? 'dact-1';
           return IdResultScreen(specimenId: id);
         },

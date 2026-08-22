@@ -59,6 +59,10 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>NSCameraUsageDescription</key>
+	<string>Strata uses the camera to photograph fossils for identification.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Strata needs photo library access so you can pick fossil images to identify.</string>
 	<key>UISupportedInterfaceOrientations~ipad</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>

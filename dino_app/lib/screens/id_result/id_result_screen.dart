@@ -1,8 +1,11 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../data/repositories/identify_repository.dart';
+import '../../models/captured_specimen.dart';
 import '../../models/id_result.dart';
 import '../../theme/strata_theme.dart';
 import '../../widgets/confidence_pill.dart';
@@ -12,11 +15,13 @@ import '../../widgets/gradient_cta_button.dart';
 class IdResultScreen extends StatefulWidget {
   const IdResultScreen({
     super.key,
-    required this.specimenId,
+    this.specimenId = 'dact-1',
+    this.captured,
     IdentifyRepository? repository,
   }) : repository = repository ?? const _DefaultRepo();
 
   final String specimenId;
+  final CapturedSpecimen? captured;
   final IdentifyRepository repository;
 
   @override
@@ -24,8 +29,15 @@ class IdResultScreen extends StatefulWidget {
 }
 
 class _IdResultScreenState extends State<IdResultScreen> {
-  late final Future<IdResult> _future =
-      widget.repository.getMockResult(widget.specimenId);
+  late final Future<IdResult> _future = _loadResult();
+
+  Future<IdResult> _loadResult() {
+    final captured = widget.captured;
+    if (captured != null) {
+      return widget.repository.identify(captured.bytes);
+    }
+    return widget.repository.getMockResult(widget.specimenId);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,7 +62,10 @@ class _IdResultScreenState extends State<IdResultScreen> {
             body: const Center(child: Text('Could not load identification.')),
           );
         }
-        return _IdResultBody(result: snapshot.data!);
+        return _IdResultBody(
+          result: snapshot.data!,
+          previewBytes: widget.captured?.bytes,
+        );
       },
     );
   }
@@ -64,12 +79,21 @@ class _DefaultRepo implements IdentifyRepository {
   Future<IdResult> getMockResult(String imageId) {
     return MockIdentifyRepository().getMockResult(imageId);
   }
+
+  @override
+  Future<IdResult> identify(Uint8List bytes) {
+    return MockIdentifyRepository().identify(bytes);
+  }
 }
 
 class _IdResultBody extends StatefulWidget {
-  const _IdResultBody({required this.result});
+  const _IdResultBody({
+    required this.result,
+    this.previewBytes,
+  });
 
   final IdResult result;
+  final Uint8List? previewBytes;
 
   @override
   State<_IdResultBody> createState() => _IdResultBodyState();
@@ -98,12 +122,9 @@ class _IdResultBodyState extends State<_IdResultBody> {
                     child: Stack(
                       fit: StackFit.expand,
                       children: [
-                        Image.asset(
-                          result.specimenImage,
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, _, _) => Container(
-                            color: const Color(0xFFD9CBB8),
-                          ),
+                        _SpecimenHeaderImage(
+                          previewBytes: widget.previewBytes,
+                          assetPath: result.specimenImage,
                         ),
                         const DecoratedBox(
                           decoration: BoxDecoration(
@@ -218,6 +239,33 @@ class _IdResultBodyState extends State<_IdResultBody> {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _SpecimenHeaderImage extends StatelessWidget {
+  const _SpecimenHeaderImage({
+    required this.previewBytes,
+    required this.assetPath,
+  });
+
+  final Uint8List? previewBytes;
+  final String assetPath;
+
+  @override
+  Widget build(BuildContext context) {
+    if (previewBytes != null) {
+      return Image.memory(
+        previewBytes!,
+        fit: BoxFit.cover,
+        gaplessPlayback: true,
+        errorBuilder: (_, _, _) => Container(color: const Color(0xFFD9CBB8)),
+      );
+    }
+    return Image.asset(
+      assetPath,
+      fit: BoxFit.cover,
+      errorBuilder: (_, _, _) => Container(color: const Color(0xFFD9CBB8)),
     );
   }
 }

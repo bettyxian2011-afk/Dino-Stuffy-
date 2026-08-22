@@ -1,7 +1,10 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:image_picker/image_picker.dart';
 
+import '../../models/captured_specimen.dart';
 import '../../theme/strata_theme.dart';
 import '../../widgets/glass_icon_button.dart';
 
@@ -18,8 +21,13 @@ class IdentifyScreen extends StatefulWidget {
 
 class _IdentifyScreenState extends State<IdentifyScreen>
     with SingleTickerProviderStateMixin {
+  final ImagePicker _picker = ImagePicker();
+
   IdentifyMode _mode = IdentifyMode.photo;
   bool _flashOn = false;
+  bool _busy = false;
+  Uint8List? _previewBytes;
+  String? _previewPath;
   late final AnimationController _scanController;
 
   @override
@@ -37,8 +45,72 @@ class _IdentifyScreenState extends State<IdentifyScreen>
     super.dispose();
   }
 
-  void _openResult() {
-    context.push('/id-result?id=${IdentifyScreen.defaultSpecimenId}');
+  Future<void> _pickFromGallery() async {
+    if (_busy) return;
+    setState(() => _busy = true);
+    try {
+      final file = await _picker.pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 2048,
+        imageQuality: 88,
+      );
+      if (file == null || !mounted) return;
+      final bytes = await file.readAsBytes();
+      setState(() {
+        _previewBytes = bytes;
+        _previewPath = file.path;
+        _mode = IdentifyMode.library;
+      });
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  Future<void> _capturePhoto() async {
+    if (_busy) return;
+    if (_previewBytes != null) {
+      _openResult(_previewBytes!, _previewPath);
+      return;
+    }
+
+    setState(() => _busy = true);
+    try {
+      XFile? file;
+      if (kIsWeb) {
+        file = await _picker.pickImage(
+          source: ImageSource.gallery,
+          maxWidth: 2048,
+          imageQuality: 88,
+        );
+      } else {
+        file = await _picker.pickImage(
+          source: ImageSource.camera,
+          maxWidth: 2048,
+          imageQuality: 88,
+          preferredCameraDevice: CameraDevice.rear,
+        );
+      }
+      if (file == null || !mounted) return;
+      final bytes = await file.readAsBytes();
+      if (!mounted) return;
+      _openResult(bytes, file.path);
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  void _openResult(Uint8List bytes, String? path) {
+    context.push(
+      '/id-result',
+      extra: CapturedSpecimen(bytes: bytes, path: path),
+    );
+  }
+
+  void _onModeChanged(IdentifyMode mode) {
+    setState(() => _mode = mode);
+    if (mode == IdentifyMode.library) {
+      _pickFromGallery();
+    }
   }
 
   @override
@@ -48,11 +120,7 @@ class _IdentifyScreenState extends State<IdentifyScreen>
       body: Stack(
         fit: StackFit.expand,
         children: [
-          Image.asset(
-            'assets/images/fossil_ammonite.png',
-            fit: BoxFit.cover,
-            errorBuilder: (_, _, _) => Container(color: const Color(0xFF2A1A10)),
-          ),
+          _PreviewImage(bytes: _previewBytes),
           DecoratedBox(
             decoration: BoxDecoration(
               gradient: LinearGradient(
@@ -68,6 +136,11 @@ class _IdentifyScreenState extends State<IdentifyScreen>
               ),
             ),
           ),
+          if (_busy)
+            const ColoredBox(
+              color: Color(0x44000000),
+              child: Center(child: CircularProgressIndicator()),
+            ),
           SafeArea(
             child: Column(
               children: [
@@ -77,7 +150,7 @@ class _IdentifyScreenState extends State<IdentifyScreen>
                     children: [
                       GlassIconButton(
                         icon: Icons.close,
-                        onPressed: () => context.pop(),
+                        onPressed: _busy ? null : () => context.pop(),
                       ),
                       const Spacer(),
                       Container(
@@ -103,7 +176,9 @@ class _IdentifyScreenState extends State<IdentifyScreen>
                         icon: _flashOn
                             ? Icons.flash_on_rounded
                             : Icons.flash_off_rounded,
-                        onPressed: () => setState(() => _flashOn = !_flashOn),
+                        onPressed: _busy
+                            ? null
+                            : () => setState(() => _flashOn = !_flashOn),
                       ),
                     ],
                   ),
@@ -129,7 +204,9 @@ class _IdentifyScreenState extends State<IdentifyScreen>
                 _StatusPill(
                   icon: Icons.auto_awesome,
                   iconColor: StrataColors.gold,
-                  text: 'Specimen detected · centering...',
+                  text: _previewBytes == null
+                      ? 'Specimen detected · centering...'
+                      : 'Photo ready · tap shutter to identify',
                   textColor: StrataColors.gold,
                 ),
                 const SizedBox(height: 8),
@@ -142,7 +219,7 @@ class _IdentifyScreenState extends State<IdentifyScreen>
                 const Spacer(),
                 _ModeSelector(
                   mode: _mode,
-                  onChanged: (mode) => setState(() => _mode = mode),
+                  onChanged: _busy ? (_) {} : _onModeChanged,
                 ),
                 const SizedBox(height: 22),
                 Padding(
@@ -151,16 +228,18 @@ class _IdentifyScreenState extends State<IdentifyScreen>
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       _GalleryThumb(
-                        onTap: () {
-                          // Library mode is visual-only in Iteration 3.
-                          setState(() => _mode = IdentifyMode.library);
-                        },
+                        previewBytes: _previewBytes,
+                        onTap: _busy ? null : _pickFromGallery,
                       ),
-                      _ShutterButton(onPressed: _openResult),
+                      _ShutterButton(
+                        onPressed: _busy ? null : _capturePhoto,
+                      ),
                       _FlipButton(
-                        onTap: () {
-                          // Flip is visual-only until real camera wiring.
-                        },
+                        onTap: _busy
+                            ? null
+                            : () {
+                                // Flip stays visual-only until live camera preview.
+                              },
                       ),
                     ],
                   ),
@@ -170,6 +249,24 @@ class _IdentifyScreenState extends State<IdentifyScreen>
           ),
         ],
       ),
+    );
+  }
+}
+
+class _PreviewImage extends StatelessWidget {
+  const _PreviewImage({required this.bytes});
+
+  final Uint8List? bytes;
+
+  @override
+  Widget build(BuildContext context) {
+    if (bytes != null) {
+      return Image.memory(bytes!, fit: BoxFit.cover, gaplessPlayback: true);
+    }
+    return Image.asset(
+      'assets/images/fossil_ammonite.png',
+      fit: BoxFit.cover,
+      errorBuilder: (_, _, _) => Container(color: const Color(0xFF2A1A10)),
     );
   }
 }
@@ -297,9 +394,13 @@ class _ModeLabel extends StatelessWidget {
 }
 
 class _GalleryThumb extends StatelessWidget {
-  const _GalleryThumb({required this.onTap});
+  const _GalleryThumb({
+    required this.previewBytes,
+    required this.onTap,
+  });
 
-  final VoidCallback onTap;
+  final Uint8List? previewBytes;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -310,14 +411,16 @@ class _GalleryThumb extends StatelessWidget {
         child: SizedBox(
           width: 48,
           height: 48,
-          child: Image.asset(
-            'assets/images/fossil_trilobite.png',
-            fit: BoxFit.cover,
-            errorBuilder: (_, _, _) => Container(
-              color: const Color(0xFF3A2A20),
-              child: const Icon(Icons.image, color: Colors.white54, size: 20),
-            ),
-          ),
+          child: previewBytes != null
+              ? Image.memory(previewBytes!, fit: BoxFit.cover)
+              : Image.asset(
+                  'assets/images/fossil_trilobite.png',
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, _, _) => Container(
+                    color: const Color(0xFF3A2A20),
+                    child: const Icon(Icons.image, color: Colors.white54, size: 20),
+                  ),
+                ),
         ),
       ),
     );
@@ -327,27 +430,30 @@ class _GalleryThumb extends StatelessWidget {
 class _ShutterButton extends StatelessWidget {
   const _ShutterButton({required this.onPressed});
 
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onPressed,
-      child: Container(
-        width: 78,
-        height: 78,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          border: Border.all(color: Colors.white, width: 4),
-        ),
-        padding: const EdgeInsets.all(5),
+      child: Opacity(
+        opacity: onPressed == null ? 0.5 : 1,
         child: Container(
-          decoration: const BoxDecoration(
+          width: 78,
+          height: 78,
+          decoration: BoxDecoration(
             shape: BoxShape.circle,
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [StrataColors.orange, Color(0xFFE07A2F)],
+            border: Border.all(color: Colors.white, width: 4),
+          ),
+          padding: const EdgeInsets.all(5),
+          child: Container(
+            decoration: const BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [StrataColors.orange, Color(0xFFE07A2F)],
+              ),
             ),
           ),
         ),
@@ -359,7 +465,7 @@ class _ShutterButton extends StatelessWidget {
 class _FlipButton extends StatelessWidget {
   const _FlipButton({required this.onTap});
 
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -369,10 +475,13 @@ class _FlipButton extends StatelessWidget {
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(12),
-        child: const SizedBox(
+        child: SizedBox(
           width: 48,
           height: 48,
-          child: Icon(Icons.cameraswitch_outlined, color: Colors.white),
+          child: Icon(
+            Icons.cameraswitch_outlined,
+            color: onTap == null ? Colors.white38 : Colors.white,
+          ),
         ),
       ),
     );
@@ -395,7 +504,6 @@ class _FocusBracketPainter extends CustomPainter {
     const arm = 28.0;
     final rect = Offset.zero & size;
 
-    // Four corner brackets
     canvas.drawLine(rect.topLeft, rect.topLeft + const Offset(arm, 0), paint);
     canvas.drawLine(rect.topLeft, rect.topLeft + const Offset(0, arm), paint);
 
@@ -424,7 +532,6 @@ class _FocusBracketPainter extends CustomPainter {
       paint,
     );
 
-    // Scanning line
     final y = size.height * (0.12 + scanProgress * 0.76);
     final linePaint = Paint()
       ..color = StrataColors.orange.withValues(alpha: 0.9)

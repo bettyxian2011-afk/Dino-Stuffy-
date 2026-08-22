@@ -6,6 +6,9 @@ import '../../models/id_result.dart';
 
 abstract class IdentifyRepository {
   Future<IdResult> getMockResult(String imageId);
+
+  /// Mock identification from image bytes (returns canned results for now).
+  Future<IdResult> identify(Uint8List bytes);
 }
 
 class MockIdentifyRepository implements IdentifyRepository {
@@ -31,5 +34,18 @@ class MockIdentifyRepository implements IdentifyRepository {
       return IdResult.fromJson(fallback);
     }
     return IdResult.fromJson(entry);
+  }
+
+  @override
+  Future<IdResult> identify(Uint8List bytes) async {
+    // Simulate inference latency; real API replaces this in Iteration 7.
+    await Future<void>.delayed(const Duration(milliseconds: 450));
+    final data = await _load();
+    final keys = data.keys.toList()..sort();
+    if (keys.isEmpty) {
+      throw StateError('No mock identification results configured.');
+    }
+    final index = bytes.fold<int>(0, (sum, byte) => sum + byte) % keys.length;
+    return getMockResult(keys[index]);
   }
 }
