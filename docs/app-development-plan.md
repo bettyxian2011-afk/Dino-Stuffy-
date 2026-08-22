@@ -4,29 +4,36 @@ Iterative Flutter plan to build Strata’s five mockup screens (Onboarding → H
 
 ## Progress
 
-| Iteration | Status |
-|-----------|--------|
-| 0 — Foundation | Completed |
-| 1 — Onboarding | Completed |
-| 2 — Home shell | Completed |
-| 3 — Identify mock | Completed |
-| 4 — ID Result | Completed |
+
+| Iteration           | Status    |
+| ------------------- | --------- |
+| 0 — Foundation      | Completed |
+| 1 — Onboarding      | Completed |
+| 2 — Home shell      | Completed |
+| 3 — Identify mock   | Completed |
+| 4 — ID Result       | Completed |
 | 5 — Paleo Translate | Completed |
-| 6 — Capture wiring | Pending |
-| 7 — Real services | Pending |
+| 6 — Capture wiring  | Pending   |
+| 7 — Real services   | Pending   |
+
+
+
 
 ## Current state
 
-[`dino_app`](../dino_app) started as a stock Flutter counter app. Iterations 0–5 delivered theming, routing, onboarding, Home shell, Identify + ID Result, and Paleo Translate (mock repository with glossary). Capture wiring and real APIs remain for later iterations.
+`[dino_app](../dino_app)` started as a stock Flutter counter app. Iterations 0–5 delivered theming, routing, onboarding, Home shell, Identify + ID Result, and Paleo Translate (mock repository with glossary). Capture wiring and real APIs remain for later iterations.
 
 **Scope for this plan:** the five mockups (Onboarding, Home, Identify, ID Result, Paleo Translate), plus a bottom-nav shell so they connect. Dig Map, Deep Time, Museums, and At Risk get **placeholder routes** only (tappable from Home, simple “Coming soon” screens). Backend stays **local mock JSON + repository interfaces** so real APIs can swap in later without rewriting screens.
 
 **Default stack decisions:**
+
 - Navigation: `go_router`
 - Fonts: `google_fonts` (serif display + sans UI) until custom brand fonts are added
 - Theme: shared `StrataTheme` tokens matching mockups (cream `#F7F4EF`, orange/gold CTAs, teal translate accent, dark camera chrome)
 - State: simple `ChangeNotifier` / inherited repositories first (no Riverpod/Bloc until needed)
 - Identify camera: mock overlay first; then `image_picker` / `camera` for capture; AI behind an `IdentifyRepository` interface
+
+
 
 ## Target folder structure
 
@@ -53,6 +60,8 @@ assets/
   data/            # fossils.json, translate_sample.json
 ```
 
+
+
 ## Iteration roadmap
 
 Each iteration should be a small, reviewable slice: ship UI → wire mock data → replace one repository with a real source.
@@ -68,12 +77,16 @@ flowchart LR
   I6 --> I7[I7 Real Services]
 ```
 
+
+
+
+
 ### Iteration 0 — Foundation (½–1 day) — completed
 
 - Replace counter app with `MaterialApp.router`, app title **Strata**
-- Add [`strata_theme.dart`](../dino_app/lib/theme/strata_theme.dart): colors, radii, text styles (serif headlines / sans body)
+- Add `[strata_theme.dart](../dino_app/lib/theme/strata_theme.dart)`: colors, radii, text styles (serif headlines / sans body)
 - Add `go_router` routes: `/onboarding`, `/home`, `/identify`, `/id-result`, `/translate`, plus placeholders
-- Register assets folder in [`pubspec.yaml`](../dino_app/pubspec.yaml); drop in logo + a few fossil placeholder images
+- Register assets folder in `[pubspec.yaml](../dino_app/pubspec.yaml)`; drop in logo + a few fossil placeholder images
 - Shared widgets: orange gradient CTA, glass/dark circular icon button, confidence pill
 
 **Done when:** app launches to a blank scaffold per route with correct theme colors.
@@ -131,7 +144,7 @@ Header, language swap card, source abstract, teal **Translate (Paleo mode)** but
 
 - Add `image_picker` (and `camera` on mobile when ready): Library + shutter use real pick/capture
 - On web/Edge: keep image_picker gallery path; camera may stay mocked
-- Pass picked image path/bytes into Identify screen preview; still call **mock** `IdentifyRepository.identify(bytes)` that returns canned `IdResult` (optionally pick result by simple heuristics later)
+- Pass picked image path/bytes into Identify screen preview; still call **mock** `IdentifyRepository.identify(bytes)` ++that returns++ canned `IdResult` (optionally pick result by simple heuristics later)
 
 **Done when:** user can pick a photo and land on ID Result with mock candidates; no real model yet.
 
@@ -139,13 +152,15 @@ Header, language swap card, source abstract, teal **Translate (Paleo mode)** but
 
 Keep screens unchanged; swap repository implementations:
 
-| Feature | Interface stays | First real source (suggested) |
-|---------|-----------------|-------------------------------|
-| Identify | `IdentifyRepository` | Vision API or custom ML endpoint returning ranked taxa + confidence |
-| Species/facts | `TaxonRepository` | Static curated JSON → later Firestore/GBIF/Paleobiology Database |
-| Sites (Near You) | `SiteRepository` | Local GeoJSON of public sites → maps SDK later |
-| Translate | `TranslateRepository` | LLM API with paleo system prompt + glossary dictionary |
-| Auth / Sign in | deferred | Firebase Auth or skip until needed |
+
+| Feature          | Interface stays       | First real source (suggested)                                       |
+| ---------------- | --------------------- | ------------------------------------------------------------------- |
+| Identify         | `IdentifyRepository`  | Vision API or custom ML endpoint returning ranked taxa + confidence |
+| Species/facts    | `TaxonRepository`     | Static curated JSON → later Firestore/GBIF/Paleobiology Database    |
+| Sites (Near You) | `SiteRepository`      | Local GeoJSON of public sites → maps SDK later                      |
+| Translate        | `TranslateRepository` | LLM API with paleo system prompt + glossary dictionary              |
+| Auth / Sign in   | deferred              | Firebase Auth or skip until needed                                  |
+
 
 **Done when:** at least one live path (e.g. Translate or Identify) works end-to-end; others remain mock.
 
@@ -162,6 +177,10 @@ flowchart TD
   Home -->|Map Time Museums| Placeholders
 ```
 
+
+
+
+
 ## Design tokens (from mockups)
 
 - Background cream: ~`#F7F4EF`
@@ -171,6 +190,8 @@ flowchart TD
 - Camera chrome: translucent black + orange brackets
 - Radii: large (cards ~16–24, pills ~999, FAB square with rounded corners)
 
+
+
 ## Out of scope for this plan (later phases)
 
 - Full Dig Map with permits / Camp Prep
@@ -179,6 +200,8 @@ flowchart TD
 - Real auth (“Sign in”)
 - Live ID streaming inference
 - Species “full profile” deep content beyond a stub
+
+
 
 ## Suggested cadence
 
