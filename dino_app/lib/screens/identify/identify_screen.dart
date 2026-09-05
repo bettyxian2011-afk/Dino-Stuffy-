@@ -61,6 +61,8 @@ class _IdentifyScreenState extends State<IdentifyScreen>
         _previewPath = file.path;
         _mode = IdentifyMode.library;
       });
+    } catch (error) {
+      _showCaptureError('Could not open the photo library.', error);
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -77,6 +79,7 @@ class _IdentifyScreenState extends State<IdentifyScreen>
     try {
       XFile? file;
       if (kIsWeb) {
+        // Web/Edge: gallery path (no reliable camera capture).
         file = await _picker.pickImage(
           source: ImageSource.gallery,
           maxWidth: 2048,
@@ -93,10 +96,35 @@ class _IdentifyScreenState extends State<IdentifyScreen>
       if (file == null || !mounted) return;
       final bytes = await file.readAsBytes();
       if (!mounted) return;
+      setState(() {
+        _previewBytes = bytes;
+        _previewPath = file!.path;
+        _mode = IdentifyMode.photo;
+      });
       _openResult(bytes, file.path);
+    } catch (error) {
+      _showCaptureError(
+        kIsWeb
+            ? 'Could not pick an image from the library.'
+            : 'Could not open the camera.',
+        error,
+      );
     } finally {
       if (mounted) setState(() => _busy = false);
     }
+  }
+
+  void _showCaptureError(String message, Object error) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          '$message\n$error',
+          style: GoogleFonts.dmSans(),
+        ),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
   }
 
   void _openResult(Uint8List bytes, String? path) {

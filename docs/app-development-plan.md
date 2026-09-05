@@ -140,15 +140,17 @@ Header, language swap card, source abstract, teal **Translate (Paleo mode)** but
 
 **Done when:** tapping Translate shows result + glossary from mock repo; swap languages toggles UI state.
 
-### Iteration 6 — Capture & gallery wiring (still mock AI)
+### Iteration 6 — Capture & gallery wiring (still mock AI) — completed
 
 - Add `image_picker` (and `camera` on mobile when ready): Library + shutter use real pick/capture
 - On web/Edge: keep image_picker gallery path; camera may stay mocked
-- Pass picked image path/bytes into Identify screen preview; still call **mock** `IdentifyRepository.identify(bytes)` ++that returns++ canned `IdResult` (optionally pick result by simple heuristics later)
+- Pass picked image path/bytes into Identify screen preview; still call **mock** `IdentifyRepository.identify(bytes)` that returns canned `IdResult` (optionally pick result by simple heuristics later)
 
 **Done when:** user can pick a photo and land on ID Result with mock candidates; no real model yet.
 
 ### Iteration 7 — Real data adapters (one service at a time)
+
+> **Detailed Identify + species facts plan:** [iteration-7-identify-roadmap.md](./iteration-7-identify-roadmap.md) (versions 0.1 → 1.0). Prioritize Identify and PBDB species facts first; Sites, Translate API, and Auth stay later.
 
 Keep screens unchanged; swap repository implementations:
 
@@ -162,7 +164,7 @@ Keep screens unchanged; swap repository implementations:
 | Auth / Sign in   | deferred              | Firebase Auth or skip until needed                                  |
 
 
-**Done when:** at least one live path (e.g. Translate or Identify) works end-to-end; others remain mock.
+**Done when:** at least one live path (Identify + species facts per the version roadmap) works end-to-end; others remain mock.
 
 ## Screen → data flow (after Iteration 4–5)
 
@@ -196,7 +198,8 @@ flowchart TD
 
 - Full Dig Map with permits / Camp Prep
 - Deep Time timeline with era scrubbing
-- Museums / At Risk detail experiences
+- Museums detail experiences
+- **At Risk tab** — replace the placeholder with a conservation explorer that surfaces living species at risk of extinction (status, habitat, threats), bridging extinct taxa from the fossil modules to modern biodiversity
 - Real auth (“Sign in”)
 - Live ID streaming inference
 - Species “full profile” deep content beyond a stub
