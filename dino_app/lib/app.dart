@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'router/app_router.dart';
+import 'theme/strata_scroll_behavior.dart';
 import 'theme/strata_theme.dart';
 
 class StrataApp extends StatelessWidget {
@@ -14,6 +15,7 @@ class StrataApp extends StatelessWidget {
       title: 'Strata',
       debugShowCheckedModeBanner: false,
       theme: StrataTheme.light(),
+      scrollBehavior: const StrataScrollBehavior(),
       routerConfig: _router,
     );
   }
