@@ -1,11 +1,13 @@
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:dino_app/app.dart';
+import 'package:dino_app/data/strata_services.dart';
 
 void main() {
   testWidgets('Onboarding shows Strata branding and Get Started', (
     WidgetTester tester,
   ) async {
+    await StrataServices.init();
     await tester.pumpWidget(StrataApp());
     await tester.pumpAndSettle();
 

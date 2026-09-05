@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../data/strata_services.dart';
 import '../../data/repositories/identify_repository.dart';
 import '../../models/captured_specimen.dart';
 import '../../models/id_result.dart';
@@ -59,7 +60,33 @@ class _IdResultScreenState extends State<IdResultScreen> {
                 onPressed: () => context.pop(),
               ),
             ),
-            body: const Center(child: Text('Could not load identification.')),
+            body: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    'Could not identify this specimen.',
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.dmSans(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 16,
+                    ),
+                  ),
+                  if (snapshot.hasError) ...[
+                    const SizedBox(height: 12),
+                    Text(
+                      '${snapshot.error}',
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.dmSans(
+                        color: StrataColors.muted,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
           );
         }
         return _IdResultBody(
@@ -71,18 +98,18 @@ class _IdResultScreenState extends State<IdResultScreen> {
   }
 }
 
-/// Allows const constructor on the screen while still using MockIdentifyRepository.
+/// Resolves the shared identify repository initialized in [StrataServices].
 class _DefaultRepo implements IdentifyRepository {
   const _DefaultRepo();
 
   @override
   Future<IdResult> getMockResult(String imageId) {
-    return MockIdentifyRepository().getMockResult(imageId);
+    return StrataServices.identifyRepository.getMockResult(imageId);
   }
 
   @override
   Future<IdResult> identify(Uint8List bytes) {
-    return MockIdentifyRepository().identify(bytes);
+    return StrataServices.identifyRepository.identify(bytes);
   }
 }
 
@@ -188,6 +215,10 @@ class _IdResultBodyState extends State<_IdResultBody> {
                         const SizedBox(height: 10),
                       ],
                       const SizedBox(height: 6),
+                      if (result.timelineLabel != null) ...[
+                        _TimelineCard(label: result.timelineLabel!),
+                        const SizedBox(height: 16),
+                      ],
                       _TipCallout(tip: result.tip),
                       const SizedBox(height: 16),
                       _TaxonomyRow(taxonomy: result.taxonomy),
@@ -303,6 +334,10 @@ class _BestMatchCard extends StatelessWidget {
                 label: result.confidenceLabel,
                 color: StrataColors.confidence,
               ),
+              if (result.pbdbVerified) ...[
+                const SizedBox(width: 8),
+                _PbdbBadge(),
+              ],
               const Spacer(),
               Text(
                 '${result.candidates.length} candidates',
@@ -343,7 +378,7 @@ class _BestMatchCard extends StatelessWidget {
           Row(
             children: [
               Text(
-                'Model confidence',
+                'Adjusted confidence',
                 style: GoogleFonts.dmSans(
                   color: StrataColors.muted,
                   fontSize: 13,
@@ -360,6 +395,16 @@ class _BestMatchCard extends StatelessWidget {
               ),
             ],
           ),
+          if (best.modelConfidence != null) ...[
+            const SizedBox(height: 4),
+            Text(
+              'Raw AI score ${best.modelConfidence}% · boosted when PBDB/catalog agree',
+              style: GoogleFonts.dmSans(
+                color: StrataColors.muted,
+                fontSize: 11,
+              ),
+            ),
+          ],
           const SizedBox(height: 8),
           ClipRRect(
             borderRadius: BorderRadius.circular(StrataRadii.pill),
@@ -368,6 +413,77 @@ class _BestMatchCard extends StatelessWidget {
               minHeight: 8,
               backgroundColor: const Color(0xFFE8DFD4),
               color: StrataColors.confidence,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PbdbBadge extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: const Color(0xFFE6F4F1),
+        borderRadius: BorderRadius.circular(StrataRadii.pill),
+        border: Border.all(color: StrataColors.teal.withValues(alpha: 0.35)),
+      ),
+      child: Text(
+        'PBDB',
+        style: GoogleFonts.dmSans(
+          color: StrataColors.teal,
+          fontSize: 11,
+          fontWeight: FontWeight.w800,
+        ),
+      ),
+    );
+  }
+}
+
+class _TimelineCard extends StatelessWidget {
+  const _TimelineCard({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFE0D6C8)),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.timeline, color: StrataColors.orange, size: 22),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Deep Time range',
+                  style: GoogleFonts.dmSans(
+                    color: StrataColors.muted,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  label,
+                  style: GoogleFonts.libreBaskerville(
+                    color: StrataColors.ink,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
             ),
           ),
         ],

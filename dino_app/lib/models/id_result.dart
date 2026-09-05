@@ -26,14 +26,18 @@ class IdCandidate {
     required this.confidence,
     required this.thumbnail,
     required this.isBestMatch,
+    this.modelConfidence,
   });
 
   final String genus;
   final String commonGroup;
   final String family;
+  /// Heuristic-adjusted confidence shown in the UI.
   final int confidence;
   final String thumbnail;
   final bool isBestMatch;
+  /// Raw model score before PBDB/catalog adjustments.
+  final int? modelConfidence;
 
   String get classificationLabel => '$commonGroup · Family $family';
 
@@ -49,6 +53,8 @@ class IdCandidate {
   }
 }
 
+enum IdentificationSource { mock, geminiPbdb }
+
 class IdResult {
   const IdResult({
     required this.id,
@@ -59,6 +65,9 @@ class IdResult {
     required this.taxonomy,
     required this.candidates,
     required this.facts,
+    this.timelineLabel,
+    this.pbdbVerified = false,
+    this.source = IdentificationSource.mock,
   });
 
   final String id;
@@ -69,6 +78,9 @@ class IdResult {
   final List<String> taxonomy;
   final List<IdCandidate> candidates;
   final List<TaxonFact> facts;
+  final String? timelineLabel;
+  final bool pbdbVerified;
+  final IdentificationSource source;
 
   IdCandidate get bestMatch =>
       candidates.firstWhere((c) => c.isBestMatch, orElse: () => candidates.first);
