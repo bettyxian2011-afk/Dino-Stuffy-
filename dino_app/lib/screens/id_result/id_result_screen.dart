@@ -30,7 +30,13 @@ class IdResultScreen extends StatefulWidget {
 }
 
 class _IdResultScreenState extends State<IdResultScreen> {
-  late final Future<IdResult> _future = _loadResult();
+  late Future<IdResult> _future;
+
+  @override
+  void initState() {
+    super.initState();
+    _future = _loadResult();
+  }
 
   Future<IdResult> _loadResult() {
     final captured = widget.captured;
@@ -40,15 +46,52 @@ class _IdResultScreenState extends State<IdResultScreen> {
     return widget.repository.getMockResult(widget.specimenId);
   }
 
+  void _retry() {
+    setState(() {
+      _future = _loadResult();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<IdResult>(
       future: _future,
       builder: (context, snapshot) {
         if (snapshot.connectionState != ConnectionState.done) {
-          return const Scaffold(
+          return Scaffold(
             backgroundColor: StrataColors.cream,
-            body: Center(child: CircularProgressIndicator()),
+            body: Center(
+              child: Padding(
+                padding: const EdgeInsets.all(32),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const CircularProgressIndicator(color: StrataColors.teal),
+                    const SizedBox(height: 20),
+                    Text(
+                      'Identifying specimen…',
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.libreBaskerville(
+                        color: StrataColors.ink,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Matching your photo against curated genera'
+                      '${widget.captured != null ? ' and live vision' : ''}.',
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.dmSans(
+                        color: StrataColors.muted,
+                        fontSize: 13,
+                        height: 1.4,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           );
         }
         if (snapshot.hasError || !snapshot.hasData) {
@@ -59,31 +102,46 @@ class _IdResultScreenState extends State<IdResultScreen> {
                 icon: const Icon(Icons.arrow_back_rounded),
                 onPressed: () => context.pop(),
               ),
+              title: const Text('Identification'),
             ),
             body: Padding(
               padding: const EdgeInsets.all(24),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
+                  const Icon(
+                    Icons.wifi_off_rounded,
+                    size: 48,
+                    color: StrataColors.brown,
+                  ),
+                  const SizedBox(height: 16),
                   Text(
                     'Could not identify this specimen.',
                     textAlign: TextAlign.center,
-                    style: GoogleFonts.dmSans(
+                    style: GoogleFonts.libreBaskerville(
                       fontWeight: FontWeight.w700,
-                      fontSize: 16,
+                      fontSize: 20,
+                      color: StrataColors.ink,
                     ),
                   ),
-                  if (snapshot.hasError) ...[
-                    const SizedBox(height: 12),
-                    Text(
-                      '${snapshot.error}',
-                      textAlign: TextAlign.center,
-                      style: GoogleFonts.dmSans(
-                        color: StrataColors.muted,
-                        fontSize: 13,
-                      ),
+                  const SizedBox(height: 10),
+                  Text(
+                    snapshot.hasError
+                        ? '${snapshot.error}'
+                        : 'No match data was returned. Check your connection and try again.',
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.dmSans(
+                      color: StrataColors.muted,
+                      fontSize: 13,
+                      height: 1.4,
                     ),
-                  ],
+                  ),
+                  const SizedBox(height: 28),
+                  GradientCtaButton(
+                    label: 'Retry',
+                    showArrow: false,
+                    onPressed: _retry,
+                  ),
                 ],
               ),
             ),

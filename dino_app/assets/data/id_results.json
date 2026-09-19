@@ -28,7 +28,7 @@
         "commonGroup": "Ammonite",
         "family": "Hildoceratidae",
         "confidence": 34,
-        "thumbnail": "assets/images/fossil_trilobite.png",
+        "thumbnail": "assets/images/fossil_ammonite.png",
         "isBestMatch": false
       }
     ],
@@ -98,6 +98,414 @@
         "icon": "public",
         "value": "Mongolia",
         "label": "Djadochta Fm"
+      }
+    ]
+  },
+  "trilo-1": {
+    "id": "trilo-1",
+    "specimenImage": "assets/images/fossil_trilobite.png",
+    "confidenceLabel": "HIGH CONFIDENCE",
+    "matchLabel": "Best match · likely genus",
+    "tip": "Capture the cephalon outline and eye placement — those traits separate common trilobite genera.",
+    "taxonomy": ["Arthropoda", "Trilobita", "Ptychopariida"],
+    "candidates": [
+      {
+        "genus": "Elrathia",
+        "commonGroup": "Trilobite",
+        "family": "Alokistocaridae",
+        "confidence": 90,
+        "thumbnail": "assets/images/fossil_trilobite.png",
+        "isBestMatch": true
+      },
+      {
+        "genus": "Calymene",
+        "commonGroup": "Trilobite",
+        "family": "Calymenidae",
+        "confidence": 55,
+        "thumbnail": "assets/images/fossil_trilobite.png",
+        "isBestMatch": false
+      },
+      {
+        "genus": "Phacops",
+        "commonGroup": "Trilobite",
+        "family": "Phacopidae",
+        "confidence": 38,
+        "thumbnail": "assets/images/fossil_trilobite.png",
+        "isBestMatch": false
+      }
+    ],
+    "facts": [
+      {
+        "icon": "schedule",
+        "value": "505Ma",
+        "label": "Middle Cambrian"
+      },
+      {
+        "icon": "straighten",
+        "value": "2–4cm",
+        "label": "Body length"
+      },
+      {
+        "icon": "public",
+        "value": "Utah, USA",
+        "label": "Wheeler Shale"
+      }
+    ]
+  },
+  "plant-1": {
+    "id": "plant-1",
+    "specimenImage": "assets/images/fossil_trilobite.png",
+    "confidenceLabel": "MEDIUM CONFIDENCE",
+    "matchLabel": "Best match · likely genus",
+    "tip": "Show venation clearly and include scale. Leaf architecture separates seed ferns from lycopsids.",
+    "taxonomy": ["Plantae", "Spermatophyta", "Glossopteridales"],
+    "candidates": [
+      {
+        "genus": "Glossopteris",
+        "commonGroup": "Seed fern",
+        "family": "Glossopteridaceae",
+        "confidence": 86,
+        "thumbnail": "assets/images/fossil_trilobite.png",
+        "isBestMatch": true
+      },
+      {
+        "genus": "Neuropteris",
+        "commonGroup": "Seed fern",
+        "family": "Neurodontopteridaceae",
+        "confidence": 52,
+        "thumbnail": "assets/images/fossil_trilobite.png",
+        "isBestMatch": false
+      },
+      {
+        "genus": "Lepidodendron",
+        "commonGroup": "Lycopsid",
+        "family": "Lepidodendraceae",
+        "confidence": 29,
+        "thumbnail": "assets/images/fossil_trilobite.png",
+        "isBestMatch": false
+      }
+    ],
+    "facts": [
+      {
+        "icon": "schedule",
+        "value": "260Ma",
+        "label": "Late Permian"
+      },
+      {
+        "icon": "straighten",
+        "value": "5–20cm",
+        "label": "Leaf length"
+      },
+      {
+        "icon": "public",
+        "value": "Gondwana",
+        "label": "Coal measures"
+      }
+    ]
+  },
+  "tyranno-1": {
+    "id": "tyranno-1",
+    "specimenImage": "assets/images/fossil_velociraptor.png",
+    "confidenceLabel": "HIGH CONFIDENCE",
+    "matchLabel": "Best match · likely genus",
+    "tip": "Tooth serration and jaw robusticity help separate tyrannosaurid genera — add a close-up of denticles.",
+    "taxonomy": ["Chordata", "Dinosauria", "Theropoda"],
+    "candidates": [
+      {
+        "genus": "Tyrannosaurus",
+        "commonGroup": "Tyrannosaurid",
+        "family": "Tyrannosauridae",
+        "confidence": 91,
+        "thumbnail": "assets/images/fossil_velociraptor.png",
+        "isBestMatch": true
+      },
+      {
+        "genus": "Albertosaurus",
+        "commonGroup": "Tyrannosaurid",
+        "family": "Tyrannosauridae",
+        "confidence": 57,
+        "thumbnail": "assets/images/fossil_velociraptor.png",
+        "isBestMatch": false
+      },
+      {
+        "genus": "Daspletosaurus",
+        "commonGroup": "Tyrannosaurid",
+        "family": "Tyrannosauridae",
+        "confidence": 33,
+        "thumbnail": "assets/images/fossil_velociraptor.png",
+        "isBestMatch": false
+      }
+    ],
+    "facts": [
+      {
+        "icon": "schedule",
+        "value": "68Ma",
+        "label": "Late Cretaceous"
+      },
+      {
+        "icon": "straighten",
+        "value": "~12m",
+        "label": "Body length"
+      },
+      {
+        "icon": "public",
+        "value": "N. America",
+        "label": "Hell Creek Fm"
+      }
+    ]
+  },
+  "brachio-1": {
+    "id": "brachio-1",
+    "specimenImage": "assets/images/fossil_ammonite.png",
+    "confidenceLabel": "MEDIUM CONFIDENCE",
+    "matchLabel": "Best match · likely genus",
+    "tip": "Photograph both valves and the hinge line. Spiriferid wing shape is a key diagnostic.",
+    "taxonomy": ["Brachiopoda", "Rhynchonellata", "Spiriferida"],
+    "candidates": [
+      {
+        "genus": "Mucrospirifer",
+        "commonGroup": "Brachiopod",
+        "family": "Mucrospiriferidae",
+        "confidence": 88,
+        "thumbnail": "assets/images/fossil_ammonite.png",
+        "isBestMatch": true
+      },
+      {
+        "genus": "Atrypa",
+        "commonGroup": "Brachiopod",
+        "family": "Atrypidae",
+        "confidence": 54,
+        "thumbnail": "assets/images/fossil_ammonite.png",
+        "isBestMatch": false
+      },
+      {
+        "genus": "Spirifer",
+        "commonGroup": "Brachiopod",
+        "family": "Spiriferidae",
+        "confidence": 36,
+        "thumbnail": "assets/images/fossil_ammonite.png",
+        "isBestMatch": false
+      }
+    ],
+    "facts": [
+      {
+        "icon": "schedule",
+        "value": "390Ma",
+        "label": "Middle Devonian"
+      },
+      {
+        "icon": "straighten",
+        "value": "2–5cm",
+        "label": "Width"
+      },
+      {
+        "icon": "public",
+        "value": "Global",
+        "label": "Shallow seas"
+      }
+    ]
+  },
+  "belem-1": {
+    "id": "belem-1",
+    "specimenImage": "assets/images/fossil_ammonite.png",
+    "confidenceLabel": "HIGH CONFIDENCE",
+    "matchLabel": "Best match · likely genus",
+    "tip": "Guard cross-section and apical groove help narrow belemnite genera — shoot an end-on view.",
+    "taxonomy": ["Mollusca", "Cephalopoda", "Belemnitida"],
+    "candidates": [
+      {
+        "genus": "Belemnitella",
+        "commonGroup": "Belemnite",
+        "family": "Belemnitellidae",
+        "confidence": 89,
+        "thumbnail": "assets/images/fossil_ammonite.png",
+        "isBestMatch": true
+      },
+      {
+        "genus": "Passaloteuthis",
+        "commonGroup": "Belemnite",
+        "family": "Passaloteuthidae",
+        "confidence": 50,
+        "thumbnail": "assets/images/fossil_ammonite.png",
+        "isBestMatch": false
+      },
+      {
+        "genus": "Hibolites",
+        "commonGroup": "Belemnite",
+        "family": "Mesohibolitidae",
+        "confidence": 32,
+        "thumbnail": "assets/images/fossil_ammonite.png",
+        "isBestMatch": false
+      }
+    ],
+    "facts": [
+      {
+        "icon": "schedule",
+        "value": "80Ma",
+        "label": "Late Cretaceous"
+      },
+      {
+        "icon": "straighten",
+        "value": "5–12cm",
+        "label": "Guard length"
+      },
+      {
+        "icon": "public",
+        "value": "Europe",
+        "label": "Chalk seas"
+      }
+    ]
+  },
+  "shark-1": {
+    "id": "shark-1",
+    "specimenImage": "assets/images/fossil_velociraptor.png",
+    "confidenceLabel": "HIGH CONFIDENCE",
+    "matchLabel": "Best match · likely genus",
+    "tip": "Tooth crown height, root lobes, and serration pattern separate lamniform sharks.",
+    "taxonomy": ["Chordata", "Chondrichthyes", "Lamniformes"],
+    "candidates": [
+      {
+        "genus": "Otodus",
+        "commonGroup": "Mackerel shark",
+        "family": "Otodontidae",
+        "confidence": 93,
+        "thumbnail": "assets/images/fossil_velociraptor.png",
+        "isBestMatch": true
+      },
+      {
+        "genus": "Carcharodon",
+        "commonGroup": "Mackerel shark",
+        "family": "Lamnidae",
+        "confidence": 48,
+        "thumbnail": "assets/images/fossil_velociraptor.png",
+        "isBestMatch": false
+      },
+      {
+        "genus": "Isurus",
+        "commonGroup": "Mackerel shark",
+        "family": "Lamnidae",
+        "confidence": 27,
+        "thumbnail": "assets/images/fossil_velociraptor.png",
+        "isBestMatch": false
+      }
+    ],
+    "facts": [
+      {
+        "icon": "schedule",
+        "value": "15Ma",
+        "label": "Miocene"
+      },
+      {
+        "icon": "straighten",
+        "value": "5–15cm",
+        "label": "Tooth height"
+      },
+      {
+        "icon": "public",
+        "value": "Global",
+        "label": "Coastal shelf"
+      }
+    ]
+  },
+  "coral-1": {
+    "id": "coral-1",
+    "specimenImage": "assets/images/fossil_trilobite.png",
+    "confidenceLabel": "MEDIUM CONFIDENCE",
+    "matchLabel": "Best match · likely genus",
+    "tip": "Colony packing and corallite walls distinguish tabulate corals — photograph a weathered cross-section.",
+    "taxonomy": ["Cnidaria", "Anthozoa", "Tabulata"],
+    "candidates": [
+      {
+        "genus": "Favosites",
+        "commonGroup": "Tabulate coral",
+        "family": "Favositidae",
+        "confidence": 87,
+        "thumbnail": "assets/images/fossil_trilobite.png",
+        "isBestMatch": true
+      },
+      {
+        "genus": "Halysites",
+        "commonGroup": "Tabulate coral",
+        "family": "Halysitidae",
+        "confidence": 53,
+        "thumbnail": "assets/images/fossil_trilobite.png",
+        "isBestMatch": false
+      },
+      {
+        "genus": "Syringopora",
+        "commonGroup": "Tabulate coral",
+        "family": "Syringoporidae",
+        "confidence": 35,
+        "thumbnail": "assets/images/fossil_trilobite.png",
+        "isBestMatch": false
+      }
+    ],
+    "facts": [
+      {
+        "icon": "schedule",
+        "value": "420Ma",
+        "label": "Silurian"
+      },
+      {
+        "icon": "straighten",
+        "value": "5–30cm",
+        "label": "Colony size"
+      },
+      {
+        "icon": "public",
+        "value": "Global",
+        "label": "Reef flats"
+      }
+    ]
+  },
+  "sauro-1": {
+    "id": "sauro-1",
+    "specimenImage": "assets/images/fossil_velociraptor.png",
+    "confidenceLabel": "MEDIUM CONFIDENCE",
+    "matchLabel": "Best match · likely genus",
+    "tip": "Vertebral proportions and limb bone robusticity help separate sauropod genera — include scale.",
+    "taxonomy": ["Chordata", "Dinosauria", "Sauropoda"],
+    "candidates": [
+      {
+        "genus": "Diplodocus",
+        "commonGroup": "Sauropod",
+        "family": "Diplodocidae",
+        "confidence": 85,
+        "thumbnail": "assets/images/fossil_velociraptor.png",
+        "isBestMatch": true
+      },
+      {
+        "genus": "Apatosaurus",
+        "commonGroup": "Sauropod",
+        "family": "Diplodocidae",
+        "confidence": 56,
+        "thumbnail": "assets/images/fossil_velociraptor.png",
+        "isBestMatch": false
+      },
+      {
+        "genus": "Brachiosaurus",
+        "commonGroup": "Sauropod",
+        "family": "Brachiosauridae",
+        "confidence": 30,
+        "thumbnail": "assets/images/fossil_velociraptor.png",
+        "isBestMatch": false
+      }
+    ],
+    "facts": [
+      {
+        "icon": "schedule",
+        "value": "150Ma",
+        "label": "Late Jurassic"
+      },
+      {
+        "icon": "straighten",
+        "value": "~25m",
+        "label": "Body length"
+      },
+      {
+        "icon": "public",
+        "value": "N. America",
+        "label": "Morrison Fm"
       }
     ]
   }

@@ -1,0 +1,18 @@
+{
+  "elapsed_time": 0.002,
+  "records": [
+    {
+      "oid": "txn:14749",
+      "rnk": 5,
+      "nam": "Dactylioceras",
+      "att": "(Hyatt 1867)",
+      "par": "txn:185594",
+      "ext": "0",
+      "noc": 496,
+      "fea": 201.4,
+      "lea": 180.4,
+      "tei": "Hettangian",
+      "tli": "Bajocian"
+    }
+  ]
+}

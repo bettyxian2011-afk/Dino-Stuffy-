@@ -14,14 +14,20 @@ Iterative Flutter plan to build Strata’s five mockup screens (Onboarding → H
 | 4 — ID Result       | Completed |
 | 5 — Paleo Translate | Completed |
 | 6 — Capture wiring  | Completed |
-| 7 — Real services   | Pending   |
+| 7 — Real services   | In progress — [Identify roadmap](./iteration-7-identify-roadmap.md) **v0.1 completed**; v0.2→1.0 next |
 
 
 
 
 ## Current state
 
-`[dino_app](../dino_app)` started as a stock Flutter counter app. Iterations 0–6 delivered theming, routing, onboarding, Home shell, Identify + ID Result, Paleo Translate, and gallery/camera capture wired to mock identification. Real APIs remain for Iteration 7.
+[`dino_app`](../dino_app) UI iterations **0–6 are completed** (theme, routing, onboarding, Home shell, Identify + ID Result, Paleo Translate, gallery/camera capture).
+
+**Iteration 7** is underway via [iteration-7-identify-roadmap.md](./iteration-7-identify-roadmap.md):
+
+- **v0.1 completed** — live Gemini when `GEMINI_API_KEY` is set (`gemini-3.6-flash`); mock fallback without a key
+- **Next:** v0.2 expand curated catalog; then result resilience, PBDB species profile, etc.
+- Species profile is still a stub; Dig Map / Timeline / Museums / At Risk remain placeholders
 
 **Scope for this plan:** the five mockups (Onboarding, Home, Identify, ID Result, Paleo Translate), plus a bottom-nav shell so they connect. Dig Map, Deep Time, Museums, and At Risk get **placeholder routes** only (tappable from Home, simple “Coming soon” screens). Backend stays **local mock JSON + repository interfaces** so real APIs can swap in later without rewriting screens.
 

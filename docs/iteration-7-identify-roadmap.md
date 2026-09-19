@@ -69,18 +69,18 @@ flowchart TD
 ## Version summary
 
 
-| Version | Feature | Builds on | Tests | Done when |
-| ------- | ------- | --------- | ----- | --------- |
-| **0.1** | Live Identify smoke path | Iteration 6 capture + existing Gemini wiring | Unit: `MockIdentifyRepository.identify`; manual key checklist | With key, a real photo returns non-mock genera |
-| **0.2** | Expand curated catalog | v0.1 | Unit: `IdCatalog.load` count + lookups | Vision prompt has ~20–30 preferred genera |
-| **0.3** | Identify result resilience | v0.2 | Widget: fake repo success + failure + retry | Failed network never dead-ends; retry works |
-| **0.4** | Species profile from PBDB | v0.3 | Fixture `PbdbTaxon.fromJson`; fake repo screen states | View full profile shows real PBDB fields |
-| **0.5** | Taxonomy + facts merge | v0.4 | Unit: PBDB → `TaxonFact` / taxonomy mappers | Out-of-catalog matches still show useful facts |
-| **0.6** | Open-world match quality | v0.5 | Heuristics + Gemini JSON parser unit tests | Taxa absent from local JSON still rank + enrich |
-| **0.7** | Capture reliability | v0.6 | Manual emulator checklist | Emulator can finish Identify via gallery if camera fails |
-| **0.8** | Persist recent IDs | v0.7 | Persistence round-trip unit test | Home “Recently identified” shows real sessions |
-| **0.9** | Quality gates | v0.8 | Full `flutter test` suite green | Identify/species covered beyond onboarding widget test |
-| **1.0** | Milestone: photo → match | v0.9 | Demo script + runbook | End-to-end demo works; Identify+facts declared done |
+| Version | Feature | Status | Builds on | Tests | Done when |
+| ------- | ------- | ------ | --------- | ----- | --------- |
+| **0.1** | Live Identify smoke path | **Completed** | Iteration 6 capture + Gemini wiring | Unit: mock identify + adapter select | Live Gemini adapter loads with key |
+| **0.2** | Expand curated catalog | **Completed** | v0.1 | Unit: `IdCatalog.load` | ~20–30 preferred genera |
+| **0.3** | Identify result resilience | **Completed** | v0.2 | Widget: success + failure + retry | Retry works; no dead-end errors |
+| **0.4** | Species profile from PBDB | **Completed** | v0.3 | Fixture + fake repo screen | Profile shows real PBDB fields |
+| **0.5** | Taxonomy + facts merge | Pending | v0.4 | Unit: PBDB → facts mappers | Out-of-catalog matches still show facts |
+| **0.6** | Open-world match quality | Pending | v0.5 | Heuristics + JSON parser tests | Non-catalog taxa still rank + enrich |
+| **0.7** | Capture reliability | Pending | v0.6 | Manual emulator checklist | Gallery works when camera fails |
+| **0.8** | Persist recent IDs | Pending | v0.7 | Persistence round-trip | Home shows real recent matches |
+| **0.9** | Quality gates | Pending | v0.8 | Full `flutter test` suite | Identify/species well covered |
+| **1.0** | Milestone: photo → match | Pending | v0.9 | Demo script + runbook | Identify + species facts declared done |
 
 
 ```mermaid
@@ -98,7 +98,7 @@ flowchart LR
 
 ---
 
-## Version 0.1 — Live Identify smoke path
+## Version 0.1 — Live Identify smoke path — completed
 
 ### Feature
 
@@ -106,24 +106,27 @@ Documented, reliable Gemini on/off path so the app clearly uses live vision when
 
 ### Tasks
 
-- Confirm `flutter run --dart-define=GEMINI_API_KEY=...` selects `GeminiIdentifyRepository` in `StrataServices`
-- Confirm missing key falls back to `MockIdentifyRepository` (no crash)
-- Document the run command in this file’s runbook (finalize wording in v1.0; draft here)
-- Add unit test for `MockIdentifyRepository.identify` (deterministic canned result)
+- [x] Confirm `flutter run --dart-define=GEMINI_API_KEY=...` selects `GeminiIdentifyRepository` in `StrataServices`
+- [x] Confirm missing key falls back to `MockIdentifyRepository` (no crash)
+- [x] Document the run command in README + this runbook
+- [x] Add unit test for `MockIdentifyRepository.identify` (deterministic canned result)
+- [x] Startup `debugPrint` shows which adapter is active
+- [x] Local `run_live.local.ps1` (gitignored) for key without committing secrets
 
-### Files likely touched
+### Files touched
 
 - `dino_app/lib/data/strata_services.dart`
-- `dino_app/lib/config/strata_config.dart`
-- `dino_app/test/` (new identify repository test)
-- Optional: short note in `dino_app/README.md`
+- `dino_app/test/identify_repository_test.dart`
+- `dino_app/README.md`
+- `dino_app/.gitignore` (`*.local.ps1`, `.env*`)
 
 ### Tests
 
 | Type | What |
 | ---- | ---- |
 | Unit | `MockIdentifyRepository.identify` returns a valid `IdResult` |
-| Manual | With key → pick photo → candidates differ from pure mock catalog shuffle |
+| Unit | `buildIdentifyRepository` selects Mock vs Gemini from key flag |
+| Manual | With key → pick photo → candidates from live vision |
 
 ### Done when
 
@@ -131,7 +134,7 @@ A teammate can run with a Gemini key and get non-mock genera from a real fossil 
 
 ---
 
-## Version 0.2 — Expand curated fossil catalog
+## Version 0.2 — Expand curated fossil catalog — completed
 
 ### Feature
 
@@ -139,22 +142,22 @@ Grow the local catalog so Gemini’s “prefer these genera” list is useful (~
 
 ### Tasks
 
-- Expand `assets/data/id_results.json` (ammonites, trilobites, plants, vertebrates, etc.)
-- Ensure `IdCatalog` indexes every candidate genus
-- Keep thumbnails/tips/facts coherent (reuse assets where needed)
+- [x] Expand `assets/data/id_results.json` (ammonites, trilobites, plants, vertebrates, etc.)
+- [x] Ensure `IdCatalog` indexes every candidate genus
+- [x] Keep thumbnails/tips/facts coherent (reuse assets where needed)
+- [x] Add unit test for `IdCatalog.load` genus count + `entryFor('Dactylioceras')`
 
-### Files likely touched
+### Files touched
 
-- `dino_app/assets/data/id_results.json`
-- `dino_app/lib/data/catalog/id_catalog.dart` (only if loader needs fixes)
-- `dino_app/assets/images/` (new thumbs only if required)
-- `dino_app/test/` catalog load test
+- `dino_app/assets/data/id_results.json` (10 curated result groups → 30 genera)
+- `dino_app/test/id_catalog_test.dart`
 
 ### Tests
 
 | Type | What |
 | ---- | ---- |
-| Unit | `IdCatalog.load` genus count ≥ expected threshold; `entryFor('Dactylioceras')` non-null |
+| Unit | `IdCatalog.load` genus count ≥ 20; `entryFor('Dactylioceras')` non-null |
+| Unit | Catalog spans ammonites, trilobites, plants, vertebrates, brachiopods, corals |
 
 ### Done when
 
@@ -162,7 +165,7 @@ The vision prompt receives a meaningful preferred genus list (not just two or th
 
 ---
 
-## Version 0.3 — Identify result resilience
+## Version 0.3 — Identify result resilience — completed
 
 ### Feature
 
@@ -170,15 +173,15 @@ Harden ID Result for loading, error, and retry so flaky networks never leave a d
 
 ### Tasks
 
-- Improve `IdResultScreen` loading copy/indicator
-- Error state with **Retry** that re-calls `identify` / `getMockResult`
-- User-visible message when Gemini fails and mock fallback is used (if applicable)
-- Avoid re-creating `Future` on every rebuild (keep stateful future pattern)
+- [x] Improve `IdResultScreen` loading copy/indicator
+- [x] Error state with **Retry** that re-calls `identify` / `getMockResult`
+- [x] Avoid re-creating `Future` on every rebuild (stateful future + explicit retry)
+- [x] Widget tests: fake repo success → genus; failure → retry succeeds
 
-### Files likely touched
+### Files touched
 
 - `dino_app/lib/screens/id_result/id_result_screen.dart`
-- `dino_app/test/` widget tests with fake `IdentifyRepository`
+- `dino_app/test/id_result_screen_test.dart`
 
 ### Tests
 
@@ -193,7 +196,7 @@ Failed network never dead-ends; retry restores a result screen.
 
 ---
 
-## Version 0.4 — Species profile from PBDB
+## Version 0.4 — Species profile from PBDB — completed
 
 ### Feature
 
@@ -201,25 +204,27 @@ Replace the stub species profile with live `TaxonRepository.findTaxon` data.
 
 ### Tasks
 
-- Expose `TaxonRepository` from `StrataServices` (or inject into profile)
-- Load name, rank, age range, occurrence count on `SpeciesProfileScreen`
-- Loading / error / empty states matching Strata theme
-- Keep navigation from ID Result **View full profile**
+- [x] Expose `TaxonRepository` from `StrataServices`
+- [x] Load name, rank, age range, occurrence count on `SpeciesProfileScreen`
+- [x] Loading / error / empty states matching Strata theme
+- [x] Keep navigation from ID Result **View full profile**
+- [x] Fix `PbdbTaxon.fromJson` for numeric PBDB rank codes
+- [x] Fixture + fake repo profile tests
 
-### Files likely touched
+### Files touched
 
 - `dino_app/lib/data/strata_services.dart`
 - `dino_app/lib/screens/id_result/species_profile_screen.dart`
 - `dino_app/lib/models/pbdb_taxon.dart`
-- `dino_app/lib/router/app_router.dart` (pass ids if needed)
-- `dino_app/test/` fixtures + profile tests
+- `dino_app/test/species_profile_test.dart`
+- `dino_app/test/fixtures/pbdb_dactylioceras.json`
 
 ### Tests
 
 | Type | What |
 | ---- | ---- |
 | Unit | `PbdbTaxon.fromJson` with fixture JSON |
-| Widget | Fake `TaxonRepository` → profile shows fields; loading/error states |
+| Widget | Fake `TaxonRepository` → profile shows fields; loading/error/empty states |
 
 ### Done when
 
@@ -445,16 +450,22 @@ Demo script succeeds: open app → Scan → capture/pick any fossil photo → ra
 
 ```bash
 # Mock path (no key)
-flutter run -d emulator
+cd dino_app
+flutter run
 
-# Live Identify
-flutter run -d emulator --dart-define=GEMINI_API_KEY=your_key_here
+# Live Identify (v0.1+)
+flutter run --dart-define=GEMINI_API_KEY=your_key_here
 
 # Optional model override
-flutter run --dart-define=GEMINI_API_KEY=your_key_here --dart-define=GEMINI_MODEL=gemini-2.0-flash
+flutter run --dart-define=GEMINI_API_KEY=your_key_here --dart-define=GEMINI_MODEL=gemini-3.6-flash
 ```
 
-**Never commit API keys.** Pass them only via `--dart-define` or CI secrets.
+**Never commit API keys.** Pass them only via `--dart-define`, a gitignored `run_live.local.ps1`, or CI secrets.
+
+On launch, check the debug console for:
+
+- `StrataServices: GeminiIdentifyRepository (live vision)` — live path
+- `StrataServices: MockIdentifyRepository (no GEMINI_API_KEY)` — mock path
 
 **Android emulator camera:** if shutter fails, use Library / gallery (v0.7 makes this explicit). Enable AVD virtual camera under Device Manager if you want system camera.
 

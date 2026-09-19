@@ -11,9 +11,9 @@ class StrataConfig {
 
   static bool get hasGeminiApiKey => geminiApiKey.isNotEmpty;
 
-  /// Fast, low-cost vision model; good for constrained fossil ID.
+  /// Fast vision model for fossil ID (override with --dart-define=GEMINI_MODEL=...).
   static const geminiModel = String.fromEnvironment(
     'GEMINI_MODEL',
-    defaultValue: 'gemini-2.0-flash',
+    defaultValue: 'gemini-3.6-flash',
   );
 }
