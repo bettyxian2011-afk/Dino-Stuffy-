@@ -55,6 +55,35 @@ class IdCandidate {
 
 enum IdentificationSource { mock, geminiPbdb }
 
+/// Vision assessment for the whole photo (not per-candidate).
+enum IdentifyAssessment {
+  fossil,
+  mayNotBeFossil,
+  uncertain;
+
+  static IdentifyAssessment fromWire(String? raw) {
+    switch ((raw ?? '').trim().toLowerCase()) {
+      case 'may_not_be_fossil':
+      case 'may-not-be-fossil':
+      case 'rock':
+      case 'non_fossil':
+        return IdentifyAssessment.mayNotBeFossil;
+      case 'uncertain':
+      case 'unclear':
+        return IdentifyAssessment.uncertain;
+      case 'fossil':
+      default:
+        return IdentifyAssessment.fossil;
+    }
+  }
+
+  String get wireValue => switch (this) {
+        IdentifyAssessment.fossil => 'fossil',
+        IdentifyAssessment.mayNotBeFossil => 'may_not_be_fossil',
+        IdentifyAssessment.uncertain => 'uncertain',
+      };
+}
+
 class IdResult {
   const IdResult({
     required this.id,
@@ -68,6 +97,10 @@ class IdResult {
     this.timelineLabel,
     this.pbdbVerified = false,
     this.source = IdentificationSource.mock,
+    this.assessment = IdentifyAssessment.fossil,
+    this.rockType,
+    this.reason,
+    this.primaryConfidence,
   });
 
   final String id;
@@ -81,6 +114,32 @@ class IdResult {
   final String? timelineLabel;
   final bool pbdbVerified;
   final IdentificationSource source;
+  final IdentifyAssessment assessment;
+  final String? rockType;
+  final String? reason;
+  /// Overall confidence used for “needs more info” gating (0–100).
+  final int? primaryConfidence;
+
+  bool get isFossilMatch =>
+      assessment == IdentifyAssessment.fossil && candidates.isNotEmpty;
+
+  bool get isRockAssessment =>
+      assessment == IdentifyAssessment.mayNotBeFossil;
+
+  bool get isUncertain => assessment == IdentifyAssessment.uncertain;
+
+  /// Show the notes / re-identify panel.
+  ///
+  /// Always true for rocks & other non-biogenic assessments (high confidence
+  /// is often misleading — many rocks look alike). Also true when uncertain
+  /// or displayed confidence is under 60%.
+  bool get needsMoreInfo {
+    if (isRockAssessment || isUncertain) return true;
+    final score = primaryConfidence ??
+        (candidates.isNotEmpty ? bestMatch.confidence : null);
+    if (score == null) return false;
+    return score < 60;
+  }
 
   IdCandidate get bestMatch =>
       candidates.firstWhere((c) => c.isBestMatch, orElse: () => candidates.first);
@@ -102,6 +161,10 @@ class IdResult {
       facts: (json['facts'] as List<dynamic>)
           .map((e) => TaxonFact.fromJson(e as Map<String, dynamic>))
           .toList(),
+      assessment: IdentifyAssessment.fromWire(json['assessment'] as String?),
+      rockType: json['rockType'] as String?,
+      reason: json['reason'] as String?,
+      primaryConfidence: json['primaryConfidence'] as int?,
     );
   }
 }

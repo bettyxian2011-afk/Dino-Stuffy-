@@ -6,6 +6,9 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../data/strata_services.dart';
 import '../../data/repositories/identify_repository.dart';
+import '../../data/services/identification_heuristics.dart';
+import '../../data/services/identify_refine_copy.dart';
+import '../../data/services/rock_lithology.dart';
 import '../../models/captured_specimen.dart';
 import '../../models/id_result.dart';
 import '../../theme/strata_theme.dart';
@@ -31,6 +34,7 @@ class IdResultScreen extends StatefulWidget {
 
 class _IdResultScreenState extends State<IdResultScreen> {
   late Future<IdResult> _future;
+  String? _userNotes;
 
   @override
   void initState() {
@@ -38,10 +42,11 @@ class _IdResultScreenState extends State<IdResultScreen> {
     _future = _loadResult();
   }
 
-  Future<IdResult> _loadResult() {
+  Future<IdResult> _loadResult({String? userNotes}) {
+    final notes = userNotes ?? _userNotes;
     final captured = widget.captured;
     if (captured != null) {
-      return widget.repository.identify(captured.bytes);
+      return widget.repository.identify(captured.bytes, userNotes: notes);
     }
     return widget.repository.getMockResult(widget.specimenId);
   }
@@ -49,6 +54,15 @@ class _IdResultScreenState extends State<IdResultScreen> {
   void _retry() {
     setState(() {
       _future = _loadResult();
+    });
+  }
+
+  void _reIdentifyWithNotes(String notes) {
+    final trimmed = notes.trim();
+    if (trimmed.isEmpty) return;
+    setState(() {
+      _userNotes = trimmed;
+      _future = _loadResult(userNotes: trimmed);
     });
   }
 
@@ -150,6 +164,8 @@ class _IdResultScreenState extends State<IdResultScreen> {
         return _IdResultBody(
           result: snapshot.data!,
           previewBytes: widget.captured?.bytes,
+          initialNotes: _userNotes,
+          onReIdentify: widget.captured != null ? _reIdentifyWithNotes : null,
         );
       },
     );
@@ -166,8 +182,11 @@ class _DefaultRepo implements IdentifyRepository {
   }
 
   @override
-  Future<IdResult> identify(Uint8List bytes) {
-    return StrataServices.identifyRepository.identify(bytes);
+  Future<IdResult> identify(Uint8List bytes, {String? userNotes}) {
+    return StrataServices.identifyRepository.identify(
+      bytes,
+      userNotes: userNotes,
+    );
   }
 }
 
@@ -175,10 +194,14 @@ class _IdResultBody extends StatefulWidget {
   const _IdResultBody({
     required this.result,
     this.previewBytes,
+    this.initialNotes,
+    this.onReIdentify,
   });
 
   final IdResult result;
   final Uint8List? previewBytes;
+  final String? initialNotes;
+  final void Function(String notes)? onReIdentify;
 
   @override
   State<_IdResultBody> createState() => _IdResultBodyState();
@@ -191,18 +214,39 @@ class _IdResultBodyState extends State<_IdResultBody> {
 
   @override
   Widget build(BuildContext context) {
+    // Rock-only path (no genera).
+    if (result.isRockAssessment) {
+      return _NonFossilResultBody(
+        result: result,
+        previewBytes: widget.previewBytes,
+        initialNotes: widget.initialNotes,
+        onReIdentify: widget.onReIdentify,
+      );
+    }
+    // Uncertain with no provisional genera — photo tip only.
+    if (result.isUncertain && result.candidates.isEmpty) {
+      return _NonFossilResultBody(
+        result: result,
+        previewBytes: widget.previewBytes,
+        initialNotes: widget.initialNotes,
+        onReIdentify: widget.onReIdentify,
+      );
+    }
+
     final best = result.bestMatch;
     final alternatives = result.alternatives;
+    final showProfileCta = result.isFossilMatch || result.isUncertain;
 
     return Scaffold(
       backgroundColor: StrataColors.cream,
       body: Column(
         children: [
           Expanded(
-            child: CustomScrollView(
-              slivers: [
-                SliverToBoxAdapter(
-                  child: SizedBox(
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  SizedBox(
                     height: 280,
                     child: Stack(
                       fit: StackFit.expand,
@@ -233,7 +277,12 @@ class _IdResultBodyState extends State<_IdResultBody> {
                               children: [
                                 GlassIconButton(
                                   icon: Icons.arrow_back_rounded,
-                                  onPressed: () => context.pop(),
+                                  onPressed: () {
+                                    if (context.mounted &&
+                                        Navigator.canPop(context)) {
+                                      Navigator.pop(context);
+                                    }
+                                  },
                                 ),
                                 const Spacer(),
                                 GlassIconButton(
@@ -247,84 +296,543 @@ class _IdResultBodyState extends State<_IdResultBody> {
                       ],
                     ),
                   ),
-                ),
-                SliverPadding(
-                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
-                  sliver: SliverList(
-                    delegate: SliverChildListDelegate([
-                      Transform.translate(
-                        offset: const Offset(0, -36),
-                        child: _BestMatchCard(
-                          result: result,
-                          best: best,
-                        ),
-                      ),
-                      Text(
-                        'If not — most likely alternatives',
-                        style: GoogleFonts.dmSans(
-                          color: StrataColors.ink,
-                          fontWeight: FontWeight.w700,
-                          fontSize: 14,
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      for (final alt in alternatives) ...[
-                        _AlternativeCard(candidate: alt),
-                        const SizedBox(height: 10),
-                      ],
-                      const SizedBox(height: 6),
-                      if (result.timelineLabel != null) ...[
-                        _TimelineCard(label: result.timelineLabel!),
-                        const SizedBox(height: 16),
-                      ],
-                      _TipCallout(tip: result.tip),
-                      const SizedBox(height: 16),
-                      _TaxonomyRow(taxonomy: result.taxonomy),
-                      const SizedBox(height: 16),
-                      _FactsRow(facts: result.facts),
-                      const SizedBox(height: 20),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: GradientCtaButton(
-                              label: 'View full profile',
-                              showArrow: false,
-                              onPressed: () => context.push(
-                                '/species/${Uri.encodeComponent(best.genus)}'
-                                '?group=${Uri.encodeComponent(best.commonGroup)}'
-                                '&family=${Uri.encodeComponent(best.family)}',
-                              ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        if (result.isUncertain) ...[
+                          Transform.translate(
+                            offset: const Offset(0, -36),
+                            child: _PhotoQualityCallout(
+                              reason: result.reason ?? result.tip,
                             ),
                           ),
-                          const SizedBox(width: 12),
-                          Material(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(16),
-                            elevation: 1,
-                            shadowColor: Colors.black26,
-                            child: InkWell(
-                              onTap: () =>
-                                  setState(() => _bookmarked = !_bookmarked),
+                          const SizedBox(height: 8),
+                        ],
+                        Transform.translate(
+                          offset: Offset(0, result.isUncertain ? 0 : -36),
+                          child: _BestMatchCard(
+                            result: result,
+                            best: best,
+                          ),
+                        ),
+                        if (alternatives.isNotEmpty) ...[
+                          Text(
+                            result.isUncertain
+                                ? 'Other provisional possibilities'
+                                : 'If not — most likely alternatives',
+                            style: GoogleFonts.dmSans(
+                              color: StrataColors.ink,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 14,
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          for (final alt in alternatives) ...[
+                            _AlternativeCard(candidate: alt),
+                            const SizedBox(height: 10),
+                          ],
+                          const SizedBox(height: 6),
+                        ],
+                        if (result.timelineLabel != null) ...[
+                          _TimelineCard(label: result.timelineLabel!),
+                          const SizedBox(height: 16),
+                        ],
+                        if (!result.isUncertain) ...[
+                          _TipCallout(tip: result.tip),
+                          const SizedBox(height: 16),
+                        ],
+                        if (result.taxonomy.isNotEmpty) ...[
+                          _TaxonomyRow(taxonomy: result.taxonomy),
+                          const SizedBox(height: 16),
+                        ],
+                        if (result.facts.isNotEmpty) ...[
+                          _FactsRow(facts: result.facts),
+                          const SizedBox(height: 20),
+                        ],
+                        if (result.needsMoreInfo &&
+                            widget.onReIdentify != null) ...[
+                          _RefineWithNotesPanel(
+                            isRock: result.isRockAssessment,
+                            initialNotes: widget.initialNotes,
+                            onSubmit: widget.onReIdentify!,
+                          ),
+                          const SizedBox(height: 20),
+                        ],
+                        Row(
+                          children: [
+                            if (showProfileCta)
+                              Expanded(
+                                child: GradientCtaButton(
+                                  label: result.isUncertain
+                                      ? 'View provisional profile'
+                                      : 'View full profile',
+                                  showArrow: false,
+                                  onPressed: () => context.push(
+                                    '/species/${Uri.encodeComponent(best.genus)}'
+                                    '?group=${Uri.encodeComponent(best.commonGroup)}'
+                                    '&family=${Uri.encodeComponent(best.family)}',
+                                  ),
+                                ),
+                              ),
+                            if (showProfileCta) const SizedBox(width: 12),
+                            Material(
+                              color: Colors.white,
                               borderRadius: BorderRadius.circular(16),
-                              child: SizedBox(
-                                width: 56,
-                                height: 56,
-                                child: Icon(
-                                  _bookmarked
-                                      ? Icons.bookmark
-                                      : Icons.bookmark_border,
-                                  color: StrataColors.brown,
+                              elevation: 1,
+                              shadowColor: Colors.black26,
+                              child: InkWell(
+                                onTap: () => setState(
+                                  () => _bookmarked = !_bookmarked,
+                                ),
+                                borderRadius: BorderRadius.circular(16),
+                                child: SizedBox(
+                                  width: 56,
+                                  height: 56,
+                                  child: Icon(
+                                    _bookmarked
+                                        ? Icons.bookmark
+                                        : Icons.bookmark_border,
+                                    color: StrataColors.brown,
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
-                        ],
-                      ),
-                    ]),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PhotoQualityCallout extends StatelessWidget {
+  const _PhotoQualityCallout({required this.reason});
+
+  final String reason;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFFF4E0),
+        borderRadius: BorderRadius.circular(StrataRadii.card),
+        border: Border.all(color: const Color(0xFFE8C98A)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.photo_camera_outlined,
+                  color: StrataColors.orange, size: 22),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  'Clearer photo needed',
+                  style: GoogleFonts.dmSans(
+                    color: const Color(0xFF5C3A22),
+                    fontWeight: FontWeight.w800,
+                    fontSize: 15,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            reason,
+            style: GoogleFonts.dmSans(
+              color: const Color(0xFF5C3A22),
+              fontSize: 13,
+              height: 1.4,
+            ),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            'What can go wrong: blur, glare, or rock texture can look like a '
+            'fossil and produce a wrong genus. The match below is the highest '
+            'provisional score — treat it as a guess until you retake.',
+            style: GoogleFonts.dmSans(
+              color: StrataColors.brown,
+              fontSize: 12,
+              height: 1.4,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _NonFossilResultBody extends StatelessWidget {
+  const _NonFossilResultBody({
+    required this.result,
+    this.previewBytes,
+    this.initialNotes,
+    this.onReIdentify,
+  });
+
+  final IdResult result;
+  final Uint8List? previewBytes;
+  final String? initialNotes;
+  final void Function(String notes)? onReIdentify;
+
+  @override
+  Widget build(BuildContext context) {
+    final isRock = result.isRockAssessment;
+    final title = isRock
+        ? RockLithology.displayName(result.rockType)
+        : 'Uncertain';
+    final headline = isRock ? 'May not be a fossil' : result.matchLabel;
+
+    return Scaffold(
+      backgroundColor: StrataColors.cream,
+      body: ListView(
+        padding: EdgeInsets.zero,
+        children: [
+          SizedBox(
+            height: 280,
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                _SpecimenHeaderImage(
+                  previewBytes: previewBytes,
+                  assetPath: result.specimenImage,
+                ),
+                const DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Color(0x33000000),
+                        Color(0x00000000),
+                        Color(0xFFF7F4EF),
+                      ],
+                      stops: [0, 0.45, 1],
+                    ),
+                  ),
+                ),
+                SafeArea(
+                  bottom: false,
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                    child: Row(
+                      children: [
+                        GlassIconButton(
+                          icon: Icons.arrow_back_rounded,
+                          onPressed: () {
+                            if (context.mounted && Navigator.canPop(context)) {
+                              Navigator.pop(context);
+                            }
+                          },
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ],
             ),
+          ),
+          Transform.translate(
+            offset: const Offset(0, -36),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Container(
+                padding: const EdgeInsets.all(18),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(StrataRadii.card),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.06),
+                      blurRadius: 18,
+                      offset: const Offset(0, 8),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    ConfidencePill(
+                      label: result.confidenceLabel,
+                      color: isRock ? StrataColors.brown : StrataColors.orange,
+                    ),
+                    const SizedBox(height: 14),
+                    Text(
+                      headline,
+                      style: GoogleFonts.dmSans(
+                        color: StrataColors.muted,
+                        fontSize: 13,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      title,
+                      style: GoogleFonts.libreBaskerville(
+                        color: StrataColors.ink,
+                        fontSize: 28,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    if (isRock) ...[
+                      const SizedBox(height: 6),
+                      Text(
+                        'Lithology / material estimate — not a species ID',
+                        style: GoogleFonts.dmSans(
+                          color: StrataColors.muted,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 32),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _TipCallout(tip: result.tip),
+                if (result.facts.isNotEmpty) ...[
+                  const SizedBox(height: 16),
+                  _FactsRow(facts: result.facts),
+                ],
+                if (result.needsMoreInfo && onReIdentify != null) ...[
+                  const SizedBox(height: 20),
+                  _RefineWithNotesPanel(
+                    isRock: result.isRockAssessment,
+                    initialNotes: initialNotes,
+                    onSubmit: onReIdentify!,
+                  ),
+                ],
+                const SizedBox(height: 24),
+                GradientCtaButton(
+                  label: 'Try another photo',
+                  showArrow: false,
+                  onPressed: () {
+                    if (context.mounted && Navigator.canPop(context)) {
+                      Navigator.pop(context);
+                    }
+                  },
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _RefineWithNotesPanel extends StatefulWidget {
+  const _RefineWithNotesPanel({
+    required this.onSubmit,
+    this.initialNotes,
+    this.isRock = false,
+  });
+
+  final String? initialNotes;
+  final void Function(String notes) onSubmit;
+  final bool isRock;
+
+  @override
+  State<_RefineWithNotesPanel> createState() => _RefineWithNotesPanelState();
+}
+
+class _RefineWithNotesPanelState extends State<_RefineWithNotesPanel> {
+  late final TextEditingController _controller;
+  RefineExample? _expanded;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: widget.initialNotes ?? '');
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _insertExample(RefineExample example) {
+    final current = _controller.text.trim();
+    final next = current.isEmpty
+        ? example.sentence
+        : '$current ${example.sentence}';
+    _controller.value = TextEditingValue(
+      text: next,
+      selection: TextSelection.collapsed(offset: next.length),
+    );
+    setState(() => _expanded = example);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(StrataRadii.card),
+        border: Border.all(color: const Color(0xFFE8C98A)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.edit_note_rounded,
+                  color: StrataColors.orange, size: 24),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  IdentifyRefineCopy.titleFor(isRock: widget.isRock),
+                  style: GoogleFonts.dmSans(
+                    color: StrataColors.ink,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 15,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            IdentifyRefineCopy.subtitleFor(isRock: widget.isRock),
+            style: GoogleFonts.dmSans(
+              color: StrataColors.muted,
+              fontSize: 13,
+              height: 1.4,
+            ),
+          ),
+          const SizedBox(height: 14),
+          Text(
+            'Tap an example to add it (terms explained for beginners):',
+            style: GoogleFonts.dmSans(
+              color: StrataColors.ink,
+              fontWeight: FontWeight.w700,
+              fontSize: 12,
+            ),
+          ),
+          const SizedBox(height: 8),
+          for (final example in IdentifyRefineCopy.examples) ...[
+            InkWell(
+              onTap: () => _insertExample(example),
+              borderRadius: BorderRadius.circular(12),
+              child: Container(
+                width: double.infinity,
+                margin: const EdgeInsets.only(bottom: 8),
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFFF8EF),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: const Color(0xFFE8DFD4)),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      example.sentence,
+                      style: GoogleFonts.dmSans(
+                        color: StrataColors.ink,
+                        fontSize: 13,
+                        height: 1.35,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      '${example.term}: ${example.definition}',
+                      style: GoogleFonts.dmSans(
+                        color: StrataColors.brown,
+                        fontSize: 11,
+                        height: 1.35,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+          const SizedBox(height: 8),
+          TextField(
+            controller: _controller,
+            minLines: 3,
+            maxLines: 5,
+            textInputAction: TextInputAction.newline,
+            decoration: InputDecoration(
+              hintText: IdentifyRefineCopy.fieldHint,
+              hintStyle: GoogleFonts.dmSans(
+                color: StrataColors.muted,
+                fontSize: 13,
+              ),
+              filled: true,
+              fillColor: StrataColors.cream,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(14),
+                borderSide: const BorderSide(color: Color(0xFFE0D6C8)),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(14),
+                borderSide: const BorderSide(color: Color(0xFFE0D6C8)),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(14),
+                borderSide: const BorderSide(color: StrataColors.teal, width: 1.5),
+              ),
+            ),
+            style: GoogleFonts.dmSans(
+              color: StrataColors.ink,
+              fontSize: 14,
+              height: 1.4,
+            ),
+          ),
+          if (_expanded != null) ...[
+            const SizedBox(height: 8),
+            Text(
+              'Using “${_expanded!.term}” — ${_expanded!.definition}',
+              style: GoogleFonts.dmSans(
+                color: StrataColors.teal,
+                fontSize: 11,
+                height: 1.35,
+              ),
+            ),
+          ],
+          const SizedBox(height: 14),
+          GradientCtaButton(
+            label: 'Re-identify with my notes',
+            showArrow: false,
+            onPressed: () => widget.onSubmit(_controller.text),
           ),
         ],
       ),
@@ -456,7 +964,9 @@ class _BestMatchCard extends StatelessWidget {
           if (best.modelConfidence != null) ...[
             const SizedBox(height: 4),
             Text(
-              'Raw AI score ${best.modelConfidence}% · boosted when PBDB/catalog agree',
+              best.modelConfidence! < IdentificationHeuristics.boostFloor
+                  ? 'Raw AI score ${best.modelConfidence}% · no catalog/PBDB boost below ${IdentificationHeuristics.boostFloor}%'
+                  : 'Raw AI score ${best.modelConfidence}% · soft boost only when ≥${IdentificationHeuristics.boostFloor}% and corroborated',
               style: GoogleFonts.dmSans(
                 color: StrataColors.muted,
                 fontSize: 11,

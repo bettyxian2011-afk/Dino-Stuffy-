@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../data/repositories/taxon_repository.dart';
+import '../../data/services/taxon_fact_mapper.dart';
 import '../../data/strata_services.dart';
 import '../../models/pbdb_taxon.dart';
 import '../../theme/strata_theme.dart';
@@ -27,18 +28,43 @@ class SpeciesProfileScreen extends StatefulWidget {
   State<SpeciesProfileScreen> createState() => _SpeciesProfileScreenState();
 }
 
+class _ProfileLoad {
+  const _ProfileLoad({
+    required this.taxon,
+    required this.taxonomy,
+  });
+
+  final PbdbTaxon taxon;
+  final List<String> taxonomy;
+}
+
 class _SpeciesProfileScreenState extends State<SpeciesProfileScreen> {
-  late Future<PbdbTaxon?> _future;
+  late Future<_ProfileLoad?> _future;
 
   @override
   void initState() {
     super.initState();
-    _future = widget.taxonRepository.findTaxon(widget.genus);
+    _future = _load();
+  }
+
+  Future<_ProfileLoad?> _load() async {
+    final taxon = await widget.taxonRepository.findTaxon(widget.genus);
+    if (taxon == null) return null;
+
+    var taxonomy = <String>[];
+    try {
+      final chain =
+          await widget.taxonRepository.getTimelineChain(widget.genus);
+      taxonomy = TaxonFactMapper.taxonomyLabelsFromChain(chain);
+    } catch (_) {
+      taxonomy = const [];
+    }
+    return _ProfileLoad(taxon: taxon, taxonomy: taxonomy);
   }
 
   void _retry() {
     setState(() {
-      _future = widget.taxonRepository.findTaxon(widget.genus);
+      _future = _load();
     });
   }
 
@@ -53,7 +79,7 @@ class _SpeciesProfileScreenState extends State<SpeciesProfileScreen> {
           onPressed: () => context.pop(),
         ),
       ),
-      body: FutureBuilder<PbdbTaxon?>(
+      body: FutureBuilder<_ProfileLoad?>(
         future: _future,
         builder: (context, snapshot) {
           if (snapshot.connectionState != ConnectionState.done) {
@@ -65,8 +91,8 @@ class _SpeciesProfileScreenState extends State<SpeciesProfileScreen> {
               onRetry: _retry,
             );
           }
-          final taxon = snapshot.data;
-          if (taxon == null) {
+          final data = snapshot.data;
+          if (data == null) {
             return _ProfileEmpty(
               genus: widget.genus,
               commonGroup: widget.commonGroup,
@@ -75,7 +101,8 @@ class _SpeciesProfileScreenState extends State<SpeciesProfileScreen> {
             );
           }
           return _ProfileBody(
-            taxon: taxon,
+            taxon: data.taxon,
+            taxonomy: data.taxonomy,
             commonGroup: widget.commonGroup,
             family: widget.family,
           );
@@ -123,7 +150,7 @@ class _ProfileLoading extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              'Fetching name, rank, age range, and occurrences.',
+              'Fetching name, rank, age range, and taxonomy.',
               textAlign: TextAlign.center,
               style: GoogleFonts.dmSans(
                 color: StrataColors.muted,
@@ -264,11 +291,13 @@ class _ProfileEmpty extends StatelessWidget {
 class _ProfileBody extends StatelessWidget {
   const _ProfileBody({
     required this.taxon,
+    required this.taxonomy,
     this.commonGroup,
     this.family,
   });
 
   final PbdbTaxon taxon;
+  final List<String> taxonomy;
   final String? commonGroup;
   final String? family;
 
@@ -320,6 +349,50 @@ class _ProfileBody extends StatelessWidget {
             ),
           ),
         ],
+        if (taxonomy.isNotEmpty) ...[
+          const SizedBox(height: 20),
+          Text(
+            'Taxonomy',
+            style: GoogleFonts.dmSans(
+              color: StrataColors.ink,
+              fontWeight: FontWeight.w700,
+              fontSize: 14,
+            ),
+          ),
+          const SizedBox(height: 10),
+          Wrap(
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 6,
+            runSpacing: 8,
+            children: [
+              for (var i = 0; i < taxonomy.length; i++) ...[
+                if (i > 0)
+                  Icon(
+                    Icons.chevron_right,
+                    size: 16,
+                    color: StrataColors.muted.withValues(alpha: 0.7),
+                  ),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(StrataRadii.pill),
+                    border: Border.all(color: const Color(0xFFE0D6C8)),
+                  ),
+                  child: Text(
+                    taxonomy[i],
+                    style: GoogleFonts.dmSans(
+                      color: StrataColors.ink,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ],
         const SizedBox(height: 24),
         _FactCard(
           icon: Icons.category_outlined,
@@ -352,8 +425,8 @@ class _ProfileBody extends StatelessWidget {
             ),
           ),
           child: Text(
-            'Data from the Paleobiology Database (PBDB). '
-            'Ranges and counts reflect published fossil occurrences.',
+            'PBDB record for this name — a double-check and fact source, '
+            'not proof that the photo is this taxon.',
             style: GoogleFonts.dmSans(
               color: StrataColors.teal,
               fontSize: 12,

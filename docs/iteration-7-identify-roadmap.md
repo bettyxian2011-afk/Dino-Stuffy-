@@ -1,6 +1,6 @@
 # Iteration 7 — Identify & Species Facts Roadmap
 
-Versioned plan to turn Strata’s mock Identify path into a reliable **photo → ranked fossil match → species facts** experience. This expands Iteration 7 from [app-development-plan.md](./app-development-plan.md), prioritizing Identify and species facts first.
+Versioned plan to turn Strata’s mock Identify path into a reliable **photo → (ranked fossil match | honest “may not be a fossil” + rock type) → species facts** experience. This expands Iteration 7 from [app-development-plan.md](./app-development-plan.md), prioritizing Identify and species facts first.
 
 **Versions:** 0.1 → 0.2 → … → 1.0  
 Each version adds **one feature**, is **fully tested**, and **builds on** the previous version.
@@ -12,9 +12,13 @@ Each version adds **one feature**, is **fully tested**, and **builds on** the pr
 Ship a demoable end-to-end flow:
 
 1. Open Identify (Scan FAB / Scan now)
-2. Capture or pick a fossil photo
-3. Get ranked genus candidates with confidence
-4. Open a species profile with real Paleobiology Database (PBDB) facts
+2. Capture or pick a photo
+3. **Either** ranked fossil genus candidates with honest confidence, **or** a clear “may not be a fossil” result with a rock/lithology label (e.g. conglomerate, sandstone)
+4. For fossil matches: open a species profile with Paleobiology Database (PBDB) facts used as a **double-check**, not a name-existence boost
+
+### Known gap (drives v0.6)
+
+Today the vision prompt always asks for fossil genera, and heuristics boost any catalog/PBDB name hit even when the model is unsure (e.g. a conglomerate returning *Carcharodon* at raw ~35% then boosted to ~52%). The plan below closes that.
 
 ## Non-goals (this roadmap)
 
@@ -27,6 +31,7 @@ Leave these for later phases (see main plan out-of-scope):
 - Live Translate API
 - Auth / Sign in
 - In-app live camera preview / Live ID streaming
+- Full petrology / rock-ID product (rock path is a short lithology label only)
 
 ---
 
@@ -45,7 +50,7 @@ Do **not** restart Identify from scratch. Build on existing code:
 | Taxon API | `TaxonRepository` / `PbdbTaxonRepository` |
 | DI / switch | `StrataServices` + `StrataConfig` (`GEMINI_API_KEY`) |
 | Result UI | `IdResultScreen` |
-| Profile UI | `SpeciesProfileScreen` (stub today) |
+| Profile UI | `SpeciesProfileScreen` (PBDB fields as of v0.4) |
 
 ```mermaid
 flowchart TD
@@ -54,15 +59,17 @@ flowchart TD
   Repo -->|no API key| Mock[MockIdentifyRepository]
   Repo -->|GEMINI_API_KEY set| Gemini[GeminiIdentifyRepository]
   Gemini --> Vision[GeminiVisionService]
-  Gemini --> Catalog[IdCatalog]
-  Gemini --> Taxon[TaxonRepository PBDB]
+  Vision -->|fossil| Catalog[IdCatalog]
+  Vision -->|may not be fossil| Rock[Rock / lithology label]
+  Gemini --> Taxon[TaxonRepository PBDB double-check]
   Mock --> Result[IdResultScreen]
   Gemini --> Result
-  Result --> Profile[SpeciesProfileScreen]
+  Rock --> Result
+  Result -->|fossil only| Profile[SpeciesProfileScreen]
   Profile --> Taxon
 ```
 
-**Priority order:** Identify reliability → catalog → result UX → species profile → open-world match → capture polish → persistence → v1.0 milestone.
+**Priority order:** Identify reliability → catalog → result UX → species profile → taxonomy facts → **non-fossil + honest confidence + PBDB double-check** → capture polish → persistence → v1.0 milestone.
 
 ---
 
@@ -75,12 +82,12 @@ flowchart TD
 | **0.2** | Expand curated catalog | **Completed** | v0.1 | Unit: `IdCatalog.load` | ~20–30 preferred genera |
 | **0.3** | Identify result resilience | **Completed** | v0.2 | Widget: success + failure + retry | Retry works; no dead-end errors |
 | **0.4** | Species profile from PBDB | **Completed** | v0.3 | Fixture + fake repo screen | Profile shows real PBDB fields |
-| **0.5** | Taxonomy + facts merge | Pending | v0.4 | Unit: PBDB → facts mappers | Out-of-catalog matches still show facts |
-| **0.6** | Open-world match quality | Pending | v0.5 | Heuristics + JSON parser tests | Non-catalog taxa still rank + enrich |
+| **0.5** | Taxonomy + facts merge | **Completed** | v0.4 | Unit: PBDB → facts mappers | Out-of-catalog matches still show facts |
+| **0.6** | Non-fossil + honest confidence | **Completed** | v0.5 | Heuristics + schema + UI tests | Rock photos → lithology, not shark genera |
 | **0.7** | Capture reliability | Pending | v0.6 | Manual emulator checklist | Gallery works when camera fails |
 | **0.8** | Persist recent IDs | Pending | v0.7 | Persistence round-trip | Home shows real recent matches |
-| **0.9** | Quality gates | Pending | v0.8 | Full `flutter test` suite | Identify/species well covered |
-| **1.0** | Milestone: photo → match | Pending | v0.9 | Demo script + runbook | Identify + species facts declared done |
+| **0.9** | Quality gates | Pending | v0.8 | Full `flutter test` suite | Identify/species/rock path covered |
+| **1.0** | Milestone: photo → match | Pending | v0.9 | Demo script + runbook | Identify + species facts + rock reject declared done |
 
 
 ```mermaid
@@ -89,7 +96,7 @@ flowchart LR
   v02 --> v03[v0.3 ID UX]
   v03 --> v04[v0.4 PBDB profile]
   v04 --> v05[v0.5 Taxonomy facts]
-  v05 --> v06[v0.6 Open match]
+  v05 --> v06[v0.6 Non-fossil + confidence]
   v06 --> v07[v0.7 Capture]
   v07 --> v08[v0.8 Recents]
   v08 --> v09[v0.9 Quality]
@@ -232,25 +239,27 @@ View full profile shows real PBDB fields for a known genus (e.g. *Dactylioceras*
 
 ---
 
-## Version 0.5 — Taxonomy + facts on profile and result
+## Version 0.5 — Taxonomy + facts on profile and result — completed
 
 ### Feature
 
 Use PBDB parent chain for taxonomy breadcrumbs; merge PBDB attrs into ID Result quick-facts when catalog facts are missing.
 
+**PBDB role in this version:** enrich *display* facts (age, occurrence count, hierarchy) for a genus the model already proposed. Do **not** treat “name exists in PBDB” as proof the photo is that fossil — confidence boosts move to the double-check rules in **v0.6**.
+
 ### Tasks
 
-- Call `getTimelineChain` for hierarchy chips on profile (and optionally ID Result)
-- Add mapper helpers: PBDB → `List<TaxonFact>` / taxonomy labels
-- On `GeminiIdentifyRepository` (or result assembly), fill facts from PBDB when catalog entry is absent
+- [x] Call `getTimelineChain` for hierarchy chips on profile
+- [x] Add mapper helpers: PBDB → `List<TaxonFact>` / taxonomy labels (`TaxonFactMapper`)
+- [x] On `GeminiIdentifyRepository`, fill facts from PBDB when catalog entry is absent
+- [x] Keep UI copy factual (“PBDB record for this name”) rather than “Verified”
 
-### Files likely touched
+### Files touched
 
+- `dino_app/lib/data/services/taxon_fact_mapper.dart`
 - `dino_app/lib/data/repositories/gemini_identify_repository.dart`
-- `dino_app/lib/data/repositories/taxon_repository.dart`
-- New helper e.g. `dino_app/lib/data/services/taxon_fact_mapper.dart`
 - `dino_app/lib/screens/id_result/species_profile_screen.dart`
-- `dino_app/lib/screens/id_result/id_result_screen.dart`
+- `dino_app/test/heuristics_and_mapper_test.dart`
 
 ### Tests
 
@@ -264,36 +273,59 @@ Out-of-catalog best matches still show useful era/location-style facts when PBDB
 
 ---
 
-## Version 0.6 — Open-world match quality
+## Version 0.6 — Non-fossil detection + honest confidence + PBDB double-check — completed
 
 ### Feature
 
-Improve “any fossil” matching so genera outside the local JSON are first-class.
+Stop forcing every photo into a fossil genus. Allow **“may not be a fossil”** with a **fixed rock/lithology label**; only boost confidence when the model is already reasonably sure; use PBDB as a **double-check**, not a name-existence bonus. **Uncertain** still shows provisional genera (top match + alternatives) plus a clearer-photo / what-can-go-wrong callout.
 
 ### Tasks
 
-- Tune `GeminiVisionService` prompt for open-set suggestions + catalog preference
-- Adjust `IdentificationHeuristics` (catalog hit, PBDB hit, occurrence boost)
-- Drive tip callout from high / medium / low confidence bands
-- Harden Gemini JSON parsing edge cases (markdown fences, empty list)
+#### A. Vision schema + prompt — done
 
-### Files likely touched
+- [x] `assessment`: `fossil` | `may_not_be_fossil` | `uncertain`
+- [x] Fixed `rockType` enum via `RockLithology.labels`
+- [x] Uncertain returns provisional `candidates` + `reason`
+- [x] Parser hardened for new fields
+
+#### B. Confidence: no boost below 60% raw — done
+
+- [x] `IdentificationHeuristics.boostFloor = 60`
+- [x] Soft boosts only when raw ≥ 60: catalog +3, PBDB genus-rank +2, occurrences +1/+3
+
+#### C. PBDB as double-check — done
+
+- [x] No boost for “name exists” alone
+- [x] Tips rewritten away from “Verified against…”
+
+#### D. ID Result UI — done
+
+- [x] Rock path: lithology label, no profile CTA
+- [x] Uncertain path: photo-quality callout + highest provisional genus + alternatives
+
+### Files touched
 
 - `dino_app/lib/data/services/gemini_vision_service.dart`
 - `dino_app/lib/data/services/identification_heuristics.dart`
+- `dino_app/lib/data/services/rock_lithology.dart`
 - `dino_app/lib/data/repositories/gemini_identify_repository.dart`
-- `dino_app/test/` heuristics + parser tests
-
-### Tests
-
-| Type | What |
-| ---- | ---- |
-| Unit | Heuristics confidence adjustments |
-| Unit | Parser accepts messy / fenced JSON |
+- `dino_app/lib/models/id_result.dart`
+- `dino_app/lib/screens/id_result/id_result_screen.dart`
+- `dino_app/test/gemini_vision_parse_test.dart`
+- `dino_app/test/heuristics_and_mapper_test.dart`
+- `dino_app/test/id_result_screen_test.dart`
 
 ### Done when
 
-Photos of taxa absent from local JSON still return ranked candidates with PBDB enrichment.
+1. Non-fossil photo → may-not-be-fossil + fixed rock type
+2. Raw confidence &lt; 60% never receives catalog/PBDB boosts
+3. Uncertain shows provisional top genus plus clearer-photo guidance
+
+### Follow-up (potential-match refine)
+
+When confidence is **&lt; 60%** (or assessment is uncertain), ID Result shows a **Potential match** panel: text box + lay example sentences (grain, matrix, suture, scale, rounded vs angular) and **Re-identify with my notes**, which re-runs Gemini with that context.
+
+For **rock / non-fossil** assessments the refine panel is **always** shown — even at high confidence — because many rocks look alike and a high % is often misleading.
 
 ---
 
@@ -364,14 +396,15 @@ After identifying a photo, Home shows that match without only hardcoding mock Ve
 
 ### Feature
 
-Confidence-threshold UX, documented failure modes, and a solid automated suite.
+Confidence-threshold UX, non-fossil regression coverage, documented failure modes, and a solid automated suite.
 
 ### Tasks
 
-- Surface low-confidence tips consistently on ID Result
+- Confirm v0.6 policies still hold: no boost below 60%; rock path never presents a best genus
+- Surface low-confidence tips consistently on ID Result (provisional, not “verified”)
 - Confirm `ImageCompressor` limits are applied on the live path
-- Expand tests (catalog, heuristics, mock identify, profile mappers, persistence)
-- Document quota / offline / invalid key failure modes in this file
+- Expand tests (catalog, heuristics, rock/fossil schema, mock identify, profile mappers, persistence)
+- Document quota / offline / invalid key / non-fossil failure modes in this file
 
 ### Files likely touched
 
@@ -383,39 +416,43 @@ Confidence-threshold UX, documented failure modes, and a solid automated suite.
 
 | Type | What |
 | ---- | ---- |
-| Gate | `flutter test` green; Identify/species coverage beyond onboarding-only |
+| Gate | `flutter test` green; Identify/species/**rock** coverage beyond onboarding-only |
 
 ### Done when
 
-Local CI-style test suite meaningfully covers the Identify and species path.
+Local CI-style test suite meaningfully covers the Identify, species, and non-fossil paths.
 
 ---
 
-## Version 1.0 — Milestone: photo → ranked fossil match
+## Version 1.0 — Milestone: photo → ranked fossil match (or honest rock reject)
 
 ### Feature
 
-End-to-end polish and declaration that Iteration 7 **Identify + species facts** is complete.
+End-to-end polish and declaration that Iteration 7 **Identify + species facts + non-fossil handling** is complete.
 
 ### Tasks
 
-- Walk the demo script below on emulator and/or device
+- Walk the demo script below on emulator and/or device (include one rock / conglomerate photo)
 - Finalize runbook
 - Update [app-development-plan.md](./app-development-plan.md) Iteration 7 status/notes
 - Explicitly leave Sites / Translate API / Auth for later phases
 
 ### Done when
 
-Demo script succeeds: open app → Scan → capture/pick any fossil photo → ranked candidates → View full profile with PBDB facts.
+Demo script succeeds for both:
+
+- Fossil photo → ranked candidates → View full profile with PBDB facts (double-check copy)
+- Non-fossil / rock photo → “may not be a fossil” + lithology (no false shark genus)
 
 ### Demo script
 
 1. `flutter run --dart-define=GEMINI_API_KEY=<key> -d <device>`
 2. Get Started → Home → Scan FAB
 3. Prefer **Library** on emulator if camera fails; otherwise shutter
-4. Confirm ID Result shows ranked candidates + confidence
+4. **Fossil path:** Confirm ID Result shows ranked candidates + confidence; raw &lt; 60% is not PBDB-boosted into “verified”
 5. Tap **View full profile** → PBDB-backed facts visible
-6. Return Home → recent identification includes the new match (after v0.8+)
+6. **Rock path:** Identify a conglomerate / plain rock photo → may-not-be-fossil + rock type; no species profile required
+7. Return Home → recent identification includes the new *fossil* match (after v0.8+; rock entries optional)
 
 ---
 
@@ -441,8 +478,11 @@ Demo script succeeds: open app → Scan → capture/pick any fossil photo → ra
 | Invalid / quota key | Error UI + retry; optional mock fallback message |
 | Offline | Error UI; retry when back online |
 | Camera unavailable | Gallery fallback (v0.7+) |
-| Genus not in catalog | Still show Gemini + PBDB enrichment (v0.5–0.6) |
-| Genus not in PBDB | Show model result; facts may be thinner |
+| Genus not in catalog | Still show Gemini candidates; PBDB facts if name resolves (v0.5–0.6) |
+| Genus not in PBDB | Show model result; facts may be thinner; **do not** invent verification |
+| Photo may not be a fossil (v0.6+) | `may_not_be_fossil` + rock/lithology label; no ranked genera / no species profile |
+| Raw model confidence &lt; 60% (v0.6+) | No catalog/PBDB boost; provisional tip; never “Verified against PBDB” from name lookup alone |
+| Weak fossil guess that only “exists in PBDB” | Treat as uncorroborated; PBDB used for facts lookup only |
 
 ---
 
@@ -473,4 +513,4 @@ On launch, check the debug console for:
 
 ## Out of scope pointer
 
-Broader product deferrals (At Risk tab, Dig Map, Deep Time, Museums, auth, live Translate) remain listed under **Out of scope** in [app-development-plan.md](./app-development-plan.md). This roadmap only completes Iteration 7’s **Identify** and **species facts** slice.
+Broader product deferrals (At Risk tab, Dig Map, Deep Time, Museums, auth, live Translate) remain listed under **Out of scope** in [app-development-plan.md](./app-development-plan.md). This roadmap completes Iteration 7’s **Identify**, **species facts**, and **honest non-fossil / rock** slice.

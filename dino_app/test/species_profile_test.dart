@@ -73,7 +73,7 @@ void main() {
       );
       expect(find.text('Hettangian – Bajocian'), findsOneWidget);
       expect(find.text('496 fossil occurrences'), findsOneWidget);
-      expect(find.textContaining('Paleobiology Database'), findsOneWidget);
+      expect(find.textContaining('PBDB record'), findsOneWidget);
     });
 
     testWidgets('shows error state and retries', (tester) async {

@@ -14,7 +14,8 @@ Iterative Flutter plan to build Strata’s five mockup screens (Onboarding → H
 | 4 — ID Result       | Completed |
 | 5 — Paleo Translate | Completed |
 | 6 — Capture wiring  | Completed |
-| 7 — Real services   | In progress — [Identify roadmap](./iteration-7-identify-roadmap.md) **v0.1 completed**; v0.2→1.0 next |
+| 7 — Real services   | In progress — [Identify roadmap](./iteration-7-identify-roadmap.md) **v0.1–0.6 completed**; next **v0.7** capture reliability |
+| 8 — Firestore, Deep Time, Museums | Planned — [Iteration 8 roadmap](./iteration-8-firestore-roadmap.md). Kids Mode is specified there and starts after accounts |
 
 
 
@@ -25,9 +26,9 @@ Iterative Flutter plan to build Strata’s five mockup screens (Onboarding → H
 
 **Iteration 7** is underway via [iteration-7-identify-roadmap.md](./iteration-7-identify-roadmap.md):
 
-- **v0.1 completed** — live Gemini when `GEMINI_API_KEY` is set (`gemini-3.6-flash`); mock fallback without a key
-- **Next:** v0.2 expand curated catalog; then result resilience, PBDB species profile, etc.
-- Species profile is still a stub; Dig Map / Timeline / Museums / At Risk remain placeholders
+- **v0.1–0.6 completed** — live Gemini, catalog, retry UX, PBDB profile, taxonomy/facts merge, non-fossil rock path + honest confidence
+- **Next:** v0.7 capture reliability (gallery fallback)
+- Dig Map / Timeline / Museums / At Risk remain placeholders
 
 **Scope for this plan:** the five mockups (Onboarding, Home, Identify, ID Result, Paleo Translate), plus a bottom-nav shell so they connect. Dig Map, Deep Time, Museums, and At Risk get **placeholder routes** only (tappable from Home, simple “Coming soon” screens). Backend stays **local mock JSON + repository interfaces** so real APIs can swap in later without rewriting screens.
 
@@ -156,15 +157,15 @@ Header, language swap card, source abstract, teal **Translate (Paleo mode)** but
 
 ### Iteration 7 — Real data adapters (one service at a time)
 
-> **Detailed Identify + species facts plan:** [iteration-7-identify-roadmap.md](./iteration-7-identify-roadmap.md) (versions 0.1 → 1.0). Prioritize Identify and PBDB species facts first; Sites, Translate API, and Auth stay later.
+> **Detailed Identify plan:** [iteration-7-identify-roadmap.md](./iteration-7-identify-roadmap.md) (versions 0.1 → 1.0). Prioritize Identify, honest non-fossil/rock handling, and PBDB species facts as a double-check; Sites, Translate API, and Auth stay later.
 
 Keep screens unchanged; swap repository implementations:
 
 
 | Feature          | Interface stays       | First real source (suggested)                                       |
 | ---------------- | --------------------- | ------------------------------------------------------------------- |
-| Identify         | `IdentifyRepository`  | Vision API or custom ML endpoint returning ranked taxa + confidence |
-| Species/facts    | `TaxonRepository`     | Static curated JSON → later Firestore/GBIF/Paleobiology Database    |
+| Identify         | `IdentifyRepository`  | Vision API: fossil genera **or** `may_not_be_fossil` + rock/lithology; no boost below 60% raw confidence |
+| Species/facts    | `TaxonRepository`     | PBDB as double-check + facts enrichment (not name-existence confidence boost) |
 | Sites (Near You) | `SiteRepository`      | Local GeoJSON of public sites → maps SDK later                      |
 | Translate        | `TranslateRepository` | LLM API with paleo system prompt + glossary dictionary              |
 | Auth / Sign in   | deferred              | Firebase Auth or skip until needed                                  |
@@ -203,10 +204,8 @@ flowchart TD
 ## Out of scope for this plan (later phases)
 
 - Full Dig Map with permits / Camp Prep
-- Deep Time timeline with era scrubbing
-- Museums detail experiences
-- **At Risk tab** — replace the placeholder with a conservation explorer that surfaces living species at risk of extinction (status, habitat, threats), bridging extinct taxa from the fossil modules to modern biodiversity
-- Real auth (“Sign in”)
+- Deep Time, Museums, Firebase accounts, and Kids Mode — specified in [iteration-8-firestore-roadmap.md](./iteration-8-firestore-roadmap.md)
+- **At Risk tab** — replace the placeholder with a conservation explorer that surfaces living species at risk of extinction (status, habitat, threats), bridging extinct taxa from the fossil modules to modern biodiversity. Kids Mode reuses that red-list catalog later.
 - Live ID streaming inference
 - Species “full profile” deep content beyond a stub
 
