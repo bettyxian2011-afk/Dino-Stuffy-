@@ -5,6 +5,7 @@ import 'catalog/id_catalog.dart';
 import 'repositories/gemini_identify_repository.dart';
 import 'repositories/identify_repository.dart';
 import 'repositories/taxon_repository.dart';
+import 'services/firebase_bootstrap.dart';
 import 'services/gemini_vision_service.dart';
 
 /// Shared repositories initialized once at app startup.
@@ -14,12 +15,21 @@ class StrataServices {
   static IdentifyRepository? _identifyRepository;
   static TaxonRepository? _taxonRepository;
   static IdCatalog? _catalog;
+  static bool _firebaseReady = false;
 
   /// True when the live Gemini identify adapter is active.
   static bool get isUsingLiveIdentify =>
       _identifyRepository is GeminiIdentifyRepository;
 
-  static Future<void> init() async {
+  /// True after a successful Firebase app construction.
+  static bool get isFirebaseReady => _firebaseReady;
+
+  /// Starts local repositories and, when FlutterFire config exists, Firebase.
+  static Future<void> init({
+    Future<bool> Function()? initializeFirebase,
+  }) async {
+    _firebaseReady =
+        await (initializeFirebase ?? FirebaseBootstrap.initialize)();
     _catalog ??= await IdCatalog.load();
     _taxonRepository ??= PbdbTaxonRepository();
     _identifyRepository ??= buildIdentifyRepository(
@@ -32,6 +42,11 @@ class StrataServices {
       isUsingLiveIdentify
           ? 'StrataServices: GeminiIdentifyRepository (live vision)'
           : 'StrataServices: MockIdentifyRepository (no GEMINI_API_KEY)',
+    );
+    debugPrint(
+      isFirebaseReady
+          ? 'StrataServices: Firebase ready'
+          : 'StrataServices: Firebase not configured (local JSON path)',
     );
   }
 
@@ -73,5 +88,6 @@ class StrataServices {
     _identifyRepository = null;
     _taxonRepository = null;
     _catalog = null;
+    _firebaseReady = false;
   }
 }

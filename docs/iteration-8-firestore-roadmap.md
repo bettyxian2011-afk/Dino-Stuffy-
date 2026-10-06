@@ -481,17 +481,34 @@ Kid versions are **K0.1 through K1.0** in the [build-order table](#build-order).
 
 ---
 
-## Runbook (fill in at v0.1)
+## Runbook (v0.1)
+
+The app boots **with or without** FlutterFire config. Until you run the commands below, `lib/firebase_options.dart` is a stub: `StrataServices` skips Firebase and keeps the local JSON repositories.
+
+Use a **non-production** Firebase project for this iteration (Auth + Firestore). Do not commit service-account keys or the Gemini key. Client files (`google-services.json`, `GoogleService-Info.plist`, generated `firebase_options.dart`) may live in the platform folders / `lib/`.
 
 ```text
-# From dino_app/, after the Firebase CLI is logged in:
+# One-time tooling
+npm install -g firebase-tools
+firebase login
 dart pub global activate flutterfire_cli
+
+# From dino_app/, with the Firebase CLI logged in:
 flutterfire configure
+# Select the Strata project.
+# Platforms we actually build: Android, iOS (add macOS/web only if you run those).
+# This overwrites lib/firebase_options.dart and writes native config files.
 
 flutter run
 ```
 
-Seed content is imported with a local script that uses a service-account file kept outside the repo. The app never embeds that file.
+**Project id:** fill in after `flutterfire configure` (the CLI prints it; it also appears in `lib/firebase_options.dart` as `projectId`).
+
+**Platforms configured:** Android, iOS (update this line if you add more).
+
+Seed content (v0.2+) is imported with a local script that uses a service-account file kept **outside** the repo (`*-firebase-adminsdk-*.json` is gitignored). The app never embeds that file.
+
+To confirm the skip path without deleting config: temporarily keep the stub options, or run tests in `test/firebase_bootstrap_test.dart`.
 
 ## Demo taxa that must exist before Kids K0.3
 

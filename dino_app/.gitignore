@@ -51,3 +51,9 @@ app.*.map.json
 .env.*
 !.env.example
 secrets.local.*
+
+# Firebase Admin / seed credentials — never commit
+**/*-firebase-adminsdk-*.json
+**/serviceAccount*.json
+**/service-account*.json
+**/firebase-service-account.json
