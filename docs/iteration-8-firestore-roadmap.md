@@ -16,7 +16,7 @@ Ship a demoable slice:
 1. The app talks to a Firebase project (Auth + Firestore) and still runs if the network is down, using the current local JSON.
 2. Firestore holds **user profiles** and a **taxon catalog** (`taxa`) that Identify, species facts, Deep Time, and (later) Kids Mode all read.
 3. **Deep Time** (`/timeline`) lists geological periods and shows iconic taxa for the one you tap.
-4. **Museums** (`/museums`) lists curated museums and opens a simple detail page.
+4. **Museums** (`/museums`) lists researched local museums, links what they hold to `taxa`, and opens a detail page. This is the last feature before v1.0 because it starts with research.
 
 ## Leave for later
 
@@ -118,9 +118,24 @@ Identify keeps PBDB as an external double-check. Firestore does not invent confi
 
 Phanerozoic periods only for this iteration (Cambrian through Quaternary). Each doc: `name`, `era` (`Paleozoic` | `Mesozoic` | `Cenozoic`), `startMa`, `endMa`, `blurb`, `order`.
 
-### `museums/{id}`
+### `museums/{id}` — added in v0.8
 
-Curated seed, about 6–10 museums. Fields: `name`, `city`, `region`, `focus`, `blurb`, `imageAsset`, `highlights` (short strings), `taxonIds` (links into `taxa`).
+About 6–10 local museums chosen in the v0.7 research step.
+
+| Field | Type | Purpose |
+| ----- | ---- | ------- |
+| `name`, `city`, `region` | string | List card and filter |
+| `focus`, `blurb` | string | Card subtitle, detail intro |
+| `website` | string | Link out from detail |
+| `imageAsset` | string | Bundled image |
+| `highlights` | string[] | Short lines on the detail page |
+| `taxonIds` | string[] | Matched `taxa` ids, so “which museums have *Triceratops*?” is one `array-contains` query |
+| `sources` | `{name, url, kind}[]` | Where the holdings came from (`collectionPortal`, `idigbio`, `gbif`, `pbdb`, `exhibitPage`, `staffEmail`) |
+| `lastVerified` | timestamp | When someone last checked the sources |
+
+### `museums/{id}/holdings/{taxonId}` — added in v0.8
+
+One doc per matched taxon at that museum: `taxonId`, `sourceName` (the name exactly as the source wrote it), `onDisplay` (bool; `false` means collection-only or unknown), `source`, `note`.
 
 ### `redListSpecies/{id}` — schema only this iteration
 
@@ -165,21 +180,46 @@ Replace the `/timeline` placeholder. Bottom nav stays put.
 
 Empty cloud results fall back to a small bundled period list so the tab is never a blank error.
 
-## Museums page
+## Museums
+
+Museums come last before v1.0 and take three versions: research, data linking, then the pages.
+
+### Research (v0.7)
+
+Pick 6–10 museums in our area. For each one, find a way to learn what fossils it has:
+
+- **The museum’s own online collection portal**, if it has one (search, download, or API)
+- **iDigBio** and **GBIF** specimen records, filtered by the museum’s institution code and fossil specimens
+- **PBDB** collection records that cite the museum’s specimen numbers
+- **Exhibit pages, floor guides, or press pages** for what is actually on display
+- **Emailing collections or education staff** when nothing public exists
+
+Record the findings in `docs/museum-research.md`, with one row per museum: name, city, website, sources found, how the data comes out (API, download, or manual), and whether it tells you **on display** or only **in the collection**. Note any terms of use on the source.
+
+### Data and linking (v0.8)
+
+- Turn the research into `museums` docs and `holdings` subcollections
+- Normalize each source name to a genus (trim species, fix case, drop “cf.” and “sp.”), then match against `taxa`
+- A matched genus becomes a `holdings` doc plus an entry in `taxonIds`
+- An unmatched genus goes into an unmatched report. Either add it to `taxa` with `useInIdentify: false`, or leave it out on purpose.
+- Ship a bundled `assets/data/museums.json` fallback with the same shape
+
+### Pages (v0.9)
 
 Replace the `/museums` placeholder.
 
 **List**
 
 - Title: Museums
-- Text filter on name and city (in memory, the seed is small)
+- Text filter on name and city (in memory, the list is small)
 - Card: image, name, city, `focus`
 
 **Detail** — push `/museums/:museumId`
 
-- Name, city, blurb
+- Name, city, blurb, website link
 - Highlight lines
-- “On display” taxon chips linking to `/species/:genus` when the id resolves
+- Taxon chips in two groups, **On display** and **In collection**, linking to `/species/:genus` when the genus resolves
+- Source credits with `lastVerified`
 
 No map and no “near you” sorting in this iteration.
 
@@ -189,7 +229,7 @@ No map and no “near you” sorting in this iteration.
 
 | Path | Read | Write |
 | ---- | ---- | ----- |
-| `taxa`, `periods`, `museums`, `redListSpecies` | Any signed-in user | Nobody from the app (seed with a script or the console) |
+| `taxa`, `periods`, `museums`, `museums/*/holdings`, `redListSpecies` | Any signed-in user | Nobody from the app (seed with a script or the console) |
 | `users/{uid}` | That user | That user, and only `displayName` after creation |
 | `accountKind`, `badgeCount`, `friendCode` | That user | Client cannot change these (set by trusted writes later; `accountKind` defaults at create) |
 
@@ -199,18 +239,20 @@ Until Auth ships in v0.4, v0.2–v0.3 may use a locked-down dev ruleset on a non
 
 ## Build order
 
-Work top to bottom. v1.0 is the Firestore, Deep Time, and Museums milestone. K0.1 starts Kids Mode after that.
+Work top to bottom. Museums (v0.7–v0.9) sit last before v1.0 because they start with research. v1.0 is the Firestore, Deep Time, and Museums milestone. K0.1 starts Kids Mode after that.
 
 | Version | Feature | Builds on | Tests | Done when |
 | ------- | ------- | --------- | ----- | --------- |
 | **0.1** | Firebase bootstrap | Iteration 7 app | App boots with and without a Firebase project file | `StrataServices` can construct Firebase when configured |
-| **0.2** | `taxa` + periods + museums schema and seed | v0.1 | Unit: JSON ↔ model, merge with `IdCatalog` | Cretaceous land genera exist as taxon docs |
+| **0.2** | `taxa` + periods schema and seed | v0.1 | Unit: JSON ↔ model, merge with `IdCatalog` | Cretaceous land genera exist as taxon docs |
 | **0.3** | Knowledge repository in the Identify path | v0.2 | Unit: offline fallback + cloud override | Identify still returns the same shape of result |
 | **0.4** | Accounts | v0.3 | Widget: signed-out vs signed-in greeting | Onboarding Sign in creates `users/{uid}` |
 | **0.5** | Deep Time list + period detail | v0.4 | Widget: era chip filters periods | `/timeline` is no longer “Coming soon” |
-| **0.6** | Museums list + detail | v0.5 | Widget: filter + open detail | `/museums` opens a seeded museum |
-| **0.7** | Rules and failure states | v0.6 | Rules unit/emulator if available; widget error state | Offline JSON path still identifies |
-| **1.0** | Milestone: Firestore, Deep Time, Museums | v0.7 | `flutter test` plus a short demo script | Firestore catalog, sign-in, Deep Time, Museums |
+| **0.6** | Rules and failure states | v0.5 | Rules unit/emulator if available; widget error state | Offline JSON path still identifies; client cannot write `taxa` |
+| **0.7** | Museum research | v0.6 | Review: every museum has at least one source | `docs/museum-research.md` covers 6–10 local museums with sources and sample taxa |
+| **0.8** | Museum data + link to `taxa` | v0.7 | Unit: name normalizer + matcher; fallback JSON loads | Every holding is matched to `taxa` or listed in the unmatched report |
+| **0.9** | Museums list + detail pages | v0.8 | Widget: filter + open detail | `/museums` opens a researched museum with linked taxa |
+| **1.0** | Milestone: Firestore, Deep Time, Museums | v0.9 | `flutter test` plus a short demo script | Firestore catalog, sign-in, Deep Time, Museums |
 | **K0.1** | Kid account + kids shell | v1.0 | Widget: kid sign-in route | Signing into a kid account opens Kids home, not adult Home |
 | **K0.2** | Introduction gallery | K0.1 | Widget: chapter order | Swiping shows the drawing chapters in order |
 | **K0.3** | Realm → period → daily five | K0.2 | Unit: daily-five pick is stable for a date | Land + Cretaceous shows the five named dinosaurs for the day |
@@ -227,9 +269,11 @@ flowchart LR
   v02 --> v03[v0.3 Algorithm read path]
   v03 --> v04[v0.4 Accounts]
   v04 --> v05[v0.5 Deep Time]
-  v05 --> v06[v0.6 Museums]
-  v06 --> v07[v0.7 Rules]
-  v07 --> v10[v1.0 Milestone]
+  v05 --> v06[v0.6 Rules]
+  v06 --> v07[v0.7 Museum research]
+  v07 --> v08[v0.8 Museum data and links]
+  v08 --> v09[v0.9 Museum pages]
+  v09 --> v10[v1.0 Milestone]
   v10 --> k01[K0.1 Kid account]
   k01 --> k02[K0.2 Intro gallery]
   k02 --> k03[K0.3 Daily five]
@@ -252,9 +296,9 @@ flowchart LR
 
 ### Version 0.2 — Schema and seed
 
-- Dart models for taxon, period, museum, user profile, red-list species
-- Seed script or documented console import for periods, a first museum set, and taxa converted from `id_results.json` plus the five Cretaceous land genera
-- Bundled fallback JSON for periods and museums (small files under `assets/data/`)
+- Dart models for taxon, period, user profile, red-list species (museum models wait for v0.8)
+- Seed script or documented console import for periods and taxa converted from `id_results.json` plus the five Cretaceous land genera
+- Bundled fallback JSON for periods (small file under `assets/data/`)
 
 **Done when:** a test loads the fallback and maps genus names the Identify catalog already knows.
 
@@ -284,21 +328,46 @@ flowchart LR
 
 **Done when:** Mesozoic → Cretaceous shows the five seeded land genera among the iconic taxa.
 
-### Version 0.6 — Museums
+### Version 0.6 — Rules and failure states
 
-- Screens under `dino_app/lib/screens/museums/`
-- Routes `/museums` and `/museums/:museumId`
-- Taxon chips reuse the species route
-
-**Done when:** filtering by a city substring leaves the matching museum, and detail lists its `taxonIds`.
-
-### Version 0.7 — Rules and failure states
-
-- Apply the access table
-- Timeline and Museums show the bundled seed with a quiet retry when the read fails
+- Apply the access table, including the `museums` paths ahead of time
+- Deep Time shows the bundled periods with a quiet retry when the read fails
 - Confirm the client cannot write `taxa`
 
 **Done when:** airplane mode still opens Deep Time from the bundle, and Identify still completes on the local catalog.
+
+### Version 0.7 — Museum research
+
+No app code. See [Research](#research-v07).
+
+- Choose 6–10 museums in our area
+- For each, check the collection portal, iDigBio, GBIF, PBDB, exhibit pages, and staff contacts
+- Write `docs/museum-research.md` with sources, how data comes out, on-display vs collection, and terms of use
+- List a few sample genera per museum
+
+**Done when:** every chosen museum has at least one usable source, and the doc says which museums have no public data.
+
+### Version 0.8 — Museum data and linking
+
+See [Data and linking](#data-and-linking-v08).
+
+- Museum and holding models, plus `MuseumRepository` with Firestore and asset implementations
+- Seed `museums` and `holdings` from the research
+- Name normalizer and matcher against `taxa`; write the unmatched report
+- Bundled `assets/data/museums.json` fallback
+
+**Done when:** every holding resolves to a `taxa` doc or appears in the unmatched report, and an `array-contains` query for a seeded genus returns its museums.
+
+### Version 0.9 — Museum pages
+
+See [Pages](#pages-v09).
+
+- Screens under `dino_app/lib/screens/museums/`
+- Routes `/museums` and `/museums/:museumId`
+- On-display and in-collection chips reuse the species route
+- Falls back to the bundled museums when the read fails
+
+**Done when:** filtering by a city substring leaves the matching museum, and its detail page shows linked taxa and source credits.
 
 ### Version 1.0 — Milestone
 
