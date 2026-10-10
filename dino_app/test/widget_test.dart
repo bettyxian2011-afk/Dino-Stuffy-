@@ -13,7 +13,9 @@ void main() {
   testWidgets('Onboarding shows Strata branding and Get Started', (
     WidgetTester tester,
   ) async {
-    await StrataServices.init(initializeFirebase: () async => false);
+    await tester.runAsync(
+      () => StrataServices.init(initializeFirebase: () async => false),
+    );
     await tester.pumpWidget(StrataApp());
     await tester.pump();
 

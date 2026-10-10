@@ -9,6 +9,8 @@ Each version adds **one feature**, is **tested**, and **builds on** the previous
 
 ---
 
+
+
 ## Goal
 
 Ship a demoable slice:
@@ -17,6 +19,8 @@ Ship a demoable slice:
 2. Firestore holds **user profiles** and a **taxon catalog** (`taxa`) that Identify, species facts, Deep Time, and (later) Kids Mode all read.
 3. **Deep Time** (`/timeline`) lists geological periods and shows iconic taxa for the one you tap.
 4. **Museums** (`/museums`) lists researched local museums, links what they hold to `taxa`, and opens a detail page. This is the last feature before v1.0 because it starts with research.
+
+
 
 ## Leave for later
 
@@ -29,16 +33,20 @@ Ship a demoable slice:
 
 ---
 
+
+
 ## Current starting point
 
-| Piece | Location today |
-| ----- | -------------- |
-| Bottom nav Time / Museums | `ShellPlaceholderTab` on `/timeline` and `/museums` |
-| Identify catalog | `IdCatalog` ← `assets/data/id_results.json` |
-| Identify pipeline | `GeminiIdentifyRepository` + heuristics + PBDB double-check |
-| Recent fossils | `MockFossilRepository` |
-| Sign in | Onboarding link is UI only |
-| Auth / database | None |
+
+| Piece                     | Location today                                              |
+| ------------------------- | ----------------------------------------------------------- |
+| Bottom nav Time / Museums | `ShellPlaceholderTab` on `/timeline` and `/museums`         |
+| Identify catalog          | `IdCatalog` ← `assets/data/id_results.json`                 |
+| Identify pipeline         | `GeminiIdentifyRepository` + heuristics + PBDB double-check |
+| Recent fossils            | `MockFossilRepository`                                      |
+| Sign in                   | Onboarding link is UI only                                  |
+| Auth / database           | None                                                        |
+
 
 ```mermaid
 flowchart LR
@@ -62,9 +70,13 @@ flowchart LR
   end
 ```
 
+
+
 Keep repository interfaces. Screens read repositories. Firestore is one implementation; bundled JSON stays the offline fallback.
 
 ---
+
+
 
 ## Firestore collections
 
@@ -74,13 +86,15 @@ Client config comes from FlutterFire (`flutterfire configure`). Do not commit se
 
 Created the first time someone signs in. Kid-only fields stay unused until Kids Mode.
 
-| Field | Type | Purpose |
-| ----- | ---- | ------- |
-| `displayName` | string | Home greeting. Replaces the hardcoded “Betty”. |
-| `accountKind` | `"standard"` \| `"kid"` | Defaults to `standard`. |
-| `createdAt` | timestamp | |
-| `badgeCount` | number | Denormalized count for the later PK gate. Stays `0` now. |
-| `friendCode` | string | Short code for later friend requests. |
+
+| Field         | Type                   | Purpose                                                  |
+| ------------- | ---------------------- | -------------------------------------------------------- |
+| `displayName` | string                 | Home greeting. Replaces the hardcoded “Betty”.           |
+| `accountKind` | `"standard"` | `"kid"` | Defaults to `standard`.                                  |
+| `createdAt`   | timestamp              |                                                          |
+| `badgeCount`  | number                 | Denormalized count for the later PK gate. Stays `0` now. |
+| `friendCode`  | string                 | Short code for later friend requests.                    |
+
 
 Subcollections reserved now, written later:
 
@@ -88,29 +102,33 @@ Subcollections reserved now, written later:
 - `users/{uid}/progress/{setKey}`
 - `users/{uid}/identifications/{id}` — optional home for recent IDs after Iteration 7 v0.8
 
+
+
 ### `taxa/{id}` — fossil knowledge
 
 One document per genus (or a clearly labeled higher group). This is the catalog algorithms and explore pages share. Seed it from today’s `id_results.json` genera, then add the Cretaceous demo set even if Identify does not use every one yet:
 
 *Triceratops*, *Velociraptor*, *Tyrannosaurus*, *Pachycephalosaurus*, *Ankylosaurus*.
 
-| Field | Type | Used by |
-| ----- | ---- | ------- |
-| `scientificName` | string | All |
-| `commonName` | string | Timeline, kids cards |
-| `commonGroup` | string | Identify cards (“Ammonite”, “Dromaeosaurid”) |
-| `family` | string | Identify |
-| `taxonomy` | string[] | Identify + profile |
-| `realm` | `"land"` \| `"sky"` \| `"ocean"` | Kids explorer. Sky covers pterosaurs and early birds. |
-| `periodIds` | string[] | Timeline filter, daily sets |
-| `ageStartMa` / `ageEndMa` | number | Facts, timeline label |
-| `facts` | `{icon, value, label}[]` | Same shape as `TaxonFact` |
-| `funFacts` | string[] | Kids quiz. Short, curated sentences. |
-| `tip` | string | Identify tip |
-| `imageAsset` | string | Bundled art path |
-| `useInIdentify` | bool | Algorithms ignore docs with `false` |
-| `kidSafe` | bool | Daily sets only include `true` |
-| `iconic` | bool | Timeline “iconic for this period” row |
+
+| Field                     | Type                           | Used by                                               |
+| ------------------------- | ------------------------------ | ----------------------------------------------------- |
+| `scientificName`          | string                         | All                                                   |
+| `commonName`              | string                         | Timeline, kids cards                                  |
+| `commonGroup`             | string                         | Identify cards (“Ammonite”, “Dromaeosaurid”)          |
+| `family`                  | string                         | Identify                                              |
+| `taxonomy`                | string[]                       | Identify + profile                                    |
+| `realm`                   | `"land"` | `"sky"` | `"ocean"` | Kids explorer. Sky covers pterosaurs and early birds. |
+| `periodIds`               | string[]                       | Timeline filter, daily sets                           |
+| `ageStartMa` / `ageEndMa` | number                         | Facts, timeline label                                 |
+| `facts`                   | `{icon, value, label}[]`       | Same shape as `TaxonFact`                             |
+| `funFacts`                | string[]                       | Kids quiz. Short, curated sentences.                  |
+| `tip`                     | string                         | Identify tip                                          |
+| `imageAsset`              | string                         | Bundled art path                                      |
+| `useInIdentify`           | bool                           | Algorithms ignore docs with `false`                   |
+| `kidSafe`                 | bool                           | Daily sets only include `true`                        |
+| `iconic`                  | bool                           | Timeline “iconic for this period” row                 |
+
 
 Identify keeps PBDB as an external double-check. Firestore does not invent confidence scores.
 
@@ -122,16 +140,20 @@ Phanerozoic periods only for this iteration (Cambrian through Quaternary). Each 
 
 About 6–10 local museums chosen in the v0.7 research step.
 
-| Field | Type | Purpose |
-| ----- | ---- | ------- |
-| `name`, `city`, `region` | string | List card and filter |
-| `focus`, `blurb` | string | Card subtitle, detail intro |
-| `website` | string | Link out from detail |
-| `imageAsset` | string | Bundled image |
-| `highlights` | string[] | Short lines on the detail page |
-| `taxonIds` | string[] | Matched `taxa` ids, so “which museums have *Triceratops*?” is one `array-contains` query |
-| `sources` | `{name, url, kind}[]` | Where the holdings came from (`collectionPortal`, `idigbio`, `gbif`, `pbdb`, `exhibitPage`, `staffEmail`) |
-| `lastVerified` | timestamp | When someone last checked the sources |
+
+| Field                    | Type                  | Purpose                                                                                                   |
+| ------------------------ | --------------------- | --------------------------------------------------------------------------------------------------------- |
+| `name`, `city`, `region` | string                | List card and filter                                                                                      |
+| `focus`, `blurb`         | string                | Card subtitle, detail intro                                                                               |
+| `website`                | string                | Link out from detail                                                                                      |
+| `imageAsset`             | string                | Bundled image                                                                                             |
+| `highlights`             | string[]              | Short lines on the detail page                                                                            |
+| `taxonIds`               | string[]              | Matched `taxa` ids, so “which museums have *Triceratops*?” is one `array-contains` query                  |
+| `sources`                | `{name, url, kind}[]` | Where the holdings came from (`collectionPortal`, `idigbio`, `gbif`, `pbdb`, `exhibitPage`, `staffEmail`) |
+| `lastVerified`           | timestamp             | When someone last checked the sources                                                                     |
+
+
+
 
 ### `museums/{id}/holdings/{taxonId}` — added in v0.8
 
@@ -139,9 +161,11 @@ One doc per matched taxon at that museum: `taxonId`, `sourceName` (the name exac
 
 ### `redListSpecies/{id}` — schema only this iteration
 
-Living species for the future At Risk page and the kids red-list track. Keep them **out of `taxa`** so Identify cannot match a photo to a living red-list animal. Fields to reserve: `commonName`, `scientificName`, `status`, `habitat`, `threats` (short strings), `funFacts`, `imageAsset`, `kidSafe`.
+Living species for the future At Risk page and the kids red-list track. Keep them **out of** `taxa` so Identify cannot match a photo to a living red-list animal. Fields to reserve: `commonName`, `scientificName`, `status`, `habitat`, `threats` (short strings), `funFacts`, `imageAsset`, `kidSafe`.
 
 ---
+
+
 
 ## How algorithms use `taxa`
 
@@ -161,6 +185,8 @@ Add `FossilKnowledgeRepository`:
 If Firestore errors or the user is offline, Identify behaves exactly as it does at the end of Iteration 7.
 
 ---
+
+
 
 ## Deep Time page
 
@@ -204,6 +230,8 @@ Record the findings in `docs/museum-research.md`, with one row per museum: name,
 - An unmatched genus goes into an unmatched report. Either add it to `taxa` with `useInIdentify: false`, or leave it out on purpose.
 - Ship a bundled `assets/data/museums.json` fallback with the same shape
 
+
+
 ### Pages (v0.9)
 
 Replace the `/museums` placeholder.
@@ -225,43 +253,51 @@ No map and no “near you” sorting in this iteration.
 
 ---
 
+
+
 ## Access rules
 
-| Path | Read | Write |
-| ---- | ---- | ----- |
-| `taxa`, `periods`, `museums`, `museums/*/holdings`, `redListSpecies` | Any signed-in user | Nobody from the app (seed with a script or the console) |
-| `users/{uid}` | That user | That user, and only `displayName` after creation |
-| `accountKind`, `badgeCount`, `friendCode` | That user | Client cannot change these (set by trusted writes later; `accountKind` defaults at create) |
+
+| Path                                                                 | Read               | Write                                                                                      |
+| -------------------------------------------------------------------- | ------------------ | ------------------------------------------------------------------------------------------ |
+| `taxa`, `periods`, `museums`, `museums/*/holdings`, `redListSpecies` | Any signed-in user | Nobody from the app (seed with a script or the console)                                    |
+| `users/{uid}`                                                        | That user          | That user, and only `displayName` after creation                                           |
+| `accountKind`, `badgeCount`, `friendCode`                            | That user          | Client cannot change these (set by trusted writes later; `accountKind` defaults at create) |
+
 
 Until Auth ships in v0.4, v0.2–v0.3 may use a locked-down dev ruleset on a non-production project. v0.4 flips rules to the table above. Catalog content is not user-writable.
 
 ---
 
+
+
 ## Build order
 
 Work top to bottom. Museums (v0.7–v0.9) sit last before v1.0 because they start with research. v1.0 is the Firestore, Deep Time, and Museums milestone. K0.1 starts Kids Mode after that.
 
-| Version | Feature | Builds on | Tests | Done when |
-| ------- | ------- | --------- | ----- | --------- |
-| **0.1** | Firebase bootstrap | Iteration 7 app | App boots with and without a Firebase project file | `StrataServices` can construct Firebase when configured |
-| **0.2** | `taxa` + periods schema and seed | v0.1 | Unit: JSON ↔ model, merge with `IdCatalog` | Cretaceous land genera exist as taxon docs |
-| **0.3** | Knowledge repository in the Identify path | v0.2 | Unit: offline fallback + cloud override | Identify still returns the same shape of result |
-| **0.4** | Accounts | v0.3 | Widget: signed-out vs signed-in greeting | Onboarding Sign in creates `users/{uid}` |
-| **0.5** | Deep Time list + period detail | v0.4 | Widget: era chip filters periods | `/timeline` is no longer “Coming soon” |
-| **0.6** | Rules and failure states | v0.5 | Rules unit/emulator if available; widget error state | Offline JSON path still identifies; client cannot write `taxa` |
-| **0.7** | Museum research | v0.6 | Review: every museum has at least one source | `docs/museum-research.md` covers 6–10 local museums with sources and sample taxa |
-| **0.8** | Museum data + link to `taxa` | v0.7 | Unit: name normalizer + matcher; fallback JSON loads | Every holding is matched to `taxa` or listed in the unmatched report |
-| **0.9** | Museums list + detail pages | v0.8 | Widget: filter + open detail | `/museums` opens a researched museum with linked taxa |
-| **1.0** | Milestone: Firestore, Deep Time, Museums | v0.9 | `flutter test` plus a short demo script | Firestore catalog, sign-in, Deep Time, Museums |
-| **K0.1** | Kid account + kids shell | v1.0 | Widget: kid sign-in route | Signing into a kid account opens Kids home, not adult Home |
-| **K0.2** | Introduction gallery | K0.1 | Widget: chapter order | Swiping shows the drawing chapters in order |
-| **K0.3** | Realm → period → daily five | K0.2 | Unit: daily-five pick is stable for a date | Land + Cretaceous shows the five named dinosaurs for the day |
-| **K0.4** | Learn flags + quiz + paleo badge | K0.3 | Unit: ≥ 75% awards once; below 75% does not | A passing quiz writes one `{date}_paleo` badge |
-| **K0.5** | Red list daily five + badge | K0.4 | Unit: red-list badge id is separate | A second track can award `{date}_redList` |
-| **K0.6** | Badge case | K0.5 | Unit: `badgeCount` matches badge docs | Count on the profile matches badge documents |
-| **K0.7** | Friends | K0.6 | Widget: accept and decline | A declined request never starts a match |
-| **K0.8** | PK | K0.7 | Unit: gate at 25; faster correct answer scores | Under 25 badges PK stays locked; at 25 a friend race scores the first correct answer |
-| **K1.0** | Milestone: Kids Mode | K0.8 | Demo script | Intro → land → Cretaceous → learn five → pass quiz → badge; a second account friends and races only after 25 badges |
+
+| Version  | Feature                                   | Builds on       | Tests                                                | Done when                                                                                                           |
+| -------- | ----------------------------------------- | --------------- | ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| **0.1**  | Firebase bootstrap                        | Iteration 7 app | App boots with and without a Firebase project file   | `StrataServices` can construct Firebase when configured                                                             |
+| **0.2**  | `taxa` + periods schema and seed          | v0.1            | Unit: JSON ↔ model, merge with `IdCatalog`           | Cretaceous land genera exist as taxon docs                                                                          |
+| **0.3**  | Knowledge repository in the Identify path | v0.2            | Unit: offline fallback + cloud override              | Identify still returns the same shape of result                                                                     |
+| **0.4**  | Accounts                                  | v0.3            | Widget: signed-out vs signed-in greeting             | Onboarding Sign in creates `users/{uid}`                                                                            |
+| **0.5**  | Deep Time list + period detail            | v0.4            | Widget: era chip filters periods                     | `/timeline` is no longer “Coming soon”                                                                              |
+| **0.6**  | Rules and failure states                  | v0.5            | Rules unit/emulator if available; widget error state | Offline JSON path still identifies; client cannot write `taxa`                                                      |
+| **0.7**  | Museum research                           | v0.6            | Review: every museum has at least one source         | `docs/museum-research.md` covers 6–10 local museums with sources and sample taxa                                    |
+| **0.8**  | Museum data + link to `taxa`              | v0.7            | Unit: name normalizer + matcher; fallback JSON loads | Every holding is matched to `taxa` or listed in the unmatched report                                                |
+| **0.9**  | Museums list + detail pages               | v0.8            | Widget: filter + open detail                         | `/museums` opens a researched museum with linked taxa                                                               |
+| **1.0**  | Milestone: Firestore, Deep Time, Museums  | v0.9            | `flutter test` plus a short demo script              | Firestore catalog, sign-in, Deep Time, Museums                                                                      |
+| **K0.1** | Kid account + kids shell                  | v1.0            | Widget: kid sign-in route                            | Signing into a kid account opens Kids home, not adult Home                                                          |
+| **K0.2** | Introduction gallery                      | K0.1            | Widget: chapter order                                | Swiping shows the drawing chapters in order                                                                         |
+| **K0.3** | Realm → period → daily five               | K0.2            | Unit: daily-five pick is stable for a date           | Land + Cretaceous shows the five named dinosaurs for the day                                                        |
+| **K0.4** | Learn flags + quiz + paleo badge          | K0.3            | Unit: ≥ 75% awards once; below 75% does not          | A passing quiz writes one `{date}_paleo` badge                                                                      |
+| **K0.5** | Red list daily five + badge               | K0.4            | Unit: red-list badge id is separate                  | A second track can award `{date}_redList`                                                                           |
+| **K0.6** | Badge case                                | K0.5            | Unit: `badgeCount` matches badge docs                | Count on the profile matches badge documents                                                                        |
+| **K0.7** | Friends                                   | K0.6            | Widget: accept and decline                           | A declined request never starts a match                                                                             |
+| **K0.8** | PK                                        | K0.7            | Unit: gate at 25; faster correct answer scores       | Under 25 badges PK stays locked; at 25 a friend race scores the first correct answer                                |
+| **K1.0** | Milestone: Kids Mode                      | K0.8            | Demo script                                          | Intro → land → Cretaceous → learn five → pass quiz → badge; a second account friends and races only after 25 badges |
+
 
 ```mermaid
 flowchart LR
@@ -284,6 +320,10 @@ flowchart LR
   k07 --> k08[K0.8 PK]
   k08 --> k10[K1.0 Kids milestone]
 ```
+
+
+
+
 
 ### Version 0.1 — Firebase bootstrap
 
@@ -380,6 +420,8 @@ Demo script:
 
 ---
 
+
+
 ## Kids Mode (after accounts)
 
 Build this only after **v1.0** in the [build-order table](#build-order). It is a **separate kid account**, not a switch on a standard account. Signing into that account opens the kids shell.
@@ -392,6 +434,8 @@ The point of the mode is to get kids interested in paleontology: drawn introduct
 - `users/{uid}.accountKind = "kid"` (set by a trusted create path, not by the client editing the field afterward)
 - Signing into a kid account routes to `/kids` instead of adult Home
 - Standard accounts keep today’s shell (Home, Map, Time, Museums)
+
+
 
 ### Kids home
 
@@ -416,16 +460,20 @@ flowchart TD
   Quiz -->|below 75%| Retry[Practice again tomorrow or retry once]
 ```
 
+
+
 1. The kid picks a realm: **Land**, **Sky**, or **Ocean**.
 2. They see the same periods as Deep Time, filtered to that realm (a period with zero `kidSafe` taxa in that realm is visible but not playable).
 3. Opening a period loads **five animals for the day**. The set is deterministic: shuffle `taxa` where `kidSafe`, `realm`, and `periodIds` match, using a seed of `local date + realm + periodId`, then take five. Every kid gets the same five for that combination on that date.
 4. Worked example — Land + Cretaceous, once those five are the whole playable pool (or the seeded head of the pool): *Triceratops*, *Velociraptor*, *Tyrannosaurus*, *Pachycephalosaurus*, *Ankylosaurus*.
 5. Each animal card shows the picture, name, realm, period, and two or three `funFacts`. Marking it learned writes `users/{uid}/progress/{yyyy-MM-dd_realm_period}` with the taxon ids learned.
 6. The quiz unlocks when all five are learned. It mixes two question kinds, all from those five animals:
-   - Picture → pick the name (four choices)
-   - Fun fact → pick which animal it describes
+  - Picture → pick the name (four choices)
+  - Fun fact → pick which animal it describes
 7. About eight questions. **Score ≥ 75%** (at least 6 of 8) awards the badge. Below that, they can retry once the same day; a second miss waits until the next day’s set.
 8. The badge is one illustrated paleo badge for that calendar day and track. Art rotates from a small bundled set (`assets/images/kids/badges/`). Badge doc id is `{yyyy-MM-dd}_paleo`, so the same day cannot award two paleo badges.
+
+
 
 ### Red list loop
 
@@ -439,6 +487,8 @@ Same steps, with `redListSpecies` where `kidSafe` is true. The kid does not pick
 - A request creates `friendships/{id}` with `users: [uidA, uidB]`, `requestedBy`, `status: pending | accepted | declined`
 - Both kids can read the friendship; only the recipient can accept
 - No chat
+
+
 
 ### PK mode
 
@@ -459,6 +509,10 @@ flowchart LR
   Race --> Faster[First correct answer scores]
 ```
 
+
+
+
+
 ### Kids safety constraints
 
 - Kid profiles store a display name, username, and friend code. No email requirement on the kid account in v1 of this phase.
@@ -469,13 +523,15 @@ flowchart LR
 
 ### Kids data (added when that phase starts)
 
-| Path | Holds |
-| ---- | ----- |
-| `users/{uid}/progress/{setKey}` | Learned taxon ids, quiz attempts, best score |
-| `users/{uid}/badges/{yyyy-MM-dd_track}` | Art id, score, set key, earned time |
-| `friendships/{id}` | The pair and status |
-| `matches/{id}` | Questions, status, scores |
-| `matches/{id}/answers/{uid_question}` | One shot per kid per question |
+
+| Path                                    | Holds                                        |
+| --------------------------------------- | -------------------------------------------- |
+| `users/{uid}/progress/{setKey}`         | Learned taxon ids, quiz attempts, best score |
+| `users/{uid}/badges/{yyyy-MM-dd_track}` | Art id, score, set key, earned time          |
+| `friendships/{id}`                      | The pair and status                          |
+| `matches/{id}`                          | Questions, status, scores                    |
+| `matches/{id}/answers/{uid_question}`   | One shot per kid per question                |
+
 
 Kid versions are **K0.1 through K1.0** in the [build-order table](#build-order). They start after the v1.0 milestone.
 
@@ -483,9 +539,9 @@ Kid versions are **K0.1 through K1.0** in the [build-order table](#build-order).
 
 ## Runbook (v0.1)
 
-The app boots **with or without** FlutterFire config. Until you run the commands below, `lib/firebase_options.dart` is a stub: `StrataServices` skips Firebase and keeps the local JSON repositories.
+The app boots **with or without** FlutterFire config. On a platform `lib/firebase_options.dart` does not cover, `StrataServices` skips Firebase and keeps the local JSON repositories.
 
-Use a **non-production** Firebase project for this iteration (Auth + Firestore). Do not commit service-account keys or the Gemini key. Client files (`google-services.json`, `GoogleService-Info.plist`, generated `firebase_options.dart`) may live in the platform folders / `lib/`.
+Use a **non-production** Firebase project for this iteration (Auth + Firestore). Do not commit service-account keys or the Gemini key. Client files (`google-services.json`, generated `firebase_options.dart`, `firebase.json`) are committed; they hold public client ids, not secrets.
 
 ```text
 # One-time tooling
@@ -494,26 +550,33 @@ firebase login
 dart pub global activate flutterfire_cli
 
 # From dino_app/, with the Firebase CLI logged in:
-flutterfire configure
-# Select the Strata project.
-# Platforms we actually build: Android, iOS (add macOS/web only if you run those).
-# This overwrites lib/firebase_options.dart and writes native config files.
+flutterfire configure --project=dino-app-90aa2
+# Platforms: android, ios, web.
+# This overwrites lib/firebase_options.dart and android/app/google-services.json,
+# and adds the google-services Gradle plugin.
 
-flutter run
+flutter run -d chrome
 ```
 
-**Project id:** fill in after `flutterfire configure` (the CLI prints it; it also appears in `lib/firebase_options.dart` as `projectId`).
+**Project id:** `dino-app-90aa2` (Firestore location: United States).
 
-**Platforms configured:** Android, iOS (update this line if you add more).
+**Platforms configured:** Android, iOS, web. Windows, macOS, and Linux desktop builds are not configured, so they skip Firebase and run on local JSON. Re-run `flutterfire configure` and add a platform if we start building for it.
+
+**Console setup:** enable the Email/Password provider under Authentication before v0.4. Until v0.6 applies the access table, keep Firestore rules locked down (deny all, or signed-in reads only).
+
+**Check it worked:** the debug console prints `StrataServices: Firebase initialized (dino-app-90aa2)` on startup. On Windows desktop it prints `Firebase options missing` instead, which is the expected skip path.
 
 Seed content (v0.2+) is imported with a local script that uses a service-account file kept **outside** the repo (`*-firebase-adminsdk-*.json` is gitignored). The app never embeds that file.
 
-To confirm the skip path without deleting config: temporarily keep the stub options, or run tests in `test/firebase_bootstrap_test.dart`.
+The skip path is covered by `test/firebase_bootstrap_test.dart`, which forces an unconfigured platform.
 
 ## Demo taxa that must exist before Kids K0.3
 
-| Realm | Period | Animals |
-| ----- | ------ | ------- |
-| Land | Cretaceous | Triceratops, Velociraptor, Tyrannosaurus, Pachycephalosaurus, Ankylosaurus |
+
+| Realm | Period     | Animals                                                                    |
+| ----- | ---------- | -------------------------------------------------------------------------- |
+| Land  | Cretaceous | Triceratops, Velociraptor, Tyrannosaurus, Pachycephalosaurus, Ankylosaurus |
+
 
 Sky and ocean pools can start smaller and grow. A period with fewer than five `kidSafe` taxa shows the ones it has and keeps the quiz locked until the pool reaches five.
+

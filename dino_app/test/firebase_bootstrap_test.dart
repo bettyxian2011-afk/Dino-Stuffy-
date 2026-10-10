@@ -1,6 +1,8 @@
 import 'package:dino_app/app.dart';
 import 'package:dino_app/data/services/firebase_bootstrap.dart';
 import 'package:dino_app/data/strata_services.dart';
+import 'package:dino_app/firebase_options.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -10,11 +12,26 @@ void main() {
 
   tearDown(StrataServices.resetForTest);
 
-  test('hasGeneratedOptions is false until flutterfire configure', () {
-    expect(FirebaseBootstrap.hasGeneratedOptions, isFalse);
+  test('generated options point at the Strata Firebase project', () {
+    expect(FirebaseBootstrap.hasGeneratedOptions, isTrue);
+    expect(DefaultFirebaseOptions.currentPlatform.projectId, 'dino-app-90aa2');
   });
 
-  test('constructFirebase returns null when options are missing', () async {
+  group('on a platform without FlutterFire config', () {
+    setUp(() => debugDefaultTargetPlatformOverride = TargetPlatform.windows);
+    tearDown(() => debugDefaultTargetPlatformOverride = null);
+
+    test('hasGeneratedOptions is false', () {
+      expect(FirebaseBootstrap.hasGeneratedOptions, isFalse);
+    });
+
+    test('constructFirebase returns null', () async {
+      expect(await FirebaseBootstrap.constructFirebase(), isNull);
+    });
+  });
+
+  test('constructFirebase returns null when native Firebase is unavailable',
+      () async {
     expect(await FirebaseBootstrap.constructFirebase(), isNull);
   });
 
@@ -37,7 +54,9 @@ void main() {
   testWidgets('onboarding still loads without a Firebase project file', (
     tester,
   ) async {
-    await StrataServices.init(initializeFirebase: () async => false);
+    await tester.runAsync(
+      () => StrataServices.init(initializeFirebase: () async => false),
+    );
     await tester.pumpWidget(StrataApp());
     await tester.pump();
 
@@ -47,7 +66,9 @@ void main() {
   testWidgets('Get Started reaches Home when Firebase is configured', (
     tester,
   ) async {
-    await StrataServices.init(initializeFirebase: () async => true);
+    await tester.runAsync(
+      () => StrataServices.init(initializeFirebase: () async => true),
+    );
     expect(StrataServices.isFirebaseReady, isTrue);
 
     await tester.pumpWidget(StrataApp());
@@ -63,7 +84,9 @@ void main() {
   testWidgets('Get Started reaches Home when Firebase is skipped', (
     tester,
   ) async {
-    await StrataServices.init(initializeFirebase: () async => false);
+    await tester.runAsync(
+      () => StrataServices.init(initializeFirebase: () async => false),
+    );
     expect(StrataServices.isFirebaseReady, isFalse);
 
     await tester.pumpWidget(StrataApp());
