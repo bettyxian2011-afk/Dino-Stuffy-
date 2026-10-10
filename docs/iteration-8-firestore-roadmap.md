@@ -128,13 +128,14 @@ One document per genus (or a clearly labeled higher group). This is the catalog 
 | `useInIdentify`           | bool                           | Algorithms ignore docs with `false`                   |
 | `kidSafe`                 | bool                           | Daily sets only include `true`                        |
 | `iconic`                  | bool                           | Timeline “iconic for this period” row                 |
+| `pbdb`                    | `{taxonNo, attribution, firstInterval, lastInterval, occurrences, extant}` | Source credit. PBDB data is CC BY 4.0. |
 
 
 Identify keeps PBDB as an external double-check. Firestore does not invent confidence scores.
 
 ### `periods/{id}`
 
-Phanerozoic periods only for this iteration (Cambrian through Quaternary). Each doc: `name`, `era` (`Paleozoic` | `Mesozoic` | `Cenozoic`), `startMa`, `endMa`, `blurb`, `order`.
+Phanerozoic periods only for this iteration (Cambrian through Quaternary). Each doc: `name`, `era` (`Paleozoic` | `Mesozoic` | `Cenozoic`), `startMa`, `endMa`, `blurb`, `order` (1 = Cambrian), `color` (ICS chart color), `pbdbIntervalId`. Ages are the ICS chart values as published by PBDB.
 
 ### `museums/{id}` — added in v0.8
 
@@ -569,6 +570,31 @@ flutter run -d chrome
 Seed content (v0.2+) is imported with a local script that uses a service-account file kept **outside** the repo (`*-firebase-adminsdk-*.json` is gitignored). The app never embeds that file.
 
 The skip path is covered by `test/firebase_bootstrap_test.dart`, which forces an unconfigured platform.
+
+## Runbook (v0.2) — seed data
+
+The seed tool lives in `seed/` at the repo root (Node 18+).
+
+| Input | Holds |
+| ----- | ----- |
+| PBDB API | Age range, period ids, family when the catalog has none, attribution, occurrence count |
+| `dino_app/assets/data/id_results.json` | `commonGroup`, `family`, `taxonomy`, `tip`, `imageAsset`, and `facts` for Identify genera |
+| `seed/curated/taxa.json` | Hand fields: `realm`, `commonName`, `iconic`, `kidSafe`, `funFacts`, plus full entries for genera Identify does not know. Any field here wins. `ageStartMa` / `ageEndMa` here replace the PBDB range. |
+| `seed/curated/periods.json` | Period `blurb` |
+
+```text
+# From the repo root
+node seed/build.mjs            # writes dino_app/assets/data/periods.json and taxa.json, prints what needs attention
+cd seed && npm install         # first time only
+node upload.mjs --dry-run      # lists the docs it would write
+node upload.mjs --key C:\path\outside\repo\dino-app-90aa2-firebase-adminsdk.json
+```
+
+The two generated files are committed. The app bundles them as the offline fallback, and `upload.mjs` overwrites the Firestore docs with the same data. Edit the curated files, never the generated ones.
+
+Get the key from Firebase console → Project settings → Service accounts → Generate new private key. Store it outside the repo; `upload.mjs` refuses a key inside the repo or for another project.
+
+To add a genus: add it to `seed/curated/taxa.json` (with `commonGroup`, `taxonomy`, and `imageAsset` if Identify does not know it), rebuild, check the report, then upload.
 
 ## Demo taxa that must exist before Kids K0.3
 

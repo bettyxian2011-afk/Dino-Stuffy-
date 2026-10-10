@@ -1,0 +1,6 @@
+node_modules/
+
+# Firebase Admin credentials — keep outside the repo, never commit
+*-firebase-adminsdk-*.json
+serviceAccount*.json
+service-account*.json

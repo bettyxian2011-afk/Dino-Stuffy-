@@ -1,0 +1,16 @@
+{
+  "name": "strata-seed",
+  "private": true,
+  "type": "module",
+  "description": "Builds and uploads Strata's Firestore seed data (taxa, periods).",
+  "scripts": {
+    "build": "node build.mjs",
+    "upload": "node upload.mjs"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "firebase-admin": "^13.0.0"
+  }
+}

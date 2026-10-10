@@ -1,0 +1,38 @@
+{
+  "cambrian": {
+    "blurb": "Most major animal groups appear in the fossil record, including the first trilobites."
+  },
+  "ordovician": {
+    "blurb": "Seas fill with trilobites, brachiopods, and early reef builders, and the period ends in a major mass extinction."
+  },
+  "silurian": {
+    "blurb": "Coral reefs spread through warm shallow seas while the first vascular plants take hold on land."
+  },
+  "devonian": {
+    "blurb": "The Age of Fishes, when the first forests grow and the first four-limbed animals appear."
+  },
+  "carboniferous": {
+    "blurb": "Swamp forests of giant lycopsids like Lepidodendron lay down coal, and the first reptiles appear."
+  },
+  "permian": {
+    "blurb": "Glossopteris forests cover Gondwana, and the period ends in the largest mass extinction in Earth's history."
+  },
+  "triassic": {
+    "blurb": "Life recovers from the Permian extinction, and the first dinosaurs and mammals appear."
+  },
+  "jurassic": {
+    "blurb": "Giant sauropods walk the land while ammonites and belemnites fill the seas."
+  },
+  "cretaceous": {
+    "blurb": "Flowering plants spread, and dinosaurs like Triceratops and Tyrannosaurus live until the asteroid impact 66 million years ago."
+  },
+  "paleogene": {
+    "blurb": "Mammals diversify after the dinosaurs disappear, and the first whales and primates appear."
+  },
+  "neogene": {
+    "blurb": "Grasslands spread, giant sharks like Otodus hunt the oceans, and early human relatives appear."
+  },
+  "quaternary": {
+    "blurb": "Ice ages come and go, mammoths roam, and modern humans spread across the globe."
+  }
+}

@@ -16,6 +16,12 @@ class TaxonFact {
       label: json['label'] as String,
     );
   }
+
+  Map<String, dynamic> toJson() => {
+        'icon': icon,
+        'value': value,
+        'label': label,
+      };
 }
 
 class IdCandidate {

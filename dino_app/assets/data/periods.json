@@ -1,0 +1,122 @@
+{
+  "cambrian": {
+    "name": "Cambrian",
+    "era": "Paleozoic",
+    "startMa": 538.8,
+    "endMa": 486.85,
+    "blurb": "Most major animal groups appear in the fossil record, including the first trilobites.",
+    "order": 1,
+    "color": "#7FA056",
+    "pbdbIntervalId": "int:22"
+  },
+  "ordovician": {
+    "name": "Ordovician",
+    "era": "Paleozoic",
+    "startMa": 486.85,
+    "endMa": 443.1,
+    "blurb": "Seas fill with trilobites, brachiopods, and early reef builders, and the period ends in a major mass extinction.",
+    "order": 2,
+    "color": "#009270",
+    "pbdbIntervalId": "int:21"
+  },
+  "silurian": {
+    "name": "Silurian",
+    "era": "Paleozoic",
+    "startMa": 443.1,
+    "endMa": 419.62,
+    "blurb": "Coral reefs spread through warm shallow seas while the first vascular plants take hold on land.",
+    "order": 3,
+    "color": "#B3E1B6",
+    "pbdbIntervalId": "int:20"
+  },
+  "devonian": {
+    "name": "Devonian",
+    "era": "Paleozoic",
+    "startMa": 419.62,
+    "endMa": 358.86,
+    "blurb": "The Age of Fishes, when the first forests grow and the first four-limbed animals appear.",
+    "order": 4,
+    "color": "#CB8C37",
+    "pbdbIntervalId": "int:19"
+  },
+  "carboniferous": {
+    "name": "Carboniferous",
+    "era": "Paleozoic",
+    "startMa": 358.86,
+    "endMa": 298.9,
+    "blurb": "Swamp forests of giant lycopsids like Lepidodendron lay down coal, and the first reptiles appear.",
+    "order": 5,
+    "color": "#67A599",
+    "pbdbIntervalId": "int:18"
+  },
+  "permian": {
+    "name": "Permian",
+    "era": "Paleozoic",
+    "startMa": 298.9,
+    "endMa": 251.902,
+    "blurb": "Glossopteris forests cover Gondwana, and the period ends in the largest mass extinction in Earth's history.",
+    "order": 6,
+    "color": "#F04028",
+    "pbdbIntervalId": "int:17"
+  },
+  "triassic": {
+    "name": "Triassic",
+    "era": "Mesozoic",
+    "startMa": 251.902,
+    "endMa": 201.4,
+    "blurb": "Life recovers from the Permian extinction, and the first dinosaurs and mammals appear.",
+    "order": 7,
+    "color": "#812B92",
+    "pbdbIntervalId": "int:16"
+  },
+  "jurassic": {
+    "name": "Jurassic",
+    "era": "Mesozoic",
+    "startMa": 201.4,
+    "endMa": 143.1,
+    "blurb": "Giant sauropods walk the land while ammonites and belemnites fill the seas.",
+    "order": 8,
+    "color": "#34B2C9",
+    "pbdbIntervalId": "int:15"
+  },
+  "cretaceous": {
+    "name": "Cretaceous",
+    "era": "Mesozoic",
+    "startMa": 143.1,
+    "endMa": 66,
+    "blurb": "Flowering plants spread, and dinosaurs like Triceratops and Tyrannosaurus live until the asteroid impact 66 million years ago.",
+    "order": 9,
+    "color": "#7FC64E",
+    "pbdbIntervalId": "int:14"
+  },
+  "paleogene": {
+    "name": "Paleogene",
+    "era": "Cenozoic",
+    "startMa": 66,
+    "endMa": 23.04,
+    "blurb": "Mammals diversify after the dinosaurs disappear, and the first whales and primates appear.",
+    "order": 10,
+    "color": "#FD9A52",
+    "pbdbIntervalId": "int:26"
+  },
+  "neogene": {
+    "name": "Neogene",
+    "era": "Cenozoic",
+    "startMa": 23.04,
+    "endMa": 2.58,
+    "blurb": "Grasslands spread, giant sharks like Otodus hunt the oceans, and early human relatives appear.",
+    "order": 11,
+    "color": "#FFE619",
+    "pbdbIntervalId": "int:25"
+  },
+  "quaternary": {
+    "name": "Quaternary",
+    "era": "Cenozoic",
+    "startMa": 2.58,
+    "endMa": 0,
+    "blurb": "Ice ages come and go, mammoths roam, and modern humans spread across the globe.",
+    "order": 12,
+    "color": "#F9F97F",
+    "pbdbIntervalId": "int:12"
+  }
+}

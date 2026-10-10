@@ -1,0 +1,76 @@
+{
+  "Dactylioceras": { "realm": "ocean", "commonName": null, "iconic": true, "kidSafe": false, "funFacts": [] },
+  "Harpoceras": { "realm": "ocean", "commonName": null, "iconic": false, "kidSafe": false, "funFacts": [] },
+  "Hildoceras": { "realm": "ocean", "commonName": null, "iconic": false, "kidSafe": false, "funFacts": [] },
+
+  "Velociraptor": { "realm": "land", "commonName": "Velociraptor", "iconic": true, "kidSafe": true, "funFacts": [] },
+  "Deinonychus": { "realm": "land", "commonName": "Deinonychus", "iconic": false, "kidSafe": false, "funFacts": [] },
+  "Utahraptor": { "realm": "land", "commonName": "Utahraptor", "iconic": false, "kidSafe": false, "funFacts": [] },
+
+  "Elrathia": { "realm": "ocean", "commonName": null, "iconic": true, "kidSafe": false, "funFacts": [] },
+  "Calymene": { "realm": "ocean", "commonName": null, "iconic": false, "kidSafe": false, "funFacts": [] },
+  "Phacops": { "realm": "ocean", "commonName": null, "iconic": true, "kidSafe": false, "funFacts": [] },
+
+  "Glossopteris": { "realm": "land", "commonName": null, "iconic": true, "kidSafe": false, "funFacts": [] },
+  "Neuropteris": { "realm": "land", "commonName": null, "iconic": false, "kidSafe": false, "funFacts": [] },
+  "Lepidodendron": { "realm": "land", "commonName": null, "iconic": true, "kidSafe": false, "funFacts": [] },
+
+  "Tyrannosaurus": { "realm": "land", "commonName": "Tyrannosaurus", "iconic": true, "kidSafe": true, "funFacts": [] },
+  "Albertosaurus": { "realm": "land", "commonName": "Albertosaurus", "iconic": false, "kidSafe": false, "funFacts": [] },
+  "Daspletosaurus": { "realm": "land", "commonName": "Daspletosaurus", "iconic": false, "kidSafe": false, "funFacts": [] },
+
+  "Mucrospirifer": { "realm": "ocean", "commonName": null, "iconic": true, "kidSafe": false, "funFacts": [] },
+  "Atrypa": { "realm": "ocean", "commonName": null, "iconic": false, "kidSafe": false, "funFacts": [] },
+  "Spirifer": { "realm": "ocean", "commonName": null, "iconic": false, "kidSafe": false, "funFacts": [] },
+
+  "Belemnitella": { "realm": "ocean", "commonName": null, "iconic": false, "kidSafe": false, "funFacts": [] },
+  "Passaloteuthis": { "realm": "ocean", "commonName": null, "iconic": false, "kidSafe": false, "funFacts": [] },
+  "Hibolites": { "realm": "ocean", "commonName": null, "iconic": false, "kidSafe": false, "funFacts": [] },
+
+  "Otodus": { "realm": "ocean", "commonName": "Megalodon", "iconic": true, "kidSafe": false, "funFacts": [] },
+  "Carcharodon": { "realm": "ocean", "commonName": "Great white shark", "iconic": false, "kidSafe": false, "funFacts": [] },
+  "Isurus": { "realm": "ocean", "commonName": "Mako shark", "iconic": false, "kidSafe": false, "funFacts": [] },
+
+  "Favosites": { "realm": "ocean", "commonName": "Honeycomb coral", "iconic": true, "kidSafe": false, "funFacts": [] },
+  "Halysites": { "realm": "ocean", "commonName": "Chain coral", "iconic": false, "kidSafe": false, "funFacts": [] },
+  "Syringopora": { "realm": "ocean", "commonName": null, "iconic": false, "kidSafe": false, "funFacts": [] },
+
+  "Diplodocus": { "realm": "land", "commonName": "Diplodocus", "iconic": true, "kidSafe": false, "funFacts": [] },
+  "Apatosaurus": { "realm": "land", "commonName": "Apatosaurus", "iconic": false, "kidSafe": false, "funFacts": [] },
+  "Brachiosaurus": { "realm": "land", "commonName": "Brachiosaurus", "iconic": true, "kidSafe": false, "funFacts": [] },
+
+  "Triceratops": {
+    "realm": "land",
+    "commonName": "Triceratops",
+    "commonGroup": "Ceratopsid",
+    "taxonomy": ["Chordata", "Dinosauria", "Ornithischia"],
+    "imageAsset": "assets/images/fossil_velociraptor.png",
+    "useInIdentify": false,
+    "iconic": true,
+    "kidSafe": true,
+    "funFacts": []
+  },
+  "Pachycephalosaurus": {
+    "realm": "land",
+    "commonName": "Pachycephalosaurus",
+    "commonGroup": "Pachycephalosaur",
+    "family": "Pachycephalosauridae",
+    "taxonomy": ["Chordata", "Dinosauria", "Ornithischia"],
+    "imageAsset": "assets/images/fossil_velociraptor.png",
+    "useInIdentify": false,
+    "iconic": true,
+    "kidSafe": true,
+    "funFacts": []
+  },
+  "Ankylosaurus": {
+    "realm": "land",
+    "commonName": "Ankylosaurus",
+    "commonGroup": "Ankylosaurid",
+    "taxonomy": ["Chordata", "Dinosauria", "Ornithischia"],
+    "imageAsset": "assets/images/fossil_velociraptor.png",
+    "useInIdentify": false,
+    "iconic": true,
+    "kidSafe": true,
+    "funFacts": []
+  }
+}

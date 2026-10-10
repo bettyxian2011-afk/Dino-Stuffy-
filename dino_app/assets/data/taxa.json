@@ -1,0 +1,1399 @@
+{
+  "albertosaurus": {
+    "scientificName": "Albertosaurus",
+    "commonName": "Albertosaurus",
+    "commonGroup": "Tyrannosaurid",
+    "family": "Tyrannosauridae",
+    "taxonomy": [
+      "Chordata",
+      "Dinosauria",
+      "Theropoda"
+    ],
+    "realm": "land",
+    "periodIds": [
+      "cretaceous"
+    ],
+    "ageStartMa": 85.7,
+    "ageEndMa": 66,
+    "facts": [
+      {
+        "icon": "schedule",
+        "value": "86–66Ma",
+        "label": "Santonian–Maastrichtian"
+      }
+    ],
+    "funFacts": [],
+    "tip": "Tooth serration and jaw robusticity help separate tyrannosaurid genera — add a close-up of denticles.",
+    "imageAsset": "assets/images/fossil_velociraptor.png",
+    "useInIdentify": true,
+    "kidSafe": false,
+    "iconic": false,
+    "pbdb": {
+      "taxonNo": "txn:38607",
+      "attribution": "Osborn 1905",
+      "firstInterval": "Santonian",
+      "lastInterval": "Maastrichtian",
+      "occurrences": 32,
+      "extant": false
+    }
+  },
+  "ankylosaurus": {
+    "scientificName": "Ankylosaurus",
+    "commonName": "Ankylosaurus",
+    "commonGroup": "Ankylosaurid",
+    "family": "Ankylosauridae",
+    "taxonomy": [
+      "Chordata",
+      "Dinosauria",
+      "Ornithischia"
+    ],
+    "realm": "land",
+    "periodIds": [
+      "cretaceous"
+    ],
+    "ageStartMa": 83.6,
+    "ageEndMa": 66,
+    "facts": [
+      {
+        "icon": "schedule",
+        "value": "84–66Ma",
+        "label": "Campanian–Maastrichtian"
+      }
+    ],
+    "funFacts": [],
+    "tip": "",
+    "imageAsset": "assets/images/fossil_velociraptor.png",
+    "useInIdentify": false,
+    "kidSafe": true,
+    "iconic": true,
+    "pbdb": {
+      "taxonNo": "txn:38837",
+      "attribution": "Brown 1908",
+      "firstInterval": "Campanian",
+      "lastInterval": "Maastrichtian",
+      "occurrences": 16,
+      "extant": false
+    }
+  },
+  "apatosaurus": {
+    "scientificName": "Apatosaurus",
+    "commonName": "Apatosaurus",
+    "commonGroup": "Sauropod",
+    "family": "Diplodocidae",
+    "taxonomy": [
+      "Chordata",
+      "Dinosauria",
+      "Sauropoda"
+    ],
+    "realm": "land",
+    "periodIds": [
+      "jurassic"
+    ],
+    "ageStartMa": 157.9,
+    "ageEndMa": 143.1,
+    "facts": [
+      {
+        "icon": "schedule",
+        "value": "158–143Ma",
+        "label": "Jurassic"
+      }
+    ],
+    "funFacts": [],
+    "tip": "Vertebral proportions and limb bone robusticity help separate sauropod genera — include scale.",
+    "imageAsset": "assets/images/fossil_velociraptor.png",
+    "useInIdentify": true,
+    "kidSafe": false,
+    "iconic": false,
+    "pbdb": {
+      "taxonNo": "txn:38665",
+      "attribution": "Marsh 1877",
+      "firstInterval": null,
+      "lastInterval": null,
+      "occurrences": 67,
+      "extant": false
+    }
+  },
+  "atrypa": {
+    "scientificName": "Atrypa",
+    "commonName": null,
+    "commonGroup": "Brachiopod",
+    "family": "Atrypidae",
+    "taxonomy": [
+      "Brachiopoda",
+      "Rhynchonellata",
+      "Spiriferida"
+    ],
+    "realm": "ocean",
+    "periodIds": [
+      "ordovician",
+      "silurian",
+      "devonian",
+      "carboniferous"
+    ],
+    "ageStartMa": 471.3,
+    "ageEndMa": 335.9,
+    "facts": [
+      {
+        "icon": "schedule",
+        "value": "471–336Ma",
+        "label": "Dapingian–Visean"
+      }
+    ],
+    "funFacts": [],
+    "tip": "Photograph both valves and the hinge line. Spiriferid wing shape is a key diagnostic.",
+    "imageAsset": "assets/images/fossil_ammonite.png",
+    "useInIdentify": true,
+    "kidSafe": false,
+    "iconic": false,
+    "pbdb": {
+      "taxonNo": "txn:29779",
+      "attribution": "Dalman 1828",
+      "firstInterval": "Dapingian",
+      "lastInterval": "Visean",
+      "occurrences": 1479,
+      "extant": false
+    }
+  },
+  "belemnitella": {
+    "scientificName": "Belemnitella",
+    "commonName": null,
+    "commonGroup": "Belemnite",
+    "family": "Belemnitellidae",
+    "taxonomy": [
+      "Mollusca",
+      "Cephalopoda",
+      "Belemnitida"
+    ],
+    "realm": "ocean",
+    "periodIds": [
+      "cretaceous"
+    ],
+    "ageStartMa": 85.7,
+    "ageEndMa": 66,
+    "facts": [
+      {
+        "icon": "schedule",
+        "value": "80Ma",
+        "label": "Late Cretaceous"
+      },
+      {
+        "icon": "straighten",
+        "value": "5–12cm",
+        "label": "Guard length"
+      },
+      {
+        "icon": "public",
+        "value": "Europe",
+        "label": "Chalk seas"
+      }
+    ],
+    "funFacts": [],
+    "tip": "Guard cross-section and apical groove help narrow belemnite genera — shoot an end-on view.",
+    "imageAsset": "assets/images/fossil_ammonite.png",
+    "useInIdentify": true,
+    "kidSafe": false,
+    "iconic": false,
+    "pbdb": {
+      "taxonNo": "txn:15842",
+      "attribution": "d'Orbigny 1840",
+      "firstInterval": "Santonian",
+      "lastInterval": "Maastrichtian",
+      "occurrences": 92,
+      "extant": false
+    }
+  },
+  "brachiosaurus": {
+    "scientificName": "Brachiosaurus",
+    "commonName": "Brachiosaurus",
+    "commonGroup": "Sauropod",
+    "family": "Brachiosauridae",
+    "taxonomy": [
+      "Chordata",
+      "Dinosauria",
+      "Sauropoda"
+    ],
+    "realm": "land",
+    "periodIds": [
+      "jurassic"
+    ],
+    "ageStartMa": 157.9,
+    "ageEndMa": 143.1,
+    "facts": [
+      {
+        "icon": "schedule",
+        "value": "158–143Ma",
+        "label": "Jurassic"
+      }
+    ],
+    "funFacts": [],
+    "tip": "Vertebral proportions and limb bone robusticity help separate sauropod genera — include scale.",
+    "imageAsset": "assets/images/fossil_velociraptor.png",
+    "useInIdentify": true,
+    "kidSafe": false,
+    "iconic": true,
+    "pbdb": {
+      "taxonNo": "txn:38677",
+      "attribution": "Riggs 1903",
+      "firstInterval": null,
+      "lastInterval": null,
+      "occurrences": 20,
+      "extant": false
+    }
+  },
+  "calymene": {
+    "scientificName": "Calymene",
+    "commonName": null,
+    "commonGroup": "Trilobite",
+    "family": "Calymenidae",
+    "taxonomy": [
+      "Arthropoda",
+      "Trilobita",
+      "Ptychopariida"
+    ],
+    "realm": "ocean",
+    "periodIds": [
+      "ordovician",
+      "silurian",
+      "devonian"
+    ],
+    "ageStartMa": 486.4,
+    "ageEndMa": 393.47,
+    "facts": [
+      {
+        "icon": "schedule",
+        "value": "486–393Ma",
+        "label": "Ordovician–Devonian"
+      }
+    ],
+    "funFacts": [],
+    "tip": "Capture the cephalon outline and eye placement — those traits separate common trilobite genera.",
+    "imageAsset": "assets/images/fossil_trilobite.png",
+    "useInIdentify": true,
+    "kidSafe": false,
+    "iconic": false,
+    "pbdb": {
+      "taxonNo": "txn:21478",
+      "attribution": "Brongniart 1822",
+      "firstInterval": null,
+      "lastInterval": null,
+      "occurrences": 522,
+      "extant": false
+    }
+  },
+  "carcharodon": {
+    "scientificName": "Carcharodon",
+    "commonName": "Great white shark",
+    "commonGroup": "Mackerel shark",
+    "family": "Lamnidae",
+    "taxonomy": [
+      "Chordata",
+      "Chondrichthyes",
+      "Lamniformes"
+    ],
+    "realm": "ocean",
+    "periodIds": [
+      "cretaceous",
+      "paleogene",
+      "neogene",
+      "quaternary"
+    ],
+    "ageStartMa": 85.7,
+    "ageEndMa": 0,
+    "facts": [
+      {
+        "icon": "schedule",
+        "value": "86–0Ma",
+        "label": "Santonian–Holocene"
+      }
+    ],
+    "funFacts": [],
+    "tip": "Tooth crown height, root lobes, and serration pattern separate lamniform sharks.",
+    "imageAsset": "assets/images/fossil_velociraptor.png",
+    "useInIdentify": true,
+    "kidSafe": false,
+    "iconic": false,
+    "pbdb": {
+      "taxonNo": "txn:34605",
+      "attribution": "Smith 1838",
+      "firstInterval": "Santonian",
+      "lastInterval": "Holocene",
+      "occurrences": 458,
+      "extant": true
+    }
+  },
+  "dactylioceras": {
+    "scientificName": "Dactylioceras",
+    "commonName": null,
+    "commonGroup": "Ammonite",
+    "family": "Dactylioceratidae",
+    "taxonomy": [
+      "Mollusca",
+      "Cephalopoda",
+      "Ammonoidea"
+    ],
+    "realm": "ocean",
+    "periodIds": [
+      "jurassic"
+    ],
+    "ageStartMa": 201.4,
+    "ageEndMa": 168.2,
+    "facts": [
+      {
+        "icon": "schedule",
+        "value": "180Ma",
+        "label": "Early Jurassic"
+      },
+      {
+        "icon": "straighten",
+        "value": "4–6cm",
+        "label": "Diameter"
+      },
+      {
+        "icon": "public",
+        "value": "Global",
+        "label": "Marine shale"
+      }
+    ],
+    "funFacts": [],
+    "tip": "Species-level ID needs suture detail. Add a close-up of the shell ridges to sharpen the result.",
+    "imageAsset": "assets/images/fossil_ammonite.png",
+    "useInIdentify": true,
+    "kidSafe": false,
+    "iconic": true,
+    "pbdb": {
+      "taxonNo": "txn:14749",
+      "attribution": "(Hyatt 1867)",
+      "firstInterval": "Hettangian",
+      "lastInterval": "Bajocian",
+      "occurrences": 496,
+      "extant": false
+    }
+  },
+  "daspletosaurus": {
+    "scientificName": "Daspletosaurus",
+    "commonName": "Daspletosaurus",
+    "commonGroup": "Tyrannosaurid",
+    "family": "Tyrannosauridae",
+    "taxonomy": [
+      "Chordata",
+      "Dinosauria",
+      "Theropoda"
+    ],
+    "realm": "land",
+    "periodIds": [
+      "cretaceous"
+    ],
+    "ageStartMa": 83.6,
+    "ageEndMa": 66,
+    "facts": [
+      {
+        "icon": "schedule",
+        "value": "84–66Ma",
+        "label": "Campanian–Maastrichtian"
+      }
+    ],
+    "funFacts": [],
+    "tip": "Tooth serration and jaw robusticity help separate tyrannosaurid genera — add a close-up of denticles.",
+    "imageAsset": "assets/images/fossil_velociraptor.png",
+    "useInIdentify": true,
+    "kidSafe": false,
+    "iconic": false,
+    "pbdb": {
+      "taxonNo": "txn:38608",
+      "attribution": "Russell 1970",
+      "firstInterval": "Campanian",
+      "lastInterval": "Maastrichtian",
+      "occurrences": 21,
+      "extant": false
+    }
+  },
+  "deinonychus": {
+    "scientificName": "Deinonychus",
+    "commonName": "Deinonychus",
+    "commonGroup": "Dromaeosaurid",
+    "family": "Dromaeosauridae",
+    "taxonomy": [
+      "Chordata",
+      "Dinosauria",
+      "Theropoda"
+    ],
+    "realm": "land",
+    "periodIds": [
+      "cretaceous"
+    ],
+    "ageStartMa": 143.1,
+    "ageEndMa": 93.9,
+    "facts": [
+      {
+        "icon": "schedule",
+        "value": "143–94Ma",
+        "label": "Berriasian–Cenomanian"
+      }
+    ],
+    "funFacts": [],
+    "tip": "Add a clear view of the sickle claw and skull proportions to refine species-level ID.",
+    "imageAsset": "assets/images/fossil_velociraptor.png",
+    "useInIdentify": true,
+    "kidSafe": false,
+    "iconic": false,
+    "pbdb": {
+      "taxonNo": "txn:38562",
+      "attribution": "Ostrom 1969",
+      "firstInterval": "Berriasian",
+      "lastInterval": "Cenomanian",
+      "occurrences": 47,
+      "extant": false
+    }
+  },
+  "diplodocus": {
+    "scientificName": "Diplodocus",
+    "commonName": "Diplodocus",
+    "commonGroup": "Sauropod",
+    "family": "Diplodocidae",
+    "taxonomy": [
+      "Chordata",
+      "Dinosauria",
+      "Sauropoda"
+    ],
+    "realm": "land",
+    "periodIds": [
+      "jurassic"
+    ],
+    "ageStartMa": 157.9,
+    "ageEndMa": 143.1,
+    "facts": [
+      {
+        "icon": "schedule",
+        "value": "150Ma",
+        "label": "Late Jurassic"
+      },
+      {
+        "icon": "straighten",
+        "value": "~25m",
+        "label": "Body length"
+      },
+      {
+        "icon": "public",
+        "value": "N. America",
+        "label": "Morrison Fm"
+      }
+    ],
+    "funFacts": [],
+    "tip": "Vertebral proportions and limb bone robusticity help separate sauropod genera — include scale.",
+    "imageAsset": "assets/images/fossil_velociraptor.png",
+    "useInIdentify": true,
+    "kidSafe": false,
+    "iconic": true,
+    "pbdb": {
+      "taxonNo": "txn:38669",
+      "attribution": "Marsh 1878",
+      "firstInterval": null,
+      "lastInterval": null,
+      "occurrences": 66,
+      "extant": false
+    }
+  },
+  "elrathia": {
+    "scientificName": "Elrathia",
+    "commonName": null,
+    "commonGroup": "Trilobite",
+    "family": "Alokistocaridae",
+    "taxonomy": [
+      "Arthropoda",
+      "Trilobita",
+      "Ptychopariida"
+    ],
+    "realm": "ocean",
+    "periodIds": [
+      "cambrian"
+    ],
+    "ageStartMa": 509.7,
+    "ageEndMa": 486.85,
+    "facts": [
+      {
+        "icon": "schedule",
+        "value": "505Ma",
+        "label": "Middle Cambrian"
+      },
+      {
+        "icon": "straighten",
+        "value": "2–4cm",
+        "label": "Body length"
+      },
+      {
+        "icon": "public",
+        "value": "Utah, USA",
+        "label": "Wheeler Shale"
+      }
+    ],
+    "funFacts": [],
+    "tip": "Capture the cephalon outline and eye placement — those traits separate common trilobite genera.",
+    "imageAsset": "assets/images/fossil_trilobite.png",
+    "useInIdentify": true,
+    "kidSafe": false,
+    "iconic": true,
+    "pbdb": {
+      "taxonNo": "txn:20481",
+      "attribution": "Walcott 1924",
+      "firstInterval": "Stage 4",
+      "lastInterval": "Stage 10",
+      "occurrences": 72,
+      "extant": false
+    }
+  },
+  "favosites": {
+    "scientificName": "Favosites",
+    "commonName": "Honeycomb coral",
+    "commonGroup": "Tabulate coral",
+    "family": "Favositidae",
+    "taxonomy": [
+      "Cnidaria",
+      "Anthozoa",
+      "Tabulata"
+    ],
+    "realm": "ocean",
+    "periodIds": [
+      "ordovician",
+      "silurian",
+      "devonian",
+      "carboniferous",
+      "permian"
+    ],
+    "ageStartMa": 458.2,
+    "ageEndMa": 264.28,
+    "facts": [
+      {
+        "icon": "schedule",
+        "value": "420Ma",
+        "label": "Silurian"
+      },
+      {
+        "icon": "straighten",
+        "value": "5–30cm",
+        "label": "Colony size"
+      },
+      {
+        "icon": "public",
+        "value": "Global",
+        "label": "Reef flats"
+      }
+    ],
+    "funFacts": [],
+    "tip": "Colony packing and corallite walls distinguish tabulate corals — photograph a weathered cross-section.",
+    "imageAsset": "assets/images/fossil_trilobite.png",
+    "useInIdentify": true,
+    "kidSafe": false,
+    "iconic": true,
+    "pbdb": {
+      "taxonNo": "txn:4880",
+      "attribution": "Lamarck 1816",
+      "firstInterval": "Sandbian",
+      "lastInterval": "Wordian",
+      "occurrences": 1808,
+      "extant": false
+    }
+  },
+  "glossopteris": {
+    "scientificName": "Glossopteris",
+    "commonName": null,
+    "commonGroup": "Seed fern",
+    "family": "Glossopteridaceae",
+    "taxonomy": [
+      "Plantae",
+      "Spermatophyta",
+      "Glossopteridales"
+    ],
+    "realm": "land",
+    "periodIds": [
+      "carboniferous",
+      "permian",
+      "triassic",
+      "jurassic"
+    ],
+    "ageStartMa": 315.2,
+    "ageEndMa": 143.1,
+    "facts": [
+      {
+        "icon": "schedule",
+        "value": "260Ma",
+        "label": "Late Permian"
+      },
+      {
+        "icon": "straighten",
+        "value": "5–20cm",
+        "label": "Leaf length"
+      },
+      {
+        "icon": "public",
+        "value": "Gondwana",
+        "label": "Coal measures"
+      }
+    ],
+    "funFacts": [],
+    "tip": "Show venation clearly and include scale. Leaf architecture separates seed ferns from lycopsids.",
+    "imageAsset": "assets/images/fossil_trilobite.png",
+    "useInIdentify": true,
+    "kidSafe": false,
+    "iconic": true,
+    "pbdb": {
+      "taxonNo": "txn:157151",
+      "attribution": "Brongniart 1828",
+      "firstInterval": "Moscovian",
+      "lastInterval": "Tithonian",
+      "occurrences": 1329,
+      "extant": false
+    }
+  },
+  "halysites": {
+    "scientificName": "Halysites",
+    "commonName": "Chain coral",
+    "commonGroup": "Tabulate coral",
+    "family": "Halysitidae",
+    "taxonomy": [
+      "Cnidaria",
+      "Anthozoa",
+      "Tabulata"
+    ],
+    "realm": "ocean",
+    "periodIds": [
+      "ordovician",
+      "silurian",
+      "devonian"
+    ],
+    "ageStartMa": 471.3,
+    "ageEndMa": 413.02,
+    "facts": [
+      {
+        "icon": "schedule",
+        "value": "471–413Ma",
+        "label": "Dapingian–Lochkovian"
+      }
+    ],
+    "funFacts": [],
+    "tip": "Colony packing and corallite walls distinguish tabulate corals — photograph a weathered cross-section.",
+    "imageAsset": "assets/images/fossil_trilobite.png",
+    "useInIdentify": true,
+    "kidSafe": false,
+    "iconic": false,
+    "pbdb": {
+      "taxonNo": "txn:4897",
+      "attribution": "von Waldheim 1813",
+      "firstInterval": "Dapingian",
+      "lastInterval": "Lochkovian",
+      "occurrences": 352,
+      "extant": false
+    }
+  },
+  "harpoceras": {
+    "scientificName": "Harpoceras",
+    "commonName": null,
+    "commonGroup": "Ammonite",
+    "family": "Hildoceratidae",
+    "taxonomy": [
+      "Mollusca",
+      "Cephalopoda",
+      "Ammonoidea"
+    ],
+    "realm": "ocean",
+    "periodIds": [
+      "jurassic"
+    ],
+    "ageStartMa": 201.4,
+    "ageEndMa": 143.1,
+    "facts": [
+      {
+        "icon": "schedule",
+        "value": "201–143Ma",
+        "label": "Hettangian–Tithonian"
+      }
+    ],
+    "funFacts": [],
+    "tip": "Species-level ID needs suture detail. Add a close-up of the shell ridges to sharpen the result.",
+    "imageAsset": "assets/images/fossil_ammonite.png",
+    "useInIdentify": true,
+    "kidSafe": false,
+    "iconic": false,
+    "pbdb": {
+      "taxonNo": "txn:14967",
+      "attribution": null,
+      "firstInterval": "Hettangian",
+      "lastInterval": "Tithonian",
+      "occurrences": 448,
+      "extant": false
+    }
+  },
+  "hibolites": {
+    "scientificName": "Hibolites",
+    "commonName": null,
+    "commonGroup": "Belemnite",
+    "family": "Mesohibolitidae",
+    "taxonomy": [
+      "Mollusca",
+      "Cephalopoda",
+      "Belemnitida"
+    ],
+    "realm": "ocean",
+    "periodIds": [
+      "jurassic",
+      "cretaceous"
+    ],
+    "ageStartMa": 165.3,
+    "ageEndMa": 100.5,
+    "facts": [
+      {
+        "icon": "schedule",
+        "value": "165–101Ma",
+        "label": "Callovian–Albian"
+      }
+    ],
+    "funFacts": [],
+    "tip": "Guard cross-section and apical groove help narrow belemnite genera — shoot an end-on view.",
+    "imageAsset": "assets/images/fossil_ammonite.png",
+    "useInIdentify": true,
+    "kidSafe": false,
+    "iconic": false,
+    "pbdb": {
+      "taxonNo": "txn:15868",
+      "attribution": "(Mayer-Eymar 1883)",
+      "firstInterval": "Callovian",
+      "lastInterval": "Albian",
+      "occurrences": 45,
+      "extant": false
+    }
+  },
+  "hildoceras": {
+    "scientificName": "Hildoceras",
+    "commonName": null,
+    "commonGroup": "Ammonite",
+    "family": "Hildoceratidae",
+    "taxonomy": [
+      "Mollusca",
+      "Cephalopoda",
+      "Ammonoidea"
+    ],
+    "realm": "ocean",
+    "periodIds": [
+      "jurassic"
+    ],
+    "ageStartMa": 192.9,
+    "ageEndMa": 174.7,
+    "facts": [
+      {
+        "icon": "schedule",
+        "value": "193–175Ma",
+        "label": "Pliensbachian–Toarcian"
+      }
+    ],
+    "funFacts": [],
+    "tip": "Species-level ID needs suture detail. Add a close-up of the shell ridges to sharpen the result.",
+    "imageAsset": "assets/images/fossil_ammonite.png",
+    "useInIdentify": true,
+    "kidSafe": false,
+    "iconic": false,
+    "pbdb": {
+      "taxonNo": "txn:14995",
+      "attribution": null,
+      "firstInterval": "Pliensbachian",
+      "lastInterval": "Toarcian",
+      "occurrences": 577,
+      "extant": false
+    }
+  },
+  "isurus": {
+    "scientificName": "Isurus",
+    "commonName": "Mako shark",
+    "commonGroup": "Mackerel shark",
+    "family": "Lamnidae",
+    "taxonomy": [
+      "Chordata",
+      "Chondrichthyes",
+      "Lamniformes"
+    ],
+    "realm": "ocean",
+    "periodIds": [
+      "cretaceous",
+      "paleogene",
+      "neogene",
+      "quaternary"
+    ],
+    "ageStartMa": 113.2,
+    "ageEndMa": 0,
+    "facts": [
+      {
+        "icon": "schedule",
+        "value": "113–0Ma",
+        "label": "Albian–Holocene"
+      }
+    ],
+    "funFacts": [],
+    "tip": "Tooth crown height, root lobes, and serration pattern separate lamniform sharks.",
+    "imageAsset": "assets/images/fossil_velociraptor.png",
+    "useInIdentify": true,
+    "kidSafe": false,
+    "iconic": false,
+    "pbdb": {
+      "taxonNo": "txn:34613",
+      "attribution": "Rafinesque 1810",
+      "firstInterval": "Albian",
+      "lastInterval": "Holocene",
+      "occurrences": 431,
+      "extant": true
+    }
+  },
+  "lepidodendron": {
+    "scientificName": "Lepidodendron",
+    "commonName": null,
+    "commonGroup": "Lycopsid",
+    "family": "Lepidodendraceae",
+    "taxonomy": [
+      "Plantae",
+      "Spermatophyta",
+      "Glossopteridales"
+    ],
+    "realm": "land",
+    "periodIds": [
+      "devonian",
+      "carboniferous",
+      "permian",
+      "triassic"
+    ],
+    "ageStartMa": 387.95,
+    "ageEndMa": 205.7,
+    "facts": [
+      {
+        "icon": "schedule",
+        "value": "388–206Ma",
+        "label": "Givetian–Norian"
+      }
+    ],
+    "funFacts": [],
+    "tip": "Show venation clearly and include scale. Leaf architecture separates seed ferns from lycopsids.",
+    "imageAsset": "assets/images/fossil_trilobite.png",
+    "useInIdentify": true,
+    "kidSafe": false,
+    "iconic": true,
+    "pbdb": {
+      "taxonNo": "txn:125629",
+      "attribution": "Sternberg 1820",
+      "firstInterval": "Givetian",
+      "lastInterval": "Norian",
+      "occurrences": 313,
+      "extant": false
+    }
+  },
+  "mucrospirifer": {
+    "scientificName": "Mucrospirifer",
+    "commonName": null,
+    "commonGroup": "Brachiopod",
+    "family": "Mucrospiriferidae",
+    "taxonomy": [
+      "Brachiopoda",
+      "Rhynchonellata",
+      "Spiriferida"
+    ],
+    "realm": "ocean",
+    "periodIds": [
+      "devonian",
+      "carboniferous"
+    ],
+    "ageStartMa": 419.62,
+    "ageEndMa": 346.7,
+    "facts": [
+      {
+        "icon": "schedule",
+        "value": "390Ma",
+        "label": "Middle Devonian"
+      },
+      {
+        "icon": "straighten",
+        "value": "2–5cm",
+        "label": "Width"
+      },
+      {
+        "icon": "public",
+        "value": "Global",
+        "label": "Shallow seas"
+      }
+    ],
+    "funFacts": [],
+    "tip": "Photograph both valves and the hinge line. Spiriferid wing shape is a key diagnostic.",
+    "imageAsset": "assets/images/fossil_ammonite.png",
+    "useInIdentify": true,
+    "kidSafe": false,
+    "iconic": true,
+    "pbdb": {
+      "taxonNo": "txn:29445",
+      "attribution": "Grabau 1931",
+      "firstInterval": "Lochkovian",
+      "lastInterval": "Tournaisian",
+      "occurrences": 728,
+      "extant": false
+    }
+  },
+  "neuropteris": {
+    "scientificName": "Neuropteris",
+    "commonName": null,
+    "commonGroup": "Seed fern",
+    "family": "Neurodontopteridaceae",
+    "taxonomy": [
+      "Plantae",
+      "Spermatophyta",
+      "Glossopteridales"
+    ],
+    "realm": "land",
+    "periodIds": [
+      "carboniferous",
+      "permian",
+      "triassic",
+      "jurassic"
+    ],
+    "ageStartMa": 358.86,
+    "ageEndMa": 143.1,
+    "facts": [
+      {
+        "icon": "schedule",
+        "value": "359–143Ma",
+        "label": "Tournaisian–Tithonian"
+      }
+    ],
+    "funFacts": [],
+    "tip": "Show venation clearly and include scale. Leaf architecture separates seed ferns from lycopsids.",
+    "imageAsset": "assets/images/fossil_trilobite.png",
+    "useInIdentify": true,
+    "kidSafe": false,
+    "iconic": false,
+    "pbdb": {
+      "taxonNo": "txn:157275",
+      "attribution": "Brongniart 1828",
+      "firstInterval": "Tournaisian",
+      "lastInterval": "Tithonian",
+      "occurrences": 408,
+      "extant": false
+    }
+  },
+  "otodus": {
+    "scientificName": "Otodus",
+    "commonName": "Megalodon",
+    "commonGroup": "Mackerel shark",
+    "family": "Otodontidae",
+    "taxonomy": [
+      "Chordata",
+      "Chondrichthyes",
+      "Lamniformes"
+    ],
+    "realm": "ocean",
+    "periodIds": [
+      "cretaceous",
+      "paleogene",
+      "neogene",
+      "quaternary"
+    ],
+    "ageStartMa": 93.9,
+    "ageEndMa": 0.34,
+    "facts": [
+      {
+        "icon": "schedule",
+        "value": "15Ma",
+        "label": "Miocene"
+      },
+      {
+        "icon": "straighten",
+        "value": "5–15cm",
+        "label": "Tooth height"
+      },
+      {
+        "icon": "public",
+        "value": "Global",
+        "label": "Coastal shelf"
+      }
+    ],
+    "funFacts": [],
+    "tip": "Tooth crown height, root lobes, and serration pattern separate lamniform sharks.",
+    "imageAsset": "assets/images/fossil_velociraptor.png",
+    "useInIdentify": true,
+    "kidSafe": false,
+    "iconic": true,
+    "pbdb": {
+      "taxonNo": "txn:34621",
+      "attribution": "Agassiz 1838",
+      "firstInterval": "Turonian",
+      "lastInterval": "Chibanian",
+      "occurrences": 660,
+      "extant": false
+    }
+  },
+  "pachycephalosaurus": {
+    "scientificName": "Pachycephalosaurus",
+    "commonName": "Pachycephalosaurus",
+    "commonGroup": "Pachycephalosaur",
+    "family": "Pachycephalosauridae",
+    "taxonomy": [
+      "Chordata",
+      "Dinosauria",
+      "Ornithischia"
+    ],
+    "realm": "land",
+    "periodIds": [
+      "cretaceous"
+    ],
+    "ageStartMa": 83.6,
+    "ageEndMa": 66,
+    "facts": [
+      {
+        "icon": "schedule",
+        "value": "84–66Ma",
+        "label": "Campanian–Maastrichtian"
+      }
+    ],
+    "funFacts": [],
+    "tip": "",
+    "imageAsset": "assets/images/fossil_velociraptor.png",
+    "useInIdentify": false,
+    "kidSafe": true,
+    "iconic": true,
+    "pbdb": {
+      "taxonNo": "txn:38786",
+      "attribution": "Brown and Schlaikjer 1943",
+      "firstInterval": "Campanian",
+      "lastInterval": "Maastrichtian",
+      "occurrences": 34,
+      "extant": false
+    }
+  },
+  "passaloteuthis": {
+    "scientificName": "Passaloteuthis",
+    "commonName": null,
+    "commonGroup": "Belemnite",
+    "family": "Passaloteuthidae",
+    "taxonomy": [
+      "Mollusca",
+      "Cephalopoda",
+      "Belemnitida"
+    ],
+    "realm": "ocean",
+    "periodIds": [
+      "jurassic"
+    ],
+    "ageStartMa": 192.9,
+    "ageEndMa": 170.9,
+    "facts": [
+      {
+        "icon": "schedule",
+        "value": "193–171Ma",
+        "label": "Pliensbachian–Aalenian"
+      }
+    ],
+    "funFacts": [],
+    "tip": "Guard cross-section and apical groove help narrow belemnite genera — shoot an end-on view.",
+    "imageAsset": "assets/images/fossil_ammonite.png",
+    "useInIdentify": true,
+    "kidSafe": false,
+    "iconic": false,
+    "pbdb": {
+      "taxonNo": "txn:15886",
+      "attribution": null,
+      "firstInterval": "Pliensbachian",
+      "lastInterval": "Aalenian",
+      "occurrences": 95,
+      "extant": false
+    }
+  },
+  "phacops": {
+    "scientificName": "Phacops",
+    "commonName": null,
+    "commonGroup": "Trilobite",
+    "family": "Phacopidae",
+    "taxonomy": [
+      "Arthropoda",
+      "Trilobita",
+      "Ptychopariida"
+    ],
+    "realm": "ocean",
+    "periodIds": [
+      "ordovician",
+      "silurian",
+      "devonian",
+      "carboniferous"
+    ],
+    "ageStartMa": 469.4,
+    "ageEndMa": 353.7,
+    "facts": [
+      {
+        "icon": "schedule",
+        "value": "469–354Ma",
+        "label": "Darriwilian–Tournaisian"
+      }
+    ],
+    "funFacts": [],
+    "tip": "Capture the cephalon outline and eye placement — those traits separate common trilobite genera.",
+    "imageAsset": "assets/images/fossil_trilobite.png",
+    "useInIdentify": true,
+    "kidSafe": false,
+    "iconic": true,
+    "pbdb": {
+      "taxonNo": "txn:21701",
+      "attribution": "Emmrich 1839",
+      "firstInterval": "Darriwilian",
+      "lastInterval": "Tournaisian",
+      "occurrences": 251,
+      "extant": false
+    }
+  },
+  "spirifer": {
+    "scientificName": "Spirifer",
+    "commonName": null,
+    "commonGroup": "Brachiopod",
+    "family": "Spiriferidae",
+    "taxonomy": [
+      "Brachiopoda",
+      "Rhynchonellata",
+      "Spiriferida"
+    ],
+    "realm": "ocean",
+    "periodIds": [
+      "ordovician",
+      "silurian",
+      "devonian",
+      "carboniferous",
+      "permian",
+      "triassic"
+    ],
+    "ageStartMa": 449.6,
+    "ageEndMa": 215.38,
+    "facts": [
+      {
+        "icon": "schedule",
+        "value": "450–215Ma",
+        "label": "Katian–Norian"
+      }
+    ],
+    "funFacts": [],
+    "tip": "Photograph both valves and the hinge line. Spiriferid wing shape is a key diagnostic.",
+    "imageAsset": "assets/images/fossil_ammonite.png",
+    "useInIdentify": true,
+    "kidSafe": false,
+    "iconic": false,
+    "pbdb": {
+      "taxonNo": "txn:29638",
+      "attribution": "(Sowerby 1818)",
+      "firstInterval": "Katian",
+      "lastInterval": "Norian",
+      "occurrences": 1059,
+      "extant": false
+    }
+  },
+  "syringopora": {
+    "scientificName": "Syringopora",
+    "commonName": null,
+    "commonGroup": "Tabulate coral",
+    "family": "Syringoporidae",
+    "taxonomy": [
+      "Cnidaria",
+      "Anthozoa",
+      "Tabulata"
+    ],
+    "realm": "ocean",
+    "periodIds": [
+      "ordovician",
+      "silurian",
+      "devonian",
+      "carboniferous",
+      "permian"
+    ],
+    "ageStartMa": 458.2,
+    "ageEndMa": 259.857,
+    "facts": [
+      {
+        "icon": "schedule",
+        "value": "458–260Ma",
+        "label": "Ordovician–Permian"
+      }
+    ],
+    "funFacts": [],
+    "tip": "Colony packing and corallite walls distinguish tabulate corals — photograph a weathered cross-section.",
+    "imageAsset": "assets/images/fossil_trilobite.png",
+    "useInIdentify": true,
+    "kidSafe": false,
+    "iconic": false,
+    "pbdb": {
+      "taxonNo": "txn:5075",
+      "attribution": "Goldfuss 1826",
+      "firstInterval": null,
+      "lastInterval": null,
+      "occurrences": 682,
+      "extant": false
+    }
+  },
+  "triceratops": {
+    "scientificName": "Triceratops",
+    "commonName": "Triceratops",
+    "commonGroup": "Ceratopsid",
+    "family": "Ceratopsidae",
+    "taxonomy": [
+      "Chordata",
+      "Dinosauria",
+      "Ornithischia"
+    ],
+    "realm": "land",
+    "periodIds": [
+      "cretaceous"
+    ],
+    "ageStartMa": 83.6,
+    "ageEndMa": 66,
+    "facts": [
+      {
+        "icon": "schedule",
+        "value": "84–66Ma",
+        "label": "Campanian–Maastrichtian"
+      }
+    ],
+    "funFacts": [],
+    "tip": "",
+    "imageAsset": "assets/images/fossil_velociraptor.png",
+    "useInIdentify": false,
+    "kidSafe": true,
+    "iconic": true,
+    "pbdb": {
+      "taxonNo": "txn:38862",
+      "attribution": "Marsh 1889",
+      "firstInterval": "Campanian",
+      "lastInterval": "Maastrichtian",
+      "occurrences": 166,
+      "extant": false
+    }
+  },
+  "tyrannosaurus": {
+    "scientificName": "Tyrannosaurus",
+    "commonName": "Tyrannosaurus",
+    "commonGroup": "Tyrannosaurid",
+    "family": "Tyrannosauridae",
+    "taxonomy": [
+      "Chordata",
+      "Dinosauria",
+      "Theropoda"
+    ],
+    "realm": "land",
+    "periodIds": [
+      "cretaceous"
+    ],
+    "ageStartMa": 83.6,
+    "ageEndMa": 66,
+    "facts": [
+      {
+        "icon": "schedule",
+        "value": "68Ma",
+        "label": "Late Cretaceous"
+      },
+      {
+        "icon": "straighten",
+        "value": "~12m",
+        "label": "Body length"
+      },
+      {
+        "icon": "public",
+        "value": "N. America",
+        "label": "Hell Creek Fm"
+      }
+    ],
+    "funFacts": [],
+    "tip": "Tooth serration and jaw robusticity help separate tyrannosaurid genera — add a close-up of denticles.",
+    "imageAsset": "assets/images/fossil_velociraptor.png",
+    "useInIdentify": true,
+    "kidSafe": true,
+    "iconic": true,
+    "pbdb": {
+      "taxonNo": "txn:38613",
+      "attribution": "Osborn 1905",
+      "firstInterval": "Campanian",
+      "lastInterval": "Maastrichtian",
+      "occurrences": 85,
+      "extant": false
+    }
+  },
+  "utahraptor": {
+    "scientificName": "Utahraptor",
+    "commonName": "Utahraptor",
+    "commonGroup": "Dromaeosaurid",
+    "family": "Dromaeosauridae",
+    "taxonomy": [
+      "Chordata",
+      "Dinosauria",
+      "Theropoda"
+    ],
+    "realm": "land",
+    "periodIds": [
+      "cretaceous"
+    ],
+    "ageStartMa": 137.05,
+    "ageEndMa": 132.6,
+    "facts": [
+      {
+        "icon": "schedule",
+        "value": "137–133Ma",
+        "label": "Valanginian"
+      }
+    ],
+    "funFacts": [],
+    "tip": "Add a clear view of the sickle claw and skull proportions to refine species-level ID.",
+    "imageAsset": "assets/images/fossil_velociraptor.png",
+    "useInIdentify": true,
+    "kidSafe": false,
+    "iconic": false,
+    "pbdb": {
+      "taxonNo": "txn:54557",
+      "attribution": "Kirkland et al. 1993",
+      "firstInterval": "Valanginian",
+      "lastInterval": null,
+      "occurrences": 4,
+      "extant": false
+    }
+  },
+  "velociraptor": {
+    "scientificName": "Velociraptor",
+    "commonName": "Velociraptor",
+    "commonGroup": "Dromaeosaurid",
+    "family": "Dromaeosauridae",
+    "taxonomy": [
+      "Chordata",
+      "Dinosauria",
+      "Theropoda"
+    ],
+    "realm": "land",
+    "periodIds": [
+      "cretaceous"
+    ],
+    "ageStartMa": 89.8,
+    "ageEndMa": 66,
+    "facts": [
+      {
+        "icon": "schedule",
+        "value": "75Ma",
+        "label": "Late Cretaceous"
+      },
+      {
+        "icon": "straighten",
+        "value": "~2m",
+        "label": "Body length"
+      },
+      {
+        "icon": "public",
+        "value": "Mongolia",
+        "label": "Djadochta Fm"
+      }
+    ],
+    "funFacts": [],
+    "tip": "Add a clear view of the sickle claw and skull proportions to refine species-level ID.",
+    "imageAsset": "assets/images/fossil_velociraptor.png",
+    "useInIdentify": true,
+    "kidSafe": true,
+    "iconic": true,
+    "pbdb": {
+      "taxonNo": "txn:38564",
+      "attribution": "Osborn 1924",
+      "firstInterval": "Coniacian",
+      "lastInterval": "Maastrichtian",
+      "occurrences": 20,
+      "extant": false
+    }
+  }
+}
