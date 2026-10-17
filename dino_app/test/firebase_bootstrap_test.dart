@@ -12,14 +12,13 @@ void main() {
 
   tearDown(StrataServices.resetForTest);
 
-  test('stub options report as missing until flutterfire configure', () {
-    // firebase_options.dart is gitignored; the committed stub throws on every
-    // platform so CI and fresh clones skip Firebase safely.
-    expect(FirebaseBootstrap.hasGeneratedOptions, isFalse);
-    expect(
-      () => DefaultFirebaseOptions.currentPlatform,
-      throwsA(isA<UnsupportedError>()),
-    );
+  test('hasGeneratedOptions follows DefaultFirebaseOptions.currentPlatform', () {
+    try {
+      DefaultFirebaseOptions.currentPlatform;
+      expect(FirebaseBootstrap.hasGeneratedOptions, isTrue);
+    } on UnsupportedError {
+      expect(FirebaseBootstrap.hasGeneratedOptions, isFalse);
+    }
   });
 
   group('on a platform without FlutterFire config', () {

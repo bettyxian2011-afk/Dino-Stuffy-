@@ -53,4 +53,13 @@ class FirebaseBootstrap {
     final app = await constructFirebase();
     return app != null;
   }
+
+  /// True when a default Firebase app exists (native plugins available).
+  static bool get isAppReady {
+    try {
+      return Firebase.apps.isNotEmpty;
+    } catch (_) {
+      return false;
+    }
+  }
 }

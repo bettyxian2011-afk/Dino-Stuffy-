@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/services.dart';
 
+import '../../models/fossil_taxon.dart';
 import '../../models/id_result.dart';
 
 /// Curated genera and UI metadata loaded from [assets/data/id_results.json].
@@ -25,6 +26,27 @@ class IdCatalogEntry {
   final List<String> taxonomy;
   final List<TaxonFact> facts;
   final String specimenImage;
+
+  IdCatalogEntry copyWith({
+    String? commonGroup,
+    String? family,
+    String? thumbnail,
+    String? tip,
+    List<String>? taxonomy,
+    List<TaxonFact>? facts,
+    String? specimenImage,
+  }) {
+    return IdCatalogEntry(
+      genus: genus,
+      commonGroup: commonGroup ?? this.commonGroup,
+      family: family ?? this.family,
+      thumbnail: thumbnail ?? this.thumbnail,
+      tip: tip ?? this.tip,
+      taxonomy: taxonomy ?? this.taxonomy,
+      facts: facts ?? this.facts,
+      specimenImage: specimenImage ?? this.specimenImage,
+    );
+  }
 }
 
 class IdCatalog {
@@ -35,7 +57,64 @@ class IdCatalog {
   List<String> get genusNames =>
       _byGenus.keys.toList()..sort((a, b) => a.compareTo(b));
 
-  IdCatalogEntry? entryFor(String genus) => _byGenus[genus];
+  IdCatalogEntry? entryFor(String genus) {
+    final key = _keyForGenus(genus);
+    return key == null ? null : _byGenus[key];
+  }
+
+  /// Overlays Identify taxa from Firestore. Cloud [facts], [taxonomy],
+  /// [family], and [commonGroup] win when present; local JSON fills thumbnails
+  /// and tips when the cloud copy omits them.
+  IdCatalog mergedWith(Iterable<FossilTaxon> cloudTaxa) {
+    final byGenus = Map<String, IdCatalogEntry>.from(_byGenus);
+    for (final taxon in cloudTaxa) {
+      if (!taxon.useInIdentify) continue;
+      final existingKey = _keyForGenus(taxon.scientificName);
+      if (existingKey == null) {
+        byGenus[taxon.scientificName] = _entryFromTaxon(taxon);
+        continue;
+      }
+      final existing = byGenus[existingKey];
+      if (existing == null) {
+        byGenus[taxon.scientificName] = _entryFromTaxon(taxon);
+        continue;
+      }
+      byGenus[existingKey] = existing.copyWith(
+        commonGroup: taxon.commonGroup.isNotEmpty
+            ? taxon.commonGroup
+            : existing.commonGroup,
+        family: taxon.family.isNotEmpty ? taxon.family : existing.family,
+        taxonomy: taxon.taxonomy.isNotEmpty
+            ? taxon.taxonomy
+            : existing.taxonomy,
+        facts: taxon.facts.isNotEmpty ? taxon.facts : existing.facts,
+        tip: taxon.tip.isNotEmpty ? taxon.tip : existing.tip,
+      );
+    }
+    return IdCatalog(byGenus);
+  }
+
+  String? _keyForGenus(String genus) {
+    if (_byGenus.containsKey(genus)) return genus;
+    final lower = genus.toLowerCase();
+    for (final key in _byGenus.keys) {
+      if (key.toLowerCase() == lower) return key;
+    }
+    return null;
+  }
+
+  static IdCatalogEntry _entryFromTaxon(FossilTaxon taxon) {
+    return IdCatalogEntry(
+      genus: taxon.scientificName,
+      commonGroup: taxon.commonGroup,
+      family: taxon.family,
+      thumbnail: taxon.imageAsset,
+      tip: taxon.tip,
+      taxonomy: taxon.taxonomy,
+      facts: taxon.facts,
+      specimenImage: taxon.imageAsset,
+    );
+  }
 
   static Future<IdCatalog> load({AssetBundle? bundle}) async {
     final data = bundle ?? rootBundle;
@@ -47,8 +126,7 @@ class IdCatalog {
       final map = entry as Map<String, dynamic>;
       final specimenImage = map['specimenImage'] as String;
       final tip = map['tip'] as String;
-      final taxonomy =
-          (map['taxonomy'] as List<dynamic>).cast<String>();
+      final taxonomy = (map['taxonomy'] as List<dynamic>).cast<String>();
       final facts = (map['facts'] as List<dynamic>)
           .map((e) => TaxonFact.fromJson(e as Map<String, dynamic>))
           .toList();

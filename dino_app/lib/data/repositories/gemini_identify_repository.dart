@@ -11,7 +11,7 @@ import '../services/taxon_fact_mapper.dart';
 import 'identify_repository.dart';
 import 'taxon_repository.dart';
 
-/// Gemini vision + PBDB enrichment, grounded on the local id_results catalog.
+/// Gemini vision + PBDB enrichment, grounded on the merged Identify catalog.
 class GeminiIdentifyRepository implements IdentifyRepository {
   GeminiIdentifyRepository({
     required GeminiVisionService vision,

@@ -1,7 +1,10 @@
 import 'package:flutter/foundation.dart';
 
 import '../config/strata_config.dart';
+import '../models/fossil_taxon.dart';
 import 'catalog/id_catalog.dart';
+import 'repositories/fossil_knowledge_repository.dart';
+import 'repositories/firestore_fossil_knowledge_repository.dart';
 import 'repositories/gemini_identify_repository.dart';
 import 'repositories/identify_repository.dart';
 import 'repositories/taxon_repository.dart';
@@ -14,6 +17,7 @@ class StrataServices {
 
   static IdentifyRepository? _identifyRepository;
   static TaxonRepository? _taxonRepository;
+  static FossilKnowledgeRepository? _knowledgeRepository;
   static IdCatalog? _catalog;
   static bool _firebaseReady = false;
 
@@ -27,10 +31,30 @@ class StrataServices {
   /// Starts local repositories and, when FlutterFire config exists, Firebase.
   static Future<void> init({
     Future<bool> Function()? initializeFirebase,
+    FossilKnowledgeRepository? knowledgeRepository,
+    Future<List<FossilTaxon>> Function()? identifyCloudTaxa,
   }) async {
     _firebaseReady =
         await (initializeFirebase ?? FirebaseBootstrap.initialize)();
-    _catalog ??= await IdCatalog.load();
+    final localKnowledge = AssetFossilKnowledgeRepository();
+    FirestoreFossilKnowledgeRepository? firestoreKnowledge;
+    if (_firebaseReady && FirebaseBootstrap.isAppReady) {
+      try {
+        firestoreKnowledge = FirestoreFossilKnowledgeRepository();
+      } catch (e) {
+        debugPrint('StrataServices: Firestore knowledge skipped ($e)');
+      }
+    }
+    _knowledgeRepository ??=
+        knowledgeRepository ??
+        FallbackFossilKnowledgeRepository(
+          local: localKnowledge,
+          remote: firestoreKnowledge,
+        );
+    _catalog ??= await _loadIdentifyCatalog(
+      identifyCloudTaxa: identifyCloudTaxa,
+      firestoreKnowledge: firestoreKnowledge,
+    );
     _taxonRepository ??= PbdbTaxonRepository();
     _identifyRepository ??= buildIdentifyRepository(
       catalog: _catalog!,
@@ -64,6 +88,42 @@ class StrataServices {
     return _taxonRepository!;
   }
 
+  static FossilKnowledgeRepository get fossilKnowledgeRepository {
+    if (_knowledgeRepository == null) {
+      throw StateError('Call StrataServices.init() before using repositories.');
+    }
+    return _knowledgeRepository!;
+  }
+
+  /// Identify catalog after optional Firestore merge.
+  @visibleForTesting
+  static IdCatalog get identifyCatalog {
+    if (_catalog == null) {
+      throw StateError('Call StrataServices.init() before using repositories.');
+    }
+    return _catalog!;
+  }
+
+  static Future<IdCatalog> _loadIdentifyCatalog({
+    Future<List<FossilTaxon>> Function()? identifyCloudTaxa,
+    FirestoreFossilKnowledgeRepository? firestoreKnowledge,
+  }) async {
+    final local = await IdCatalog.load();
+    final loadCloud = identifyCloudTaxa ?? firestoreKnowledge?.taxaForIdentify;
+    if (loadCloud == null) return local;
+    try {
+      final cloud = await loadCloud();
+      if (cloud.isEmpty) return local;
+      debugPrint(
+        'StrataServices: Identify catalog merged ${cloud.length} cloud taxa',
+      );
+      return local.mergedWith(cloud);
+    } catch (e) {
+      debugPrint('StrataServices: Identify catalog using local JSON ($e)');
+      return local;
+    }
+  }
+
   /// Builds the identify adapter. Exposed for unit tests.
   @visibleForTesting
   static IdentifyRepository buildIdentifyRepository({
@@ -87,6 +147,7 @@ class StrataServices {
   static void resetForTest() {
     _identifyRepository = null;
     _taxonRepository = null;
+    _knowledgeRepository = null;
     _catalog = null;
     _firebaseReady = false;
   }
