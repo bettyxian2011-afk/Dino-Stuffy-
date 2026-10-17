@@ -1,0 +1,35 @@
+// Stub template — copy to firebase_options.dart, or overwrite by running:
+//   flutterfire configure --project=dino-app-90aa2
+// from dino_app/. Real API keys must never be committed.
+// ignore_for_file: type=lint
+import 'package:firebase_core/firebase_core.dart' show FirebaseOptions;
+import 'package:flutter/foundation.dart'
+    show defaultTargetPlatform, kIsWeb, TargetPlatform;
+
+class DefaultFirebaseOptions {
+  static FirebaseOptions get currentPlatform {
+    if (kIsWeb) {
+      throw UnsupportedError(_notConfigured('web'));
+    }
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+        throw UnsupportedError(_notConfigured('android'));
+      case TargetPlatform.iOS:
+        throw UnsupportedError(_notConfigured('ios'));
+      case TargetPlatform.macOS:
+        throw UnsupportedError(_notConfigured('macos'));
+      case TargetPlatform.windows:
+        throw UnsupportedError(_notConfigured('windows'));
+      case TargetPlatform.linux:
+        throw UnsupportedError(_notConfigured('linux'));
+      default:
+        throw UnsupportedError(
+          'DefaultFirebaseOptions are not supported for this platform.',
+        );
+    }
+  }
+
+  static String _notConfigured(String platform) =>
+      'DefaultFirebaseOptions have not been configured for $platform — '
+      'run FlutterFire CLI from dino_app/ (see docs/iteration-8-firestore-roadmap.md).';
+}

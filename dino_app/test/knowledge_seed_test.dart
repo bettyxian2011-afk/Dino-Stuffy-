@@ -83,7 +83,18 @@ void main() {
         expect(periodIds.containsAll(taxon.periodIds), isTrue, reason: taxon.id);
         expect(taxon.pbdb?.taxonNo, startsWith('txn:'), reason: taxon.id);
         expect(taxon.facts, isNotEmpty, reason: taxon.id);
+        expect(taxon.ageSource, isNotNull, reason: taxon.id);
+        expect(taxon.reviewed, isFalse, reason: taxon.id);
       }
+    });
+
+    test('certain-occ ages beat the old genus-summary outliers', () {
+      // Uncertain Kirtland "? Ankylosaurus" used to push the start to 83.6.
+      expect(taxa['ankylosaurus']!.ageStartMa, lessThanOrEqualTo(72.2));
+      // Lone Santonian Missouri record used to push Albertosaurus to 85.7.
+      expect(taxa['albertosaurus']!.ageStartMa, lessThan(80));
+      expect(taxa['albertosaurus']!.ageEnvelope, isNotNull);
+      expect(taxa['albertosaurus']!.ageCore, isNotNull);
     });
   });
 

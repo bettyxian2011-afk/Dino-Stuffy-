@@ -12,9 +12,14 @@ void main() {
 
   tearDown(StrataServices.resetForTest);
 
-  test('generated options point at the Strata Firebase project', () {
-    expect(FirebaseBootstrap.hasGeneratedOptions, isTrue);
-    expect(DefaultFirebaseOptions.currentPlatform.projectId, 'dino-app-90aa2');
+  test('stub options report as missing until flutterfire configure', () {
+    // firebase_options.dart is gitignored; the committed stub throws on every
+    // platform so CI and fresh clones skip Firebase safely.
+    expect(FirebaseBootstrap.hasGeneratedOptions, isFalse);
+    expect(
+      () => DefaultFirebaseOptions.currentPlatform,
+      throwsA(isA<UnsupportedError>()),
+    );
   });
 
   group('on a platform without FlutterFire config', () {

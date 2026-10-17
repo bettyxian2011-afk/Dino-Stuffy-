@@ -10,6 +10,58 @@ enum TaxonRealm {
   static TaxonRealm fromWire(String raw) => TaxonRealm.values.byName(raw);
 }
 
+/// How [FossilTaxon.ageStartMa] / [ageEndMa] were chosen.
+enum AgeSource {
+  /// Hand-set in seed/curated or the Firebase console.
+  manual,
+
+  /// Majority of dated occurrences used Macrostrat formation ages.
+  macrostrat,
+
+  /// Outlier-trimmed range from certain PBDB occurrences.
+  pbdbCore,
+
+  /// Widest PBDB genus-summary appearance (last-resort fallback).
+  pbdbEnvelope;
+
+  static AgeSource? fromWire(String? raw) {
+    if (raw == null) return null;
+    return switch (raw) {
+      'manual' => AgeSource.manual,
+      'macrostrat' => AgeSource.macrostrat,
+      'pbdb-core' => AgeSource.pbdbCore,
+      'pbdb-envelope' => AgeSource.pbdbEnvelope,
+      _ => null,
+    };
+  }
+
+  String get wireValue => switch (this) {
+        AgeSource.manual => 'manual',
+        AgeSource.macrostrat => 'macrostrat',
+        AgeSource.pbdbCore => 'pbdb-core',
+        AgeSource.pbdbEnvelope => 'pbdb-envelope',
+      };
+}
+
+/// A Ma range computed during seeding (envelope = all certain occs,
+/// core = outlier-trimmed).
+class AgeRange {
+  const AgeRange({required this.startMa, required this.endMa});
+
+  final double startMa;
+  final double endMa;
+
+  factory AgeRange.fromJson(Map<String, dynamic> json) => AgeRange(
+        startMa: (json['startMa'] as num).toDouble(),
+        endMa: (json['endMa'] as num).toDouble(),
+      );
+
+  Map<String, dynamic> toJson() => {
+        'startMa': startMa,
+        'endMa': endMa,
+      };
+}
+
 /// PBDB record a [FossilTaxon] was built from. PBDB data is CC BY 4.0, so
 /// keep [attribution] with the taxon.
 class PbdbSource {
@@ -19,6 +71,8 @@ class PbdbSource {
     this.firstInterval,
     this.lastInterval,
     this.occurrences,
+    this.certainOccurrences,
+    this.formationsUsed = const [],
     this.extant = false,
   });
 
@@ -28,6 +82,10 @@ class PbdbSource {
   final String? firstInterval;
   final String? lastInterval;
   final int? occurrences;
+
+  /// Count of certain-identification occurrences used for the age range.
+  final int? certainOccurrences;
+  final List<String> formationsUsed;
   final bool extant;
 
   factory PbdbSource.fromJson(Map<String, dynamic> json) {
@@ -37,6 +95,9 @@ class PbdbSource {
       firstInterval: json['firstInterval'] as String?,
       lastInterval: json['lastInterval'] as String?,
       occurrences: (json['occurrences'] as num?)?.toInt(),
+      certainOccurrences: (json['certainOccurrences'] as num?)?.toInt(),
+      formationsUsed:
+          (json['formationsUsed'] as List<dynamic>? ?? const []).cast<String>(),
       extant: json['extant'] as bool? ?? false,
     );
   }
@@ -47,6 +108,8 @@ class PbdbSource {
         'firstInterval': firstInterval,
         'lastInterval': lastInterval,
         'occurrences': occurrences,
+        'certainOccurrences': certainOccurrences,
+        'formationsUsed': formationsUsed,
         'extant': extant,
       };
 }
@@ -67,6 +130,10 @@ class FossilTaxon {
     this.commonName,
     this.ageStartMa,
     this.ageEndMa,
+    this.ageSource,
+    this.ageEnvelope,
+    this.ageCore,
+    this.reviewed = false,
     this.funFacts = const [],
     this.tip = '',
     this.useInIdentify = false,
@@ -87,11 +154,22 @@ class FossilTaxon {
   final TaxonRealm realm;
   final List<String> periodIds;
 
-  /// Oldest age in millions of years.
+  /// Oldest age in millions of years (core range, or a manual override).
   final double? ageStartMa;
 
   /// Youngest age in millions of years. `0` for living genera.
   final double? ageEndMa;
+  final AgeSource? ageSource;
+
+  /// Widest span of certain dated occurrences, before outlier trimming.
+  final AgeRange? ageEnvelope;
+
+  /// Outlier-trimmed span; usually the same as [ageStartMa]/[ageEndMa]
+  /// unless [ageSource] is [AgeSource.manual].
+  final AgeRange? ageCore;
+
+  /// When true, seed rebuild and upload leave this document alone.
+  final bool reviewed;
   final List<TaxonFact> facts;
   final List<String> funFacts;
   final String tip;
@@ -105,6 +183,8 @@ class FossilTaxon {
 
   factory FossilTaxon.fromJson(String id, Map<String, dynamic> json) {
     final pbdb = json['pbdb'] as Map<String, dynamic>?;
+    final envelope = json['ageEnvelope'] as Map<String, dynamic>?;
+    final core = json['ageCore'] as Map<String, dynamic>?;
     return FossilTaxon(
       id: id,
       scientificName: json['scientificName'] as String,
@@ -116,6 +196,10 @@ class FossilTaxon {
       periodIds: (json['periodIds'] as List<dynamic>).cast<String>(),
       ageStartMa: (json['ageStartMa'] as num?)?.toDouble(),
       ageEndMa: (json['ageEndMa'] as num?)?.toDouble(),
+      ageSource: AgeSource.fromWire(json['ageSource'] as String?),
+      ageEnvelope: envelope == null ? null : AgeRange.fromJson(envelope),
+      ageCore: core == null ? null : AgeRange.fromJson(core),
+      reviewed: json['reviewed'] as bool? ?? false,
       facts: (json['facts'] as List<dynamic>)
           .map((e) => TaxonFact.fromJson(e as Map<String, dynamic>))
           .toList(),
@@ -140,6 +224,10 @@ class FossilTaxon {
         'periodIds': periodIds,
         'ageStartMa': ageStartMa,
         'ageEndMa': ageEndMa,
+        'ageSource': ageSource?.wireValue,
+        'ageEnvelope': ageEnvelope?.toJson(),
+        'ageCore': ageCore?.toJson(),
+        'reviewed': reviewed,
         'facts': facts.map((f) => f.toJson()).toList(),
         'funFacts': funFacts,
         'tip': tip,

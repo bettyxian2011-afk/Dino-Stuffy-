@@ -57,3 +57,10 @@ secrets.local.*
 **/serviceAccount*.json
 **/service-account*.json
 **/firebase-service-account.json
+
+# FlutterFire client config (API keys). Regenerate locally:
+#   flutterfire configure --project=dino-app-90aa2
+# Stub template: lib/firebase_options.dart.example
+lib/firebase_options.dart
+android/app/google-services.json
+**/GoogleService-Info.plist

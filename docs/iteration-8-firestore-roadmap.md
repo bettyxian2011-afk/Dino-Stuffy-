@@ -542,7 +542,7 @@ Kid versions are **K0.1 through K1.0** in the [build-order table](#build-order).
 
 The app boots **with or without** FlutterFire config. On a platform `lib/firebase_options.dart` does not cover, `StrataServices` skips Firebase and keeps the local JSON repositories.
 
-Use a **non-production** Firebase project for this iteration (Auth + Firestore). Do not commit service-account keys or the Gemini key. Client files (`google-services.json`, generated `firebase_options.dart`, `firebase.json`) are committed; they hold public client ids, not secrets.
+Use a **non-production** Firebase project for this iteration (Auth + Firestore). Do not commit service-account keys, the Gemini key, or FlutterFire client files. `lib/firebase_options.dart`, `android/app/google-services.json`, and `GoogleService-Info.plist` are **gitignored** (GitHub secret scanning flags the `AIza…` client keys). A key-free stub lives at `lib/firebase_options.dart.example`.
 
 ```text
 # One-time tooling
@@ -551,10 +551,13 @@ firebase login
 dart pub global activate flutterfire_cli
 
 # From dino_app/, with the Firebase CLI logged in:
+# Fresh clone without config: copy the stub first so the package compiles
+copy lib\firebase_options.dart.example lib\firebase_options.dart
+
 flutterfire configure --project=dino-app-90aa2
 # Platforms: android, ios, web.
-# This overwrites lib/firebase_options.dart and android/app/google-services.json,
-# and adds the google-services Gradle plugin.
+# Writes gitignored lib/firebase_options.dart and android/app/google-services.json.
+# Do not git add those files.
 
 flutter run -d chrome
 ```
@@ -577,22 +580,26 @@ The seed tool lives in `seed/` at the repo root (Node 18+).
 
 | Input | Holds |
 | ----- | ----- |
-| PBDB API | Age range, period ids, family when the catalog has none, attribution, occurrence count |
+| PBDB certain occurrences | Age ranges (not the genus-summary first/last appearance). Outliers trimmed; envelope + core stored. |
+| Macrostrat | Formation ages for the common formations of each genus, used only when tighter than PBDB |
 | `dino_app/assets/data/id_results.json` | `commonGroup`, `family`, `taxonomy`, `tip`, `imageAsset`, and `facts` for Identify genera |
-| `seed/curated/taxa.json` | Hand fields: `realm`, `commonName`, `iconic`, `kidSafe`, `funFacts`, plus full entries for genera Identify does not know. Any field here wins. `ageStartMa` / `ageEndMa` here replace the PBDB range. |
+| `seed/curated/taxa.json` | Hand fields: `realm`, `commonName`, `iconic`, `kidSafe`, `funFacts`, plus full entries for genera Identify does not know. Any field here wins. `ageStartMa` / `ageEndMa` here replace the computed range and set `ageSource: "manual"`. |
 | `seed/curated/periods.json` | Period `blurb` |
+
+Age fields on each taxon: `ageStartMa` / `ageEndMa` (the core range the app uses), `ageSource` (`manual` \| `macrostrat` \| `pbdb-core` \| `pbdb-envelope`), `ageEnvelope`, `ageCore`, and `reviewed`. When `reviewed` is true, `build.mjs` keeps the previous document and `upload.mjs` skips that Firestore doc so console corrections survive.
 
 ```text
 # From the repo root
-node seed/build.mjs            # writes dino_app/assets/data/periods.json and taxa.json, prints what needs attention
+node seed/build.mjs            # writes periods.json and taxa.json; prints envelope/core gaps and other flags
 cd seed && npm install         # first time only
-node upload.mjs --dry-run      # lists the docs it would write
+node upload.mjs --dry-run
 node upload.mjs --key C:\path\outside\repo\dino-app-90aa2-firebase-adminsdk.json
+node export.mjs --key ...      # pull console edits back into taxa.json
 ```
 
-The two generated files are committed. The app bundles them as the offline fallback, and `upload.mjs` overwrites the Firestore docs with the same data. Edit the curated files, never the generated ones.
+The two generated files are committed. The app bundles them as the offline fallback. After you start correcting ages in the Firebase console, set `reviewed: true` on that doc, then `export.mjs` to sync the offline copy. Do not run `upload.mjs` over reviewed docs (it skips them) and do not rebuild them (build skips them too).
 
-Get the key from Firebase console → Project settings → Service accounts → Generate new private key. Store it outside the repo; `upload.mjs` refuses a key inside the repo or for another project.
+Get the key from Firebase console → Project settings → Service accounts → Generate new private key. Store it outside the repo; the scripts refuse a key inside the repo or for another project.
 
 To add a genus: add it to `seed/curated/taxa.json` (with `commonGroup`, `taxonomy`, and `imageAsset` if Identify does not know it), rebuild, check the report, then upload.
 

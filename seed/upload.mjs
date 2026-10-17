@@ -1,6 +1,7 @@
 // Writes dino_app/assets/data/periods.json and taxa.json to Firestore.
-// Each document is overwritten in full, so the JSON files stay the source of
-// truth. Uses the Admin SDK, which bypasses security rules.
+// Periods are always overwritten. Taxa docs with reviewed:true already in
+// Firestore are skipped so console corrections survive. Uses the Admin SDK,
+// which bypasses security rules.
 //
 // Usage:
 //   node seed/upload.mjs --key C:\path\outside\repo\service-account.json
@@ -49,11 +50,36 @@ if (key.project_id !== PROJECT_ID) {
 initializeApp({ credential: cert(key), projectId: PROJECT_ID });
 const db = getFirestore();
 
-for (const [name, docs] of Object.entries(collections)) {
+{
   const batch = db.batch();
-  for (const [id, data] of Object.entries(docs)) {
-    batch.set(db.collection(name).doc(id), data);
+  for (const [id, data] of Object.entries(collections.periods)) {
+    batch.set(db.collection('periods').doc(id), data);
   }
   await batch.commit();
-  console.log(`${name}: wrote ${Object.keys(docs).length} docs`);
+  console.log(`periods: wrote ${Object.keys(collections.periods).length} docs`);
+}
+
+{
+  const existing = await db.collection('taxa').get();
+  const reviewed = new Set(
+    existing.docs.filter((d) => d.data().reviewed === true).map((d) => d.id),
+  );
+
+  const toWrite = Object.entries(collections.taxa).filter(([id]) => !reviewed.has(id));
+  const skipped = Object.keys(collections.taxa).filter((id) => reviewed.has(id));
+
+  // Firestore batches max out at 500 ops.
+  const CHUNK = 400;
+  for (let i = 0; i < toWrite.length; i += CHUNK) {
+    const batch = db.batch();
+    for (const [id, data] of toWrite.slice(i, i + CHUNK)) {
+      batch.set(db.collection('taxa').doc(id), data);
+    }
+    await batch.commit();
+  }
+
+  console.log(`taxa: wrote ${toWrite.length} docs`);
+  if (skipped.length) {
+    console.log(`taxa: skipped ${skipped.length} reviewed (${skipped.join(', ')})`);
+  }
 }
