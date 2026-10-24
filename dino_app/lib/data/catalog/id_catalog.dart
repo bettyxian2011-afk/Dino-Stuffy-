@@ -16,6 +16,7 @@ class IdCatalogEntry {
     required this.taxonomy,
     required this.facts,
     required this.specimenImage,
+    this.factsFromCloud = false,
   });
 
   final String genus;
@@ -27,6 +28,10 @@ class IdCatalogEntry {
   final List<TaxonFact> facts;
   final String specimenImage;
 
+  /// True when [facts] were copied from a Firestore taxon in this session.
+  /// Local JSON facts stay false so offline Identify keeps its PBDB fact order.
+  final bool factsFromCloud;
+
   IdCatalogEntry copyWith({
     String? commonGroup,
     String? family,
@@ -35,6 +40,7 @@ class IdCatalogEntry {
     List<String>? taxonomy,
     List<TaxonFact>? facts,
     String? specimenImage,
+    bool? factsFromCloud,
   }) {
     return IdCatalogEntry(
       genus: genus,
@@ -45,6 +51,7 @@ class IdCatalogEntry {
       taxonomy: taxonomy ?? this.taxonomy,
       facts: facts ?? this.facts,
       specimenImage: specimenImage ?? this.specimenImage,
+      factsFromCloud: factsFromCloud ?? this.factsFromCloud,
     );
   }
 }
@@ -79,6 +86,7 @@ class IdCatalog {
         byGenus[taxon.scientificName] = _entryFromTaxon(taxon);
         continue;
       }
+      final cloudFacts = taxon.facts.isNotEmpty;
       byGenus[existingKey] = existing.copyWith(
         commonGroup: taxon.commonGroup.isNotEmpty
             ? taxon.commonGroup
@@ -87,7 +95,8 @@ class IdCatalog {
         taxonomy: taxon.taxonomy.isNotEmpty
             ? taxon.taxonomy
             : existing.taxonomy,
-        facts: taxon.facts.isNotEmpty ? taxon.facts : existing.facts,
+        facts: cloudFacts ? taxon.facts : existing.facts,
+        factsFromCloud: cloudFacts,
         tip: taxon.tip.isNotEmpty ? taxon.tip : existing.tip,
       );
     }
@@ -113,6 +122,7 @@ class IdCatalog {
       taxonomy: taxon.taxonomy,
       facts: taxon.facts,
       specimenImage: taxon.imageAsset,
+      factsFromCloud: taxon.facts.isNotEmpty,
     );
   }
 

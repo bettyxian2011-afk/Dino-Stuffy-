@@ -19,11 +19,11 @@ class GeminiIdentifyRepository implements IdentifyRepository {
     required IdCatalog catalog,
     MockIdentifyRepository? fallback,
     ImageCompressor? compressor,
-  })  : _vision = vision,
-        _taxonRepository = taxonRepository,
-        _catalog = catalog,
-        _fallback = fallback ?? MockIdentifyRepository(),
-        _compressor = compressor ?? const ImageCompressor();
+  }) : _vision = vision,
+       _taxonRepository = taxonRepository,
+       _catalog = catalog,
+       _fallback = fallback ?? MockIdentifyRepository(),
+       _compressor = compressor ?? const ImageCompressor();
 
   final GeminiVisionService _vision;
   final TaxonRepository _taxonRepository;
@@ -90,7 +90,7 @@ class GeminiIdentifyRepository implements IdentifyRepository {
     final photoTip = vision.reason?.trim().isNotEmpty == true
         ? vision.reason!.trim()
         : 'Photo quality is too weak for a reliable ID. Retake with sharper '
-            'focus, even lighting, and a scale bar.';
+              'focus, even lighting, and a scale bar.';
 
     if (vision.candidates.isEmpty) {
       final confidence = vision.confidence ?? 40;
@@ -158,8 +158,7 @@ class GeminiIdentifyRepository implements IdentifyRepository {
       }
 
       final catalogEntry = _catalog.entryFor(raw.genus);
-      final pbdbGenusRank =
-          pbdb != null && pbdb.rank.toLowerCase() == 'genus';
+      final pbdbGenusRank = pbdb != null && pbdb.rank.toLowerCase() == 'genus';
       final confidence = IdentificationHeuristics.adjustedConfidence(
         modelConfidence: raw.confidence,
         inLocalCatalog: catalogEntry != null,
@@ -194,7 +193,8 @@ class GeminiIdentifyRepository implements IdentifyRepository {
     }
 
     final facts = _buildFacts(best);
-    final tip = tipOverride ??
+    final tip =
+        tipOverride ??
         IdentificationHeuristics.doubleCheckNote(
           modelConfidence: best.modelConfidence,
           inPbdb: best.pbdb != null,
@@ -202,7 +202,8 @@ class GeminiIdentifyRepository implements IdentifyRepository {
           pbdbOccurrences: best.pbdb?.occurrenceCount,
         );
 
-    final potential = best.adjustedConfidence < IdentificationHeuristics.boostFloor ||
+    final potential =
+        best.adjustedConfidence < IdentificationHeuristics.boostFloor ||
         best.modelConfidence < IdentificationHeuristics.boostFloor ||
         assessment == IdentifyAssessment.uncertain;
     final resolvedLabel = potential && assessment == IdentifyAssessment.fossil
@@ -213,8 +214,9 @@ class GeminiIdentifyRepository implements IdentifyRepository {
       id: '$idPrefix-${best.genus.toLowerCase()}',
       specimenImage:
           best.catalog?.specimenImage ?? 'assets/images/fossil_ammonite.png',
-      confidenceLabel:
-          IdentificationHeuristics.confidenceLabel(best.adjustedConfidence),
+      confidenceLabel: IdentificationHeuristics.confidenceLabel(
+        best.adjustedConfidence,
+      ),
       matchLabel: resolvedLabel,
       tip: tip,
       taxonomy: taxonomy,
@@ -228,14 +230,17 @@ class GeminiIdentifyRepository implements IdentifyRepository {
         for (var i = 0; i < enriched.length; i++)
           IdCandidate(
             genus: enriched[i].genus,
-            commonGroup: enriched[i].catalog?.commonGroup ??
+            commonGroup:
+                enriched[i].catalog?.commonGroup ??
                 enriched[i].pbdb?.rank ??
                 'Fossil',
-            family: enriched[i].catalog?.family ??
+            family:
+                enriched[i].catalog?.family ??
                 (enriched[i].pbdb?.attribution ?? 'Unknown'),
             confidence: enriched[i].adjustedConfidence,
             modelConfidence: enriched[i].modelConfidence,
-            thumbnail: enriched[i].catalog?.thumbnail ??
+            thumbnail:
+                enriched[i].catalog?.thumbnail ??
                 'assets/images/fossil_ammonite.png',
             isBestMatch: i == 0,
           ),
@@ -246,11 +251,15 @@ class GeminiIdentifyRepository implements IdentifyRepository {
 
   List<TaxonFact> _buildFacts(_EnrichedCandidate best) {
     final facts = <TaxonFact>[];
-
-    if (best.pbdb != null) {
+    final catalog = best.catalog;
+    // Firestore facts replace the PBDB chips. Scoring still uses PBDB only
+    // as a double-check; this does not change confidence rules.
+    if (catalog != null && catalog.factsFromCloud && catalog.facts.isNotEmpty) {
+      facts.addAll(catalog.facts.take(2));
+    } else if (best.pbdb != null) {
       facts.addAll(TaxonFactMapper.factsFromTaxon(best.pbdb!, maxFacts: 2));
-    } else if (best.catalog != null && best.catalog!.facts.isNotEmpty) {
-      facts.add(best.catalog!.facts.first);
+    } else if (catalog != null && catalog.facts.isNotEmpty) {
+      facts.add(catalog.facts.first);
     }
 
     facts.add(
@@ -261,8 +270,8 @@ class GeminiIdentifyRepository implements IdentifyRepository {
       ),
     );
 
-    if (best.catalog != null) {
-      for (final fact in best.catalog!.facts) {
+    if (catalog != null) {
+      for (final fact in catalog.facts) {
         if (facts.length >= 3) break;
         if (facts.any((f) => f.label == fact.label)) continue;
         facts.add(fact);

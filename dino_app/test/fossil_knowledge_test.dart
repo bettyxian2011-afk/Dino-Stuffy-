@@ -5,6 +5,7 @@ import 'package:dino_app/data/repositories/fossil_knowledge_repository.dart';
 import 'package:dino_app/data/repositories/gemini_identify_repository.dart';
 import 'package:dino_app/data/repositories/taxon_repository.dart';
 import 'package:dino_app/data/services/gemini_vision_service.dart';
+import 'package:dino_app/data/services/identification_heuristics.dart';
 import 'package:dino_app/data/services/image_compressor.dart';
 import 'package:dino_app/data/strata_services.dart';
 import 'package:dino_app/models/fossil_taxon.dart';
@@ -111,6 +112,36 @@ class _EmptyTaxonRepository implements TaxonRepository {
 
   @override
   Future<List<PbdbTaxon>> getTimelineChain(String name) async => const [];
+}
+
+class _FixedTaxonRepository implements TaxonRepository {
+  _FixedTaxonRepository(this.taxon);
+
+  final PbdbTaxon taxon;
+
+  @override
+  Future<PbdbTaxon?> findTaxon(String name) async => taxon;
+
+  @override
+  Future<List<PbdbTaxon>> getTimelineChain(String name) async => const [];
+}
+
+const _pbdbDactylioceras = PbdbTaxon(
+  name: 'Dactylioceras',
+  rank: 'genus',
+  attribution: '(Hyatt 1867)',
+  firstInterval: 'Hettangian',
+  lastInterval: 'Bajocian',
+  occurrenceCount: 496,
+);
+
+int _expectedConfidence({required bool inCatalog}) {
+  return IdentificationHeuristics.adjustedConfidence(
+    modelConfidence: 88,
+    inLocalCatalog: inCatalog,
+    pbdbGenusRank: true,
+    pbdbOccurrences: 496,
+  );
 }
 
 class _PassthroughCompressor extends ImageCompressor {
@@ -230,6 +261,9 @@ void main() {
       expect(entry.facts.single.value, '183Ma');
       expect(entry.thumbnail, localEntry.thumbnail);
       expect(entry.tip, localEntry.tip);
+      expect(entry.factsFromCloud, isTrue);
+      expect(merged.entryFor('Harpoceras')!.family, 'Hildoceratidae');
+      expect(merged.entryFor('Harpoceras')!.factsFromCloud, isFalse);
     });
 
     test('skips taxa not used in Identify', () {
@@ -335,5 +369,68 @@ void main() {
       expect(result.facts.any((f) => f.value == '183Ma'), isTrue);
       expect(result.candidates, isNotEmpty);
     });
+
+    test('cloud facts replace PBDB chips without changing the score', () async {
+      final local = await IdCatalog.load();
+      final catalog = local.mergedWith([
+        _taxon(
+          id: 'dactylioceras',
+          scientificName: 'Dactylioceras',
+          commonGroup: 'Cloud ammonite',
+          family: 'CloudFamily',
+          facts: const [
+            TaxonFact(icon: 'schedule', value: '190–174Ma', label: 'Cloud age'),
+          ],
+        ),
+      ]);
+
+      final repo = GeminiIdentifyRepository(
+        vision: _StubVision(
+          const GeminiVisionResult(
+            assessment: IdentifyAssessment.fossil,
+            candidates: [
+              GeminiVisionCandidate(genus: 'Dactylioceras', confidence: 88),
+            ],
+          ),
+        ),
+        taxonRepository: _FixedTaxonRepository(_pbdbDactylioceras),
+        catalog: catalog,
+        compressor: const _PassthroughCompressor(),
+      );
+
+      final result = await repo.identify(Uint8List.fromList([1, 2, 3]));
+      expect(result.pbdbVerified, isTrue);
+      expect(result.bestMatch.family, 'CloudFamily');
+      expect(result.bestMatch.commonGroup, 'Cloud ammonite');
+      expect(result.facts.map((f) => f.value), contains('190–174Ma'));
+      expect(result.facts.map((f) => f.label), isNot(contains('PBDB range')));
+      expect(result.primaryConfidence, _expectedConfidence(inCatalog: true));
+    });
+
+    test(
+      'local catalog still shows PBDB facts when Firestore did not overlay',
+      () async {
+        final catalog = await IdCatalog.load();
+        final repo = GeminiIdentifyRepository(
+          vision: _StubVision(
+            const GeminiVisionResult(
+              assessment: IdentifyAssessment.fossil,
+              candidates: [
+                GeminiVisionCandidate(genus: 'Dactylioceras', confidence: 88),
+              ],
+            ),
+          ),
+          taxonRepository: _FixedTaxonRepository(_pbdbDactylioceras),
+          catalog: catalog,
+          compressor: const _PassthroughCompressor(),
+        );
+
+        final result = await repo.identify(Uint8List.fromList([1, 2, 3]));
+        expect(result.facts.map((f) => f.label), contains('PBDB range'));
+        expect(result.facts.map((f) => f.value), isNot(contains('180Ma')));
+        expect(result.primaryConfidence, _expectedConfidence(inCatalog: true));
+        expect(result.bestMatch.family, 'Dactylioceratidae');
+      },
+    );
   });
 }
