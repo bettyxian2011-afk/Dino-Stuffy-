@@ -96,6 +96,22 @@ void main() {
       expect(taxa['albertosaurus']!.ageEnvelope, isNotNull);
       expect(taxa['albertosaurus']!.ageCore, isNotNull);
     });
+
+    test('gold Hell Creek dinosaurs stay Cretaceous-only', () {
+      for (final id in [
+        'triceratops',
+        'tyrannosaurus',
+        'ankylosaurus',
+        'pachycephalosaurus',
+      ]) {
+        final taxon = taxa[id]!;
+        expect(taxon.periodIds, ['cretaceous'], reason: id);
+        expect(taxon.ageEndMa, greaterThanOrEqualTo(66), reason: id);
+        expect(taxon.ageSource, AgeSource.manual, reason: id);
+        expect(taxon.facts.first.icon, 'schedule');
+        expect(taxon.facts.first.value, contains('${taxon.ageStartMa!.round()}'));
+      }
+    });
   });
 
   group('JSON round trips', () {

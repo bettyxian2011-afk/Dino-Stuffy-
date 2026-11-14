@@ -1,21 +1,21 @@
 {
-  "Dactylioceras": { "realm": "ocean", "commonName": null, "iconic": true, "kidSafe": false, "funFacts": [] },
+  "Dactylioceras": { "realm": "ocean", "commonName": null, "iconic": true, "kidSafe": false, "funFacts": [], "ageStartMa": 190, "ageEndMa": 174 },
   "Harpoceras": { "realm": "ocean", "commonName": null, "iconic": false, "kidSafe": false, "funFacts": [] },
   "Hildoceras": { "realm": "ocean", "commonName": null, "iconic": false, "kidSafe": false, "funFacts": [] },
 
-  "Velociraptor": { "realm": "land", "commonName": "Velociraptor", "iconic": true, "kidSafe": true, "funFacts": [] },
+  "Velociraptor": { "realm": "land", "commonName": "Velociraptor", "iconic": true, "kidSafe": true, "funFacts": [], "ageStartMa": 75, "ageEndMa": 71 },
   "Deinonychus": { "realm": "land", "commonName": "Deinonychus", "iconic": false, "kidSafe": false, "funFacts": [] },
   "Utahraptor": { "realm": "land", "commonName": "Utahraptor", "iconic": false, "kidSafe": false, "funFacts": [] },
 
-  "Elrathia": { "realm": "ocean", "commonName": null, "iconic": true, "kidSafe": false, "funFacts": [] },
+  "Elrathia": { "realm": "ocean", "commonName": null, "iconic": true, "kidSafe": false, "funFacts": [], "ageStartMa": 507, "ageEndMa": 505 },
   "Calymene": { "realm": "ocean", "commonName": null, "iconic": false, "kidSafe": false, "funFacts": [] },
   "Phacops": { "realm": "ocean", "commonName": null, "iconic": true, "kidSafe": false, "funFacts": [] },
 
-  "Glossopteris": { "realm": "land", "commonName": null, "iconic": true, "kidSafe": false, "funFacts": [] },
+  "Glossopteris": { "realm": "land", "commonName": null, "iconic": true, "kidSafe": false, "funFacts": [], "ageStartMa": 300, "ageEndMa": 252 },
   "Neuropteris": { "realm": "land", "commonName": null, "iconic": false, "kidSafe": false, "funFacts": [] },
   "Lepidodendron": { "realm": "land", "commonName": null, "iconic": true, "kidSafe": false, "funFacts": [] },
 
-  "Tyrannosaurus": { "realm": "land", "commonName": "Tyrannosaurus", "iconic": true, "kidSafe": true, "funFacts": [] },
+  "Tyrannosaurus": { "realm": "land", "commonName": "Tyrannosaurus", "iconic": true, "kidSafe": true, "funFacts": [], "ageStartMa": 68, "ageEndMa": 66 },
   "Albertosaurus": { "realm": "land", "commonName": "Albertosaurus", "iconic": false, "kidSafe": false, "funFacts": [] },
   "Daspletosaurus": { "realm": "land", "commonName": "Daspletosaurus", "iconic": false, "kidSafe": false, "funFacts": [] },
 
@@ -27,8 +27,8 @@
   "Passaloteuthis": { "realm": "ocean", "commonName": null, "iconic": false, "kidSafe": false, "funFacts": [] },
   "Hibolites": { "realm": "ocean", "commonName": null, "iconic": false, "kidSafe": false, "funFacts": [] },
 
-  "Otodus": { "realm": "ocean", "commonName": "Megalodon", "iconic": true, "kidSafe": false, "funFacts": [] },
-  "Carcharodon": { "realm": "ocean", "commonName": "Great white shark", "iconic": false, "kidSafe": false, "funFacts": [] },
+  "Otodus": { "realm": "ocean", "commonName": "Megalodon", "iconic": true, "kidSafe": false, "funFacts": [], "ageStartMa": 65, "ageEndMa": 3.6 },
+  "Carcharodon": { "realm": "ocean", "commonName": "Great white shark", "iconic": false, "kidSafe": false, "funFacts": [], "ageStartMa": 20, "ageEndMa": 0 },
   "Isurus": { "realm": "ocean", "commonName": "Mako shark", "iconic": false, "kidSafe": false, "funFacts": [] },
 
   "Favosites": { "realm": "ocean", "commonName": "Honeycomb coral", "iconic": true, "kidSafe": false, "funFacts": [] },
@@ -48,7 +48,9 @@
     "useInIdentify": false,
     "iconic": true,
     "kidSafe": true,
-    "funFacts": []
+    "funFacts": [],
+    "ageStartMa": 68,
+    "ageEndMa": 66
   },
   "Pachycephalosaurus": {
     "realm": "land",
@@ -60,7 +62,9 @@
     "useInIdentify": false,
     "iconic": true,
     "kidSafe": true,
-    "funFacts": []
+    "funFacts": [],
+    "ageStartMa": 70,
+    "ageEndMa": 66
   },
   "Ankylosaurus": {
     "realm": "land",
@@ -71,6 +75,8 @@
     "useInIdentify": false,
     "iconic": true,
     "kidSafe": true,
-    "funFacts": []
+    "funFacts": [],
+    "ageStartMa": 70,
+    "ageEndMa": 66
   }
 }

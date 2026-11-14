@@ -181,6 +181,22 @@ class FossilTaxon {
 
   String get displayName => commonName ?? scientificName;
 
+  /// Compact Ma label from curated ages (Identify / profile chips).
+  String? get ageRangeLabel {
+    if (ageStartMa == null || ageEndMa == null) return null;
+    final old = ageStartMa!.round();
+    final young = ageEndMa!.round();
+    return old == young ? '$old Ma' : '$old–$young Ma';
+  }
+
+  /// Schedule fact value when present, otherwise [ageRangeLabel].
+  String? get scheduleFactValue {
+    for (final fact in facts) {
+      if (fact.icon == 'schedule') return fact.value;
+    }
+    return ageRangeLabel;
+  }
+
   factory FossilTaxon.fromJson(String id, Map<String, dynamic> json) {
     final pbdb = json['pbdb'] as Map<String, dynamic>?;
     final envelope = json['ageEnvelope'] as Map<String, dynamic>?;

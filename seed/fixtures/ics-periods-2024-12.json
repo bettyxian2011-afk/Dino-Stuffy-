@@ -1,0 +1,20 @@
+{
+  "_meta": {
+    "source": "ICS International Chronostratigraphic Chart",
+    "version": "2024-12",
+    "url": "https://stratigraphy.org/ICSchart/ChronostratChart2024-12.pdf",
+    "note": "Period ages only. Parallel Deep Time / ICS timeline work can replace or extend this pin; blurbs stay in seed/curated/periods.json. periodIds on taxa are always recomputed from final ages ∩ this table."
+  },
+  "cambrian": { "startMa": 538.8, "endMa": 486.85 },
+  "ordovician": { "startMa": 486.85, "endMa": 443.1 },
+  "silurian": { "startMa": 443.1, "endMa": 419.62 },
+  "devonian": { "startMa": 419.62, "endMa": 358.86 },
+  "carboniferous": { "startMa": 358.86, "endMa": 298.9 },
+  "permian": { "startMa": 298.9, "endMa": 251.902 },
+  "triassic": { "startMa": 251.902, "endMa": 201.4 },
+  "jurassic": { "startMa": 201.4, "endMa": 143.1 },
+  "cretaceous": { "startMa": 143.1, "endMa": 66 },
+  "paleogene": { "startMa": 66, "endMa": 23.04 },
+  "neogene": { "startMa": 23.04, "endMa": 2.58 },
+  "quaternary": { "startMa": 2.58, "endMa": 0 }
+}

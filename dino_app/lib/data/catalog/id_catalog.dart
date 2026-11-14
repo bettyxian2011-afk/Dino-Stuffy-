@@ -28,8 +28,8 @@ class IdCatalogEntry {
   final List<TaxonFact> facts;
   final String specimenImage;
 
-  /// True when [facts] were copied from a Firestore taxon in this session.
-  /// Local JSON facts stay false so offline Identify keeps its PBDB fact order.
+  /// True when [facts] came from a `taxa/{id}` document (bundled assets and/or
+  /// Firestore). Those ages beat live PBDB appearance chips on Identify.
   final bool factsFromCloud;
 
   IdCatalogEntry copyWith({
