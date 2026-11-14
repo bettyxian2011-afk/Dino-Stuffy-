@@ -82,11 +82,11 @@ class FallbackFossilKnowledgeRepository implements FossilKnowledgeRepository {
     if (cloud == null) return read(local);
     try {
       final value = await read(cloud);
-      if (isEmpty(value)) return read(local);
-      return value;
+      if (!isEmpty(value)) return value;
     } catch (_) {
-      return read(local);
+      // Fall back to the bundled catalog if Firestore cannot be read.
     }
+    return read(local);
   }
 
   @override

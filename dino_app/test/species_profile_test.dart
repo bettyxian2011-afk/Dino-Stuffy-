@@ -4,7 +4,7 @@ import 'dart:io';
 import 'package:dino_app/data/repositories/taxon_repository.dart';
 import 'package:dino_app/models/pbdb_taxon.dart';
 import 'package:dino_app/screens/id_result/species_profile_screen.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

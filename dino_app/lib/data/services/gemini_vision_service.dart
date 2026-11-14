@@ -86,6 +86,7 @@ class GeminiVisionService {
   Future<GeminiVisionResult> identifyPhoto({
     required Uint8List jpegBytes,
     required List<String> catalogGenera,
+    String mimeType = 'image/jpeg',
     String? userNotes,
   }) async {
     if (catalogGenera.isEmpty) {
@@ -140,7 +141,7 @@ Respond with JSON only (no markdown). Examples:
           contents: [
             Content.user([
               Part.text(prompt),
-              Part.bytes(jpegBytes, 'image/jpeg'),
+              Part.bytes(jpegBytes, mimeType),
             ]),
           ],
           generationConfig: GenerationConfig(

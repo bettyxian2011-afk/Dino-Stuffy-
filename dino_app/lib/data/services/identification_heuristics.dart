@@ -46,7 +46,7 @@ class IdentificationHeuristics {
     required int? pbdbOccurrences,
   }) {
     if (modelConfidence < boostFloor) {
-      return 'Provisional ID (model ${modelConfidence}%). '
+      return 'Provisional ID (model $modelConfidence%). '
           'PBDB/catalog were not used to boost this score — '
           'add a clearer photo or scale bar.';
     }

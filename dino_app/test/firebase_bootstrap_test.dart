@@ -12,14 +12,17 @@ void main() {
 
   tearDown(StrataServices.resetForTest);
 
-  test('hasGeneratedOptions follows DefaultFirebaseOptions.currentPlatform', () {
-    try {
-      DefaultFirebaseOptions.currentPlatform;
-      expect(FirebaseBootstrap.hasGeneratedOptions, isTrue);
-    } on UnsupportedError {
-      expect(FirebaseBootstrap.hasGeneratedOptions, isFalse);
-    }
-  });
+  test(
+    'hasGeneratedOptions follows DefaultFirebaseOptions.currentPlatform',
+    () {
+      try {
+        DefaultFirebaseOptions.currentPlatform;
+        expect(FirebaseBootstrap.hasGeneratedOptions, isTrue);
+      } on UnsupportedError {
+        expect(FirebaseBootstrap.hasGeneratedOptions, isFalse);
+      }
+    },
+  );
 
   group('on a platform without FlutterFire config', () {
     setUp(() => debugDefaultTargetPlatformOverride = TargetPlatform.windows);
@@ -34,10 +37,12 @@ void main() {
     });
   });
 
-  test('constructFirebase returns null when native Firebase is unavailable',
-      () async {
-    expect(await FirebaseBootstrap.constructFirebase(), isNull);
-  });
+  test(
+    'constructFirebase returns null when native Firebase is unavailable',
+    () async {
+      expect(await FirebaseBootstrap.constructFirebase(), isNull);
+    },
+  );
 
   test(
     'init keeps local repositories when Firebase is not configured',
@@ -81,7 +86,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));
 
-    expect(find.textContaining('Betty'), findsOneWidget);
+    expect(find.textContaining('Good '), findsOneWidget);
     expect(find.text('Scan now'), findsOneWidget);
   });
 
@@ -99,7 +104,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));
 
-    expect(find.textContaining('Betty'), findsOneWidget);
+    expect(find.textContaining('Good '), findsOneWidget);
     expect(find.text('Scan now'), findsOneWidget);
   });
 }

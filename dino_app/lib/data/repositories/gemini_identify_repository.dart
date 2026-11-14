@@ -13,17 +13,27 @@ import 'taxon_repository.dart';
 
 /// Gemini vision + PBDB enrichment, grounded on the merged Identify catalog.
 class GeminiIdentifyRepository implements IdentifyRepository {
-  GeminiIdentifyRepository({
+  factory GeminiIdentifyRepository({
     required GeminiVisionService vision,
     required TaxonRepository taxonRepository,
     required IdCatalog catalog,
     MockIdentifyRepository? fallback,
     ImageCompressor? compressor,
-  }) : _vision = vision,
-       _taxonRepository = taxonRepository,
-       _catalog = catalog,
-       _fallback = fallback ?? MockIdentifyRepository(),
-       _compressor = compressor ?? const ImageCompressor();
+  }) => GeminiIdentifyRepository._(
+    vision,
+    taxonRepository,
+    catalog,
+    fallback ?? MockIdentifyRepository(),
+    compressor ?? const ImageCompressor(),
+  );
+
+  GeminiIdentifyRepository._(
+    this._vision,
+    this._taxonRepository,
+    this._catalog,
+    this._fallback,
+    this._compressor,
+  );
 
   final GeminiVisionService _vision;
   final TaxonRepository _taxonRepository;
@@ -41,6 +51,7 @@ class GeminiIdentifyRepository implements IdentifyRepository {
     final jpegBytes = _compressor.forVision(bytes);
     final vision = await _vision.identifyPhoto(
       jpegBytes: jpegBytes,
+      mimeType: ImageCompressor.mimeTypeFor(jpegBytes),
       catalogGenera: _catalog.genusNames,
       userNotes: userNotes,
     );
@@ -64,9 +75,7 @@ class GeminiIdentifyRepository implements IdentifyRepository {
       specimenImage: 'assets/images/fossil_trilobite.png',
       confidenceLabel: IdentificationHeuristics.confidenceLabel(confidence),
       matchLabel: 'May not be a fossil — check details',
-      tip: vision.reason?.trim().isNotEmpty == true
-          ? vision.reason!.trim()
-          : 'This looks like rock or non-biogenic material rather than a fossil.',
+      tip: vision.reason?.trim().isNotEmpty == true ? vision.reason!.trim() : 'This looks like rock or non-biogenic material rather than a fossil.',
       taxonomy: const [],
       candidates: const [],
       facts: [

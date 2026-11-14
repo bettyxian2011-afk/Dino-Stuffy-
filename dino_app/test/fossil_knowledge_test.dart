@@ -160,6 +160,7 @@ class _StubVision extends GeminiVisionService {
   Future<GeminiVisionResult> identifyPhoto({
     required Uint8List jpegBytes,
     required List<String> catalogGenera,
+    String mimeType = 'image/jpeg',
     String? userNotes,
   }) async => result;
 }

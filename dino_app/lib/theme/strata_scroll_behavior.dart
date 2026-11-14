@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Disables Android's stretch/glow overscroll so lists don't distort at edges.
 class StrataScrollBehavior extends MaterialScrollBehavior {

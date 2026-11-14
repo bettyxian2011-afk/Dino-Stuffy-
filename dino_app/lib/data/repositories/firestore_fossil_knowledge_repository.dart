@@ -13,6 +13,7 @@ class FirestoreFossilKnowledgeRepository implements FossilKnowledgeRepository {
 
   final FirebaseFirestore _db;
   final Duration timeout;
+  Future<List<FossilTaxon>>? _iconicCache;
 
   CollectionReference<Map<String, dynamic>> get _taxa => _db.collection('taxa');
 
@@ -55,13 +56,17 @@ class FirestoreFossilKnowledgeRepository implements FossilKnowledgeRepository {
 
   @override
   Future<List<FossilTaxon>> iconicForPeriod(String periodId) async {
-    final snap = await _taxa
-        .where('iconic', isEqualTo: true)
-        .get()
-        .timeout(timeout);
-    return _parseDocs(
-      snap,
-    ).where((t) => t.periodIds.contains(periodId)).toList();
+    try {
+      final iconic = await (_iconicCache ??= _taxa
+          .where('iconic', isEqualTo: true)
+          .get()
+          .timeout(timeout)
+          .then(_parseDocs));
+      return iconic.where((t) => t.periodIds.contains(periodId)).toList();
+    } catch (_) {
+      _iconicCache = null;
+      rethrow;
+    }
   }
 
   @override

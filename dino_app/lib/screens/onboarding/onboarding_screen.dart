@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -102,24 +102,34 @@ class OnboardingScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 18),
                   Center(
-                    child: Text.rich(
-                      TextSpan(
-                        style: GoogleFonts.dmSans(
-                          color: Colors.white.withValues(alpha: 0.85),
-                          fontSize: 14,
+                    child: Wrap(
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [
+                        Text(
+                          'Already have an account? ',
+                          style: GoogleFonts.dmSans(
+                            color: Colors.white.withValues(alpha: 0.85),
+                            fontSize: 14,
+                          ),
                         ),
-                        children: [
-                          const TextSpan(text: 'Already have an account? '),
-                          TextSpan(
-                            text: 'Sign in',
+                        TextButton(
+                          onPressed: () => context.push('/sign-in'),
+                          style: TextButton.styleFrom(
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(horizontal: 4),
+                            minimumSize: Size.zero,
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          ),
+                          child: Text(
+                            'Sign in',
                             style: GoogleFonts.dmSans(
                               color: Colors.white,
                               fontWeight: FontWeight.w700,
                               fontSize: 14,
                             ),
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ),
                 ],

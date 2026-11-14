@@ -1,5 +1,5 @@
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
@@ -118,10 +118,7 @@ class _IdentifyScreenState extends State<IdentifyScreen>
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(
-          '$message\n$error',
-          style: GoogleFonts.dmSans(),
-        ),
+        content: Text('$message\n$error', style: GoogleFonts.dmSans()),
         behavior: SnackBarBehavior.floating,
       ),
     );
@@ -259,9 +256,7 @@ class _IdentifyScreenState extends State<IdentifyScreen>
                         previewBytes: _previewBytes,
                         onTap: _busy ? null : _pickFromGallery,
                       ),
-                      _ShutterButton(
-                        onPressed: _busy ? null : _capturePhoto,
-                      ),
+                      _ShutterButton(onPressed: _busy ? null : _capturePhoto),
                       _FlipButton(
                         onTap: _busy
                             ? null
@@ -289,12 +284,56 @@ class _PreviewImage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (bytes != null) {
-      return Image.memory(bytes!, fit: BoxFit.cover, gaplessPlayback: true);
+      return Image.memory(
+        bytes!,
+        fit: BoxFit.cover,
+        gaplessPlayback: true,
+        errorBuilder: (_, _, _) => const _PreviewUnavailable(),
+      );
     }
     return Image.asset(
       'assets/images/fossil_ammonite.png',
       fit: BoxFit.cover,
       errorBuilder: (_, _, _) => Container(color: const Color(0xFF2A1A10)),
+    );
+  }
+}
+
+class _PreviewUnavailable extends StatelessWidget {
+  const _PreviewUnavailable();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: const Color(0xFF211B17),
+      alignment: Alignment.center,
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            Icons.image_not_supported_outlined,
+            color: Colors.white70,
+            size: 36,
+          ),
+          const SizedBox(height: 12),
+          Text(
+            'Preview unavailable',
+            textAlign: TextAlign.center,
+            style: GoogleFonts.dmSans(
+              color: Colors.white,
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            'Tap the shutter to identify this photo.',
+            textAlign: TextAlign.center,
+            style: GoogleFonts.dmSans(color: Colors.white70, fontSize: 13),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -343,10 +382,7 @@ class _StatusPill extends StatelessWidget {
 }
 
 class _ModeSelector extends StatelessWidget {
-  const _ModeSelector({
-    required this.mode,
-    required this.onChanged,
-  });
+  const _ModeSelector({required this.mode, required this.onChanged});
 
   final IdentifyMode mode;
   final ValueChanged<IdentifyMode> onChanged;
@@ -422,10 +458,7 @@ class _ModeLabel extends StatelessWidget {
 }
 
 class _GalleryThumb extends StatelessWidget {
-  const _GalleryThumb({
-    required this.previewBytes,
-    required this.onTap,
-  });
+  const _GalleryThumb({required this.previewBytes, required this.onTap});
 
   final Uint8List? previewBytes;
   final VoidCallback? onTap;
@@ -440,13 +473,28 @@ class _GalleryThumb extends StatelessWidget {
           width: 48,
           height: 48,
           child: previewBytes != null
-              ? Image.memory(previewBytes!, fit: BoxFit.cover)
+              ? Image.memory(
+                  previewBytes!,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, _, _) => Container(
+                    color: const Color(0xFF3A2A20),
+                    child: const Icon(
+                      Icons.image_not_supported_outlined,
+                      color: Colors.white54,
+                      size: 20,
+                    ),
+                  ),
+                )
               : Image.asset(
                   'assets/images/fossil_trilobite.png',
                   fit: BoxFit.cover,
                   errorBuilder: (_, _, _) => Container(
                     color: const Color(0xFF3A2A20),
-                    child: const Icon(Icons.image, color: Colors.white54, size: 20),
+                    child: const Icon(
+                      Icons.image,
+                      color: Colors.white54,
+                      size: 20,
+                    ),
                   ),
                 ),
         ),
@@ -535,7 +583,11 @@ class _FocusBracketPainter extends CustomPainter {
     canvas.drawLine(rect.topLeft, rect.topLeft + const Offset(arm, 0), paint);
     canvas.drawLine(rect.topLeft, rect.topLeft + const Offset(0, arm), paint);
 
-    canvas.drawLine(rect.topRight, rect.topRight + const Offset(-arm, 0), paint);
+    canvas.drawLine(
+      rect.topRight,
+      rect.topRight + const Offset(-arm, 0),
+      paint,
+    );
     canvas.drawLine(rect.topRight, rect.topRight + const Offset(0, arm), paint);
 
     canvas.drawLine(

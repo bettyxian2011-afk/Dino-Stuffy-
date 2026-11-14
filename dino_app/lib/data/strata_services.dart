@@ -3,8 +3,11 @@ import 'package:flutter/foundation.dart';
 import '../config/strata_config.dart';
 import '../models/fossil_taxon.dart';
 import 'catalog/id_catalog.dart';
+import 'repositories/account_repository.dart';
 import 'repositories/fossil_knowledge_repository.dart';
 import 'repositories/firestore_fossil_knowledge_repository.dart';
+import 'repositories/period_repository.dart';
+import 'repositories/firestore_period_repository.dart';
 import 'repositories/gemini_identify_repository.dart';
 import 'repositories/identify_repository.dart';
 import 'repositories/taxon_repository.dart';
@@ -16,8 +19,10 @@ class StrataServices {
   StrataServices._();
 
   static IdentifyRepository? _identifyRepository;
+  static AccountRepository? _accountRepository;
   static TaxonRepository? _taxonRepository;
   static FossilKnowledgeRepository? _knowledgeRepository;
+  static PeriodRepository? _periodRepository;
   static IdCatalog? _catalog;
   static bool _firebaseReady = false;
 
@@ -28,14 +33,24 @@ class StrataServices {
   /// True after a successful Firebase app construction.
   static bool get isFirebaseReady => _firebaseReady;
 
+  static AccountRepository get accountRepository =>
+      _accountRepository ?? const GuestAccountRepository();
+
   /// Starts local repositories and, when FlutterFire config exists, Firebase.
   static Future<void> init({
     Future<bool> Function()? initializeFirebase,
     FossilKnowledgeRepository? knowledgeRepository,
+    PeriodRepository? periodRepository,
     Future<List<FossilTaxon>> Function()? identifyCloudTaxa,
+    AccountRepository? accountRepository,
   }) async {
     _firebaseReady =
         await (initializeFirebase ?? FirebaseBootstrap.initialize)();
+    _accountRepository ??=
+        accountRepository ??
+        (_firebaseReady && FirebaseBootstrap.isAppReady
+            ? FirebaseAccountRepository()
+            : const GuestAccountRepository());
     final localKnowledge = AssetFossilKnowledgeRepository();
     FirestoreFossilKnowledgeRepository? firestoreKnowledge;
     if (_firebaseReady && FirebaseBootstrap.isAppReady) {
@@ -50,6 +65,14 @@ class StrataServices {
         FallbackFossilKnowledgeRepository(
           local: localKnowledge,
           remote: firestoreKnowledge,
+        );
+    _periodRepository ??=
+        periodRepository ??
+        FallbackPeriodRepository(
+          local: AssetPeriodRepository(),
+          remote: _firebaseReady && FirebaseBootstrap.isAppReady
+              ? FirestorePeriodRepository()
+              : null,
         );
     _catalog ??= await _loadIdentifyCatalog(
       identifyCloudTaxa: identifyCloudTaxa,
@@ -94,6 +117,9 @@ class StrataServices {
     }
     return _knowledgeRepository!;
   }
+
+  static PeriodRepository get periodRepository =>
+      _periodRepository ?? AssetPeriodRepository();
 
   /// Identify catalog after optional Firestore merge.
   @visibleForTesting
@@ -146,8 +172,10 @@ class StrataServices {
   @visibleForTesting
   static void resetForTest() {
     _identifyRepository = null;
+    _accountRepository = null;
     _taxonRepository = null;
     _knowledgeRepository = null;
+    _periodRepository = null;
     _catalog = null;
     _firebaseReady = false;
   }

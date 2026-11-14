@@ -1,0 +1,67 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function ownsProfile(uid) {
+      return signedIn() && request.auth.uid == uid;
+    }
+
+    match /taxa/{taxonId} {
+      allow read: if signedIn();
+      allow write: if false;
+    }
+
+    match /periods/{periodId} {
+      allow read: if signedIn();
+      allow write: if false;
+    }
+
+    match /museums/{museumId} {
+      allow read: if signedIn();
+      allow write: if false;
+
+      match /holdings/{taxonId} {
+        allow read: if signedIn();
+        allow write: if false;
+      }
+    }
+
+    match /redListSpecies/{speciesId} {
+      allow read: if signedIn();
+      allow write: if false;
+    }
+
+    match /users/{uid} {
+      allow get, list: if ownsProfile(uid);
+      allow create: if ownsProfile(uid)
+        && request.resource.data.keys().hasAll([
+          'displayName', 'accountKind', 'createdAt', 'badgeCount', 'friendCode'
+        ])
+        && request.resource.data.keys().hasOnly([
+          'displayName', 'accountKind', 'createdAt', 'badgeCount', 'friendCode'
+        ])
+        && request.resource.data.displayName is string
+        && request.resource.data.displayName.size() > 0
+        && request.resource.data.displayName.size() <= 80
+        && request.resource.data.accountKind == 'standard'
+        && request.resource.data.createdAt is timestamp
+        && request.resource.data.badgeCount == 0
+        && request.resource.data.friendCode is string
+        && request.resource.data.friendCode.matches('^[A-HJ-NP-Z2-9]{6}$');
+      allow update: if ownsProfile(uid)
+        && request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['displayName', 'photoURL'])
+        && request.resource.data.displayName is string
+        && request.resource.data.displayName.size() > 0
+        && request.resource.data.displayName.size() <= 80
+        && (!request.resource.data.keys().hasAny(['photoURL'])
+          || (request.resource.data.photoURL is string
+            && request.resource.data.photoURL.size() <= 2048));
+      allow delete: if false;
+    }
+  }
+}

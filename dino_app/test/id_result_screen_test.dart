@@ -1,10 +1,10 @@
-﻿import 'dart:typed_data';
+import 'dart:typed_data';
 
 import 'package:dino_app/data/repositories/identify_repository.dart';
 import 'package:dino_app/models/captured_specimen.dart';
 import 'package:dino_app/models/id_result.dart';
 import 'package:dino_app/screens/id_result/id_result_screen.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

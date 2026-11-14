@@ -15,6 +15,7 @@ class UserProfile {
     required this.displayName,
     required this.createdAt,
     required this.friendCode,
+    this.photoUrl,
     this.accountKind = AccountKind.standard,
     this.badgeCount = 0,
   });
@@ -27,6 +28,7 @@ class UserProfile {
   /// Denormalized count of `users/{uid}/badges` docs, for the PK gate.
   final int badgeCount;
   final String friendCode;
+  final String? photoUrl;
 
   /// Accepts a Firestore [Timestamp], a [DateTime], or an ISO-8601 string
   /// for [createdAt], so the same parser works for Firestore and JSON.
@@ -38,16 +40,18 @@ class UserProfile {
       createdAt: _parseTime(json['createdAt']),
       badgeCount: (json['badgeCount'] as num?)?.toInt() ?? 0,
       friendCode: json['friendCode'] as String? ?? '',
+      photoUrl: json['photoURL'] as String?,
     );
   }
 
   Map<String, dynamic> toJson() => {
-        'displayName': displayName,
-        'accountKind': accountKind.name,
-        'createdAt': Timestamp.fromDate(createdAt),
-        'badgeCount': badgeCount,
-        'friendCode': friendCode,
-      };
+    'displayName': displayName,
+    'accountKind': accountKind.name,
+    'createdAt': Timestamp.fromDate(createdAt),
+    'badgeCount': badgeCount,
+    'friendCode': friendCode,
+    if (photoUrl != null) 'photoURL': photoUrl,
+  };
 
   static DateTime _parseTime(Object? value) {
     if (value is Timestamp) return value.toDate();

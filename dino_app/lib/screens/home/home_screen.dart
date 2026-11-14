@@ -1,9 +1,12 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../data/repositories/fossil_repository.dart';
+import '../../data/repositories/account_repository.dart';
 import '../../data/repositories/site_repository.dart';
+import '../../data/strata_services.dart';
+import '../../models/user_profile.dart';
 import '../../theme/strata_theme.dart';
 import '../../widgets/gradient_hero_card.dart';
 import '../../widgets/near_you_card.dart';
@@ -15,22 +18,28 @@ class HomeScreen extends StatelessWidget {
     super.key,
     this.fossilRepository = const MockFossilRepository(),
     this.siteRepository = const MockSiteRepository(),
+    this.accountRepository,
   });
 
   final FossilRepository fossilRepository;
   final SiteRepository siteRepository;
+  final AccountRepository? accountRepository;
 
-  String get _greeting {
+  String _greeting(String displayName) {
     final hour = DateTime.now().hour;
-    if (hour < 12) return 'Good morning, Betty';
-    if (hour < 17) return 'Good afternoon, Betty';
-    return 'Good evening, Betty';
+    final salutation = hour < 12
+        ? 'Good morning'
+        : hour < 17
+        ? 'Good afternoon'
+        : 'Good evening';
+    return displayName.isEmpty ? salutation : '$salutation, $displayName';
   }
 
   @override
   Widget build(BuildContext context) {
     final recent = fossilRepository.getRecentMatches();
     final nearYou = siteRepository.getNearYou();
+    final accounts = accountRepository ?? StrataServices.accountRepository;
 
     return SafeArea(
       bottom: false,
@@ -39,33 +48,40 @@ class HomeScreen extends StatelessWidget {
           SliverPadding(
             padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
             sliver: SliverToBoxAdapter(
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      _greeting,
-                      style: GoogleFonts.libreBaskerville(
-                        color: StrataColors.ink,
-                        fontSize: 26,
-                        fontWeight: FontWeight.w700,
-                        height: 1.2,
+              child: StreamBuilder<UserProfile?>(
+                stream: accounts.watchProfile(),
+                builder: (context, snapshot) {
+                  final name = snapshot.data?.displayName.trim() ?? '';
+                  final avatar = name.isEmpty ? 'S' : name[0].toUpperCase();
+                  return Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          _greeting(name),
+                          style: GoogleFonts.libreBaskerville(
+                            color: StrataColors.ink,
+                            fontSize: 26,
+                            fontWeight: FontWeight.w700,
+                            height: 1.2,
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  CircleAvatar(
-                    radius: 20,
-                    backgroundColor: const Color(0xFFE8DFD4),
-                    child: Text(
-                      'B',
-                      style: GoogleFonts.dmSans(
-                        color: StrataColors.brown,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 16,
+                      const SizedBox(width: 12),
+                      IconButton(
+                        tooltip: 'Account',
+                        onPressed: () => context.push(
+                          snapshot.data == null ? '/sign-in' : '/account',
+                        ),
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(),
+                        icon: _Avatar(
+                          initial: avatar,
+                          photoUrl: snapshot.data?.photoUrl,
+                        ),
                       ),
-                    ),
-                  ),
-                ],
+                    ],
+                  );
+                },
               ),
             ),
           ),
@@ -186,4 +202,39 @@ class HomeScreen extends StatelessWidget {
       ),
     );
   }
+}
+
+class _Avatar extends StatelessWidget {
+  const _Avatar({required this.initial, this.photoUrl});
+
+  final String initial;
+  final String? photoUrl;
+
+  @override
+  Widget build(BuildContext context) {
+    return CircleAvatar(
+      radius: 20,
+      backgroundColor: const Color(0xFFE8DFD4),
+      child: photoUrl == null
+          ? _initialText()
+          : ClipOval(
+              child: Image.network(
+                photoUrl!,
+                width: 40,
+                height: 40,
+                fit: BoxFit.cover,
+                errorBuilder: (_, _, _) => _initialText(),
+              ),
+            ),
+    );
+  }
+
+  Widget _initialText() => Text(
+    initial,
+    style: GoogleFonts.dmSans(
+      color: StrataColors.brown,
+      fontWeight: FontWeight.w700,
+      fontSize: 16,
+    ),
+  );
 }
