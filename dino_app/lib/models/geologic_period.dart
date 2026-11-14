@@ -27,6 +27,8 @@ class GeologicPeriod {
     required this.order,
     this.color,
     this.pbdbIntervalId,
+    this.sourceVersion,
+    this.sourceUrl,
   });
 
   final String id;
@@ -46,6 +48,10 @@ class GeologicPeriod {
   /// ICS chart color as `#RRGGBB`.
   final String? color;
   final String? pbdbIntervalId;
+
+  /// Optional display metadata from a live chart; not persisted in Firestore.
+  final String? sourceVersion;
+  final String? sourceUrl;
 
   factory GeologicPeriod.fromJson(String id, Map<String, dynamic> json) {
     return GeologicPeriod(

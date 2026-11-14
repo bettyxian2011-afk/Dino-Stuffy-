@@ -17,12 +17,15 @@ class IcsPeriodRepository implements PeriodRepository {
 
   static const dataUrl =
       'https://raw.githubusercontent.com/i-c-stratigraphy/chart/main/chart.ttl';
+  static const chartUrl = 'https://stratigraphy.org/chart/';
 
   static const _gts = 'http://resource.geosciml.org/ontology/timescale/gts#';
   static const _rank = 'http://resource.geosciml.org/ontology/timescale/rank/';
   static const _skos = 'http://www.w3.org/2004/02/skos/core#';
   static const _time = 'http://www.w3.org/2006/time#';
   static const _schema = 'https://schema.org/';
+  static const _owl = 'http://www.w3.org/2002/07/owl#';
+  static const _chartDefinition = 'https://data.stratigraphy.org/def/chart';
   static const _chartData = 'https://data.stratigraphy.org/data/gts/';
 
   final http.Client _client;
@@ -57,6 +60,15 @@ class IcsPeriodRepository implements PeriodRepository {
   /// Parses the period level of the ICS chart.
   static List<GeologicPeriod> parseChart(String turtleText) {
     final graph = turtle.decode(turtleText);
+    final sourceVersion = graph
+        .findTriples(
+          subject: const IriTerm(_chartDefinition),
+          predicate: const IriTerm('${_owl}versionInfo'),
+        )
+        .map((triple) => triple.object)
+        .whereType<LiteralTerm>()
+        .map((literal) => literal.value)
+        .firstOrNull;
     final periodSubjects = graph
         .findTriples(
           predicate: const IriTerm('${_gts}rank'),
@@ -92,6 +104,8 @@ class IcsPeriodRepository implements PeriodRepository {
           blurb: '',
           order: 0,
           color: _literal(graph, subject, const IriTerm('${_schema}color')),
+          sourceVersion: sourceVersion,
+          sourceUrl: chartUrl,
         ),
       );
     }
@@ -108,6 +122,8 @@ class IcsPeriodRepository implements PeriodRepository {
         blurb: period.blurb,
         order: index + 1,
         color: period.color,
+        sourceVersion: period.sourceVersion,
+        sourceUrl: period.sourceUrl,
       );
     }
 
@@ -191,6 +207,8 @@ class IcsOverlayPeriodRepository implements PeriodRepository {
             order: canonical.order,
             color: canonical.color ?? period.color,
             pbdbIntervalId: period.pbdbIntervalId,
+            sourceVersion: canonical.sourceVersion,
+            sourceUrl: canonical.sourceUrl,
           );
         })
         .toList(growable: false);
