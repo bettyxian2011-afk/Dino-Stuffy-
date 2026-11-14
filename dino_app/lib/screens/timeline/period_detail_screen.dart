@@ -215,6 +215,20 @@ class _PeriodBody extends StatelessWidget {
                   _TaxonCard(taxon: data.taxa[index]),
             ),
           ),
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 4, 20, 28),
+            child: Text(
+              'Period boundaries and colors: International Commission on '
+              'Stratigraphy chart · stratigraphy.org/chart · CC BY 4.0.',
+              style: const TextStyle(
+                color: StrataColors.muted,
+                fontSize: 12,
+                height: 1.4,
+              ),
+            ),
+          ),
+        ),
       ],
     );
   }

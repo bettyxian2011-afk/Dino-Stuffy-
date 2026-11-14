@@ -11,8 +11,10 @@ enum GeologicEra {
       values.firstWhere((e) => e.label == raw);
 }
 
-/// One `periods/{id}` document. Ages follow the ICS chart as published by
-/// PBDB. The id is the lowercase period name.
+/// A geological period from Firestore, bundled JSON, or the ICS chart.
+/// When chart data is available, ICS supplies the canonical boundary ages and
+/// color while Firestore/bundled data supplies app copy and PBDB mappings.
+/// The id is the lowercase period name.
 class GeologicPeriod {
   const GeologicPeriod({
     required this.id,
@@ -59,13 +61,13 @@ class GeologicPeriod {
   }
 
   Map<String, dynamic> toJson() => {
-        'name': name,
-        'era': era.label,
-        'startMa': startMa,
-        'endMa': endMa,
-        'blurb': blurb,
-        'order': order,
-        'color': color,
-        'pbdbIntervalId': pbdbIntervalId,
-      };
+    'name': name,
+    'era': era.label,
+    'startMa': startMa,
+    'endMa': endMa,
+    'blurb': blurb,
+    'order': order,
+    'color': color,
+    'pbdbIntervalId': pbdbIntervalId,
+  };
 }

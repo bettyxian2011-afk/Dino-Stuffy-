@@ -135,7 +135,7 @@ Identify keeps PBDB as an external double-check. Firestore does not invent confi
 
 ### `periods/{id}`
 
-Phanerozoic periods only for this iteration (Cambrian through Quaternary). Each doc: `name`, `era` (`Paleozoic` | `Mesozoic` | `Cenozoic`), `startMa`, `endMa`, `blurb`, `order` (1 = Cambrian), `color` (ICS chart color), `pbdbIntervalId`. Ages are the ICS chart values as published by PBDB.
+Phanerozoic periods only for this iteration (Cambrian through Quaternary). Each doc: `name`, `era` (`Paleozoic` | `Mesozoic` | `Cenozoic`), `startMa`, `endMa`, `blurb`, `order` (1 = Cambrian), `color` (ICS chart color), `pbdbIntervalId`. Ages and colors are sourced from the ICS chart and refreshed from its machine-readable data by the client.
 
 ### `museums/{id}` — added in v0.8
 
@@ -206,6 +206,13 @@ Replace the `/timeline` placeholder. Bottom nav stays put.
 - Tap a taxon with a genus → existing `/species/:genus`
 
 Empty cloud results fall back to a small bundled period list so the tab is never a blank error.
+
+Period boundary ages and colors also use the ICS machine-readable chart at
+`https://github.com/i-c-stratigraphy/chart/blob/main/chart.ttl`. The client
+overlays the current ICS values on Firestore or bundled period records; curated
+blurbs and PBDB interval IDs remain from those records. If the ICS request is
+unavailable, Deep Time uses its existing Firestore/bundled fallback. Attribute
+the ICS chart under CC BY 4.0.
 
 ## Museums
 

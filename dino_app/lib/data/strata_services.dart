@@ -8,6 +8,7 @@ import 'repositories/fossil_knowledge_repository.dart';
 import 'repositories/firestore_fossil_knowledge_repository.dart';
 import 'repositories/period_repository.dart';
 import 'repositories/firestore_period_repository.dart';
+import 'repositories/ics_period_repository.dart';
 import 'repositories/gemini_identify_repository.dart';
 import 'repositories/identify_repository.dart';
 import 'repositories/taxon_repository.dart';
@@ -66,13 +67,17 @@ class StrataServices {
           local: localKnowledge,
           remote: firestoreKnowledge,
         );
+    final curatedPeriods = FallbackPeriodRepository(
+      local: AssetPeriodRepository(),
+      remote: _firebaseReady && FirebaseBootstrap.isAppReady
+          ? FirestorePeriodRepository()
+          : null,
+    );
     _periodRepository ??=
         periodRepository ??
-        FallbackPeriodRepository(
-          local: AssetPeriodRepository(),
-          remote: _firebaseReady && FirebaseBootstrap.isAppReady
-              ? FirestorePeriodRepository()
-              : null,
+        IcsOverlayPeriodRepository(
+          base: curatedPeriods,
+          ics: IcsPeriodRepository(),
         );
     _catalog ??= await _loadIdentifyCatalog(
       identifyCloudTaxa: identifyCloudTaxa,
