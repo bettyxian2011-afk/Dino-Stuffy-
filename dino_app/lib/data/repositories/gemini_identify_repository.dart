@@ -229,7 +229,7 @@ class GeminiIdentifyRepository implements IdentifyRepository {
       matchLabel: resolvedLabel,
       tip: tip,
       taxonomy: taxonomy,
-      timelineLabel: best.pbdb?.ageRangeLabel,
+      timelineLabel: _timelineLabel(best),
       pbdbVerified: best.pbdb != null,
       source: IdentificationSource.geminiPbdb,
       assessment: assessment,
@@ -258,17 +258,30 @@ class GeminiIdentifyRepository implements IdentifyRepository {
     );
   }
 
+  /// Catalog / taxa.json ages beat live PBDB appearance when a catalog taxon
+  /// exists. PBDB remains a double-check for scoring only.
+  String? _timelineLabel(_EnrichedCandidate best) {
+    final catalog = best.catalog;
+    if (catalog != null) {
+      for (final fact in catalog.facts) {
+        if (fact.icon == 'schedule') {
+          return fact.label == 'Age' ? fact.value : '${fact.value} · ${fact.label}';
+        }
+      }
+      if (catalog.facts.isNotEmpty) return catalog.facts.first.value;
+    }
+    return best.pbdb?.ageRangeLabel;
+  }
+
   List<TaxonFact> _buildFacts(_EnrichedCandidate best) {
     final facts = <TaxonFact>[];
     final catalog = best.catalog;
-    // Firestore facts replace the PBDB chips. Scoring still uses PBDB only
-    // as a double-check; this does not change confidence rules.
-    if (catalog != null && catalog.factsFromCloud && catalog.facts.isNotEmpty) {
+    // Curated taxa/{id} facts (asset or Firestore) replace PBDB age chips.
+    // Scoring still uses PBDB only as a double-check.
+    if (catalog != null && catalog.facts.isNotEmpty) {
       facts.addAll(catalog.facts.take(2));
     } else if (best.pbdb != null) {
       facts.addAll(TaxonFactMapper.factsFromTaxon(best.pbdb!, maxFacts: 2));
-    } else if (catalog != null && catalog.facts.isNotEmpty) {
-      facts.add(catalog.facts.first);
     }
 
     facts.add(

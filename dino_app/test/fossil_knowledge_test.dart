@@ -281,30 +281,31 @@ void main() {
   });
 
   group('StrataServices Identify catalog', () {
-    test('keeps local JSON facts when Firebase is not configured', () async {
+    test('merges bundled taxa ages when Firebase is not configured', () async {
       await StrataServices.init(initializeFirebase: () async => false);
       expect(StrataServices.isFirebaseReady, isFalse);
       final entry = StrataServices.identifyCatalog.entryFor('Dactylioceras')!;
-      expect(entry.facts.first.value, '180Ma');
+      expect(entry.facts.first.value, '190–174Ma');
+      expect(entry.factsFromCloud, isTrue);
       expect(entry.family, 'Dactylioceratidae');
     });
 
-    test('keeps local JSON when the cloud read throws', () async {
+    test('keeps asset merge when the cloud read throws', () async {
       await StrataServices.init(
         initializeFirebase: () async => false,
         identifyCloudTaxa: () async => throw StateError('offline'),
       );
       final entry = StrataServices.identifyCatalog.entryFor('Dactylioceras')!;
-      expect(entry.facts.first.value, '180Ma');
+      expect(entry.facts.first.value, '190–174Ma');
     });
 
-    test('keeps local JSON when the cloud read is empty', () async {
+    test('keeps asset merge when the cloud read is empty', () async {
       await StrataServices.init(
         initializeFirebase: () async => false,
         identifyCloudTaxa: () async => const [],
       );
       final entry = StrataServices.identifyCatalog.entryFor('Dactylioceras')!;
-      expect(entry.facts.first.value, '180Ma');
+      expect(entry.facts.first.value, '190–174Ma');
     });
 
     test('overlays cloud taxon fields when a cloud list is supplied', () async {
@@ -409,7 +410,7 @@ void main() {
     });
 
     test(
-      'local catalog still shows PBDB facts when Firestore did not overlay',
+      'local catalog facts beat live PBDB age chips',
       () async {
         final catalog = await IdCatalog.load();
         final repo = GeminiIdentifyRepository(
@@ -427,8 +428,9 @@ void main() {
         );
 
         final result = await repo.identify(Uint8List.fromList([1, 2, 3]));
-        expect(result.facts.map((f) => f.label), contains('PBDB range'));
-        expect(result.facts.map((f) => f.value), isNot(contains('180Ma')));
+        expect(result.facts.map((f) => f.label), isNot(contains('PBDB range')));
+        expect(result.facts.map((f) => f.value), contains('180Ma'));
+        expect(result.pbdbVerified, isTrue);
         expect(result.primaryConfidence, _expectedConfidence(inCatalog: true));
         expect(result.bestMatch.family, 'Dactylioceratidae');
       },

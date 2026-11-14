@@ -1,7 +1,10 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:dino_app/data/repositories/fossil_knowledge_repository.dart';
 import 'package:dino_app/data/repositories/taxon_repository.dart';
+import 'package:dino_app/models/fossil_taxon.dart';
+import 'package:dino_app/models/id_result.dart';
 import 'package:dino_app/models/pbdb_taxon.dart';
 import 'package:dino_app/screens/id_result/species_profile_screen.dart';
 import 'package:material_ui/material_ui.dart';
@@ -116,6 +119,7 @@ void main() {
             genus: 'Unknownus',
             commonGroup: 'Mystery',
             taxonRepository: repo,
+            knowledgeRepository: _EmptyKnowledge(),
           ),
         ),
       );
@@ -128,7 +132,100 @@ void main() {
       );
       expect(find.text('Retry PBDB lookup'), findsOneWidget);
     });
+
+    testWidgets('catalog ages beat live PBDB appearance labels', (tester) async {
+      final repo = _FakeTaxonRepository(
+        taxon: const PbdbTaxon(
+          name: 'Triceratops',
+          rank: 'genus',
+          firstInterval: 'Campanian',
+          lastInterval: 'Danian',
+          occurrenceCount: 42,
+        ),
+      );
+      final knowledge = _MemoryKnowledge(
+        FossilTaxon(
+          id: 'triceratops',
+          scientificName: 'Triceratops',
+          commonGroup: 'Ceratopsid',
+          family: 'Ceratopsidae',
+          taxonomy: const ['Dinosauria'],
+          realm: TaxonRealm.land,
+          periodIds: const ['cretaceous'],
+          facts: const [
+            TaxonFact(icon: 'schedule', value: '68–66Ma', label: 'Cretaceous'),
+          ],
+          imageAsset: 'assets/images/fossil_velociraptor.png',
+          ageStartMa: 68,
+          ageEndMa: 66,
+          ageSource: AgeSource.manual,
+          iconic: true,
+        ),
+      );
+
+      await tester.pumpWidget(
+        wrap(
+          SpeciesProfileScreen(
+            genus: 'Triceratops',
+            taxonRepository: repo,
+            knowledgeRepository: knowledge,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('68–66 Ma'), findsOneWidget);
+      expect(find.text('Campanian – Danian'), findsNothing);
+      expect(find.textContaining('Strata catalog'), findsOneWidget);
+    });
   });
+}
+
+class _EmptyKnowledge implements FossilKnowledgeRepository {
+  @override
+  Future<FossilTaxon?> getTaxon(String id) async => null;
+
+  @override
+  Stream<FossilTaxon?> watchTaxon(String id) async* {
+    yield null;
+  }
+
+  @override
+  Future<List<FossilTaxon>> taxaForIdentify() async => const [];
+
+  @override
+  Future<List<FossilTaxon>> iconicForPeriod(String periodId) async =>
+      const [];
+
+  @override
+  Future<List<FossilTaxon>> kidPool(TaxonRealm realm, String periodId) async =>
+      const [];
+}
+
+class _MemoryKnowledge implements FossilKnowledgeRepository {
+  _MemoryKnowledge(this.taxon);
+
+  final FossilTaxon taxon;
+
+  @override
+  Future<FossilTaxon?> getTaxon(String id) async =>
+      id == taxon.id ? taxon : null;
+
+  @override
+  Stream<FossilTaxon?> watchTaxon(String id) async* {
+    yield await getTaxon(id);
+  }
+
+  @override
+  Future<List<FossilTaxon>> taxaForIdentify() async => [taxon];
+
+  @override
+  Future<List<FossilTaxon>> iconicForPeriod(String periodId) async =>
+      taxon.periodIds.contains(periodId) ? [taxon] : const [];
+
+  @override
+  Future<List<FossilTaxon>> kidPool(TaxonRealm realm, String periodId) async =>
+      const [];
 }
 
 class _FakeTaxonRepository implements TaxonRepository {

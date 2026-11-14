@@ -1,0 +1,19 @@
+{
+  "_meta": {
+    "source": "Firestore manual ages (student hand-review snapshot documented in docs/pbdb-accuracy-plan.md, 2026-10-17)",
+    "note": "Committed gold set for eval — no secrets. Extend via read-only export.mjs when more genera are reviewed. Algorithm improvements are scored against these ages without writing Firestore.",
+    "icsChart": "2024-12"
+  },
+  "taxa": {
+    "triceratops": { "ageStartMa": 68, "ageEndMa": 66, "note": "Hell Creek / Lance" },
+    "tyrannosaurus": { "ageStartMa": 68, "ageEndMa": 66, "note": "Hell Creek / Lance" },
+    "ankylosaurus": { "ageStartMa": 70, "ageEndMa": 66, "note": "Hell Creek" },
+    "pachycephalosaurus": { "ageStartMa": 70, "ageEndMa": 66, "note": "Hell Creek; same Paleogene leak as Triceratops" },
+    "velociraptor": { "ageStartMa": 75, "ageEndMa": 71, "note": "Djadochta" },
+    "otodus": { "ageStartMa": 65, "ageEndMa": 3.6, "note": "Megalodon lineage; not full Cretaceous–Recent" },
+    "carcharodon": { "ageStartMa": 20, "ageEndMa": 0, "note": "Great white; extant" },
+    "glossopteris": { "ageStartMa": 300, "ageEndMa": 252, "note": "Gondwanan glossopterids" },
+    "dactylioceras": { "ageStartMa": 190, "ageEndMa": 174, "note": "Early Jurassic ammonite" },
+    "elrathia": { "ageStartMa": 507, "ageEndMa": 505, "note": "Wheeler Shale" }
+  }
+}

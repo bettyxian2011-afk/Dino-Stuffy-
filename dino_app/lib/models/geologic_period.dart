@@ -11,8 +11,9 @@ enum GeologicEra {
       values.firstWhere((e) => e.label == raw);
 }
 
-/// One `periods/{id}` document. Ages follow the ICS chart as published by
-/// PBDB. The id is the lowercase period name.
+/// One `periods/{id}` document. Ages are pinned to the ICS chart
+/// (`seed/fixtures/ics-periods-2024-12.json`); PBDB supplies interval ids.
+/// The id is the lowercase period name.
 class GeologicPeriod {
   const GeologicPeriod({
     required this.id,

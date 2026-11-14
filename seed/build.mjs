@@ -5,9 +5,13 @@
 // Age ranges (when not set by hand):
 //   1. Load certain PBDB occurrences (idqual=certain), not the genus summary.
 //   2. Prefer Macrostrat formation ages over PBDB's coarse interval bounds.
-//   3. Envelope = widest span of those dated occs; core = outlier-trimmed
-//      (an edge needs ≥2 occs or ≥2 formations). The app uses the core.
-//   4. Flag when envelope and core differ by more than GAP_MA.
+//   3. Percentile-trim large samples; envelope = widest; core = outlier-trimmed
+//      (large samples need ≥2 formations on an edge). Clamp lone K–Pg leaks.
+//   4. Flag when envelope and core differ by more than GAP_MA, and extant
+//      genera with deep starts.
+//
+// Final ageStartMa / ageEndMa ALWAYS drive periodIds and the schedule
+// TaxonFact (Deep Time, Identify, Kids Mode share taxa/{id}).
 //
 // Taxa marked reviewed:true in the previous taxa.json are left untouched so
 // console corrections survive a rebuild.
@@ -16,21 +20,38 @@
 // catalog (id_results.json), then PBDB. Curated ageStartMa / ageEndMa win
 // and set ageSource to "manual".
 //
+// Periods: blurbs from curated; ages pinned to ICS 2024-12 fixture when the
+// curated row does not set startMa/endMa. PBDB fills pbdbIntervalId / color.
+// Parallel ICS timeline work can own richer period docs — this pin keeps
+// periodIds stable and merge-friendly.
+//
 // Usage: node seed/build.mjs
 
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
+import {
+  GAP_MA,
+  agesOverlap,
+  clampMajorBoundaryYoungEdge,
+  num,
+  median,
+  periodIdsFor,
+  percentileTrim,
+  plausibleAge,
+  rangeOf,
+  syncScheduleFact,
+  trimToCore,
+} from './lib/ages.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const assetsDir = path.join(root, 'dino_app', 'assets', 'data');
 const curatedDir = path.join(root, 'seed', 'curated');
+const fixturesDir = path.join(root, 'seed', 'fixtures');
 const cacheDir = path.join(root, 'seed', 'cache');
 
 const PBDB = 'https://paleobiodb.org/data1.2';
 const MACROSTRAT = 'https://macrostrat.org/api';
-/** Flag when envelope and core differ by more than this many Ma. */
-const GAP_MA = 5;
 const PERIOD_NAMES = [
   'Cambrian', 'Ordovician', 'Silurian', 'Devonian', 'Carboniferous', 'Permian',
   'Triassic', 'Jurassic', 'Cretaceous', 'Paleogene', 'Neogene', 'Quaternary',
@@ -62,6 +83,7 @@ async function pbdbGet(endpoint, cacheKey) {
 async function buildPeriods(report) {
   console.log('Fetching PBDB period intervals…');
   const curated = await readJson(path.join(curatedDir, 'periods.json'));
+  const ics = await readJson(path.join(fixturesDir, 'ics-periods-2024-12.json'));
   const intervals = await pbdbGet('intervals/list.json?scale=1&max_ma=540', 'intervals');
   console.log(`Got ${intervals.length} intervals.`);
   const byId = new Map(intervals.map((i) => [i.oid, i]));
@@ -73,11 +95,16 @@ async function buildPeriods(report) {
     const id = name.toLowerCase();
     const blurb = curated[id]?.blurb ?? '';
     if (!blurb) report.push(`periods/${id}: blurb is empty`);
+    const pin = ics[id] ?? {};
+    const startMa = curated[id]?.startMa ?? pin.startMa ?? interval.eag;
+    const endMa = curated[id]?.endMa ?? pin.endMa ?? interval.lag;
+    // Schema stays {name,era,startMa,endMa,blurb,order,color,pbdbIntervalId}
+    // so parallel ICS timeline work can merge without fighting extra fields.
     periods[id] = {
       name,
       era: byId.get(interval.pid)?.nam,
-      startMa: interval.eag,
-      endMa: interval.lag,
+      startMa,
+      endMa,
       blurb,
       order: index + 1,
       color: interval.col ?? null,
@@ -101,39 +128,7 @@ async function loadCatalog() {
   return byGenus;
 }
 
-function periodIdsFor(startMa, endMa, periods) {
-  return Object.entries(periods)
-    .filter(([, p]) => p.startMa > endMa && p.endMa < startMa)
-    .map(([id]) => id);
-}
-
-function ageFact(startMa, endMa, periodIds, periods) {
-  const old = Math.round(startMa);
-  const young = Math.round(endMa);
-  const value = old === young ? `${old}Ma` : `${old}–${young}Ma`;
-  const first = periods[periodIds[0]]?.name;
-  const last = periods[periodIds.at(-1)]?.name;
-  const label = first === last ? (first ?? 'Age') : `${first}–${last}`;
-  return { icon: 'schedule', value, label };
-}
-
 const usable = (rank) => rank && !rank.startsWith('NO_');
-const num = (v) => {
-  const n = Number(v);
-  return Number.isFinite(n) ? n : null;
-};
-const median = (xs) => {
-  if (!xs.length) return null;
-  const s = [...xs].sort((a, b) => a - b);
-  const mid = Math.floor(s.length / 2);
-  return s.length % 2 ? s[mid] : (s[mid - 1] + s[mid]) / 2;
-};
-
-const plausibleAge = (b, t) =>
-  b != null && t != null && b > t && b - t <= 40 && b <= 550 && t >= 0;
-
-/** Ma ranges overlap when each starts (older) after the other's end (younger). */
-const agesOverlap = (a, b) => a.startMa > b.endMa && b.startMa > a.endMa;
 
 /**
  * Macrostrat formation ages. Exact name match preferred; result must be a
@@ -255,58 +250,6 @@ function dateOccurrence(occ, formationAges) {
   };
 }
 
-/**
- * Drop edges supported by only one occurrence and only one formation.
- * An edge is kept when ≥2 occs or ≥2 formations support it.
- */
-function trimToCore(dated) {
-  if (dated.length === 0) return null;
-  let remaining = [...dated];
-
-  for (let pass = 0; pass < 20; pass++) {
-    if (remaining.length < 2) break;
-    const start = Math.max(...remaining.map((d) => d.startMa));
-    const end = Math.min(...remaining.map((d) => d.endMa));
-    const edgeTol = 0.2;
-
-    const oldEdge = remaining.filter((d) => Math.abs(d.startMa - start) <= edgeTol);
-    const youngEdge = remaining.filter((d) => Math.abs(d.endMa - end) <= edgeTol);
-    const oldFms = new Set(oldEdge.map((d) => d.formation).filter(Boolean));
-    const youngFms = new Set(youngEdge.map((d) => d.formation).filter(Boolean));
-
-    const oldOk = oldEdge.length >= 2 || oldFms.size >= 2;
-    const youngOk = youngEdge.length >= 2 || youngFms.size >= 2;
-
-    let next = remaining;
-    if (!oldOk) {
-      const drop = new Set(oldEdge);
-      next = next.filter((d) => !drop.has(d));
-    }
-    if (!youngOk && next.length >= 2) {
-      const drop = new Set(youngEdge);
-      next = next.filter((d) => !drop.has(d));
-    }
-
-    if (next.length === remaining.length || next.length === 0) break;
-    remaining = next;
-  }
-
-  if (remaining.length === 0) remaining = dated;
-  return {
-    startMa: Math.max(...remaining.map((d) => d.startMa)),
-    endMa: Math.min(...remaining.map((d) => d.endMa)),
-    occCount: remaining.length,
-  };
-}
-
-function rangeOf(dated) {
-  if (!dated.length) return null;
-  return {
-    startMa: Math.max(...dated.map((d) => d.startMa)),
-    endMa: Math.min(...dated.map((d) => d.endMa)),
-  };
-}
-
 async function computeAgeRanges(genus, formationCache, report) {
   const id = genus.toLowerCase();
   let occs = [];
@@ -336,8 +279,10 @@ async function computeAgeRanges(genus, formationCache, report) {
     return null;
   }
 
+  const trimmed = percentileTrim(dated);
   const envelope = rangeOf(dated);
-  const core = trimToCore(dated);
+  let core = trimToCore(trimmed);
+  core = clampMajorBoundaryYoungEdge(core, trimmed);
   const macroCount = dated.filter((d) => d.source === 'macrostrat').length;
   const ageSource = macroCount >= dated.length / 2 ? 'macrostrat' : 'pbdb-core';
   const formations = [...new Set(dated.map((d) => d.formation).filter(Boolean))];
@@ -436,7 +381,18 @@ async function buildTaxa(periods, report) {
       report.push(`taxa/${id}: fell back to genus-summary appearance ages`);
     }
 
+    const extant = record.ext === '1' || record.ext === 1;
+    if (extant && ageEndMa <= 0.1 && ageStartMa > 50) {
+      report.push(
+        `taxa/${id}: extant / living with deep start ${ageStartMa} Ma — prefer manual ages`,
+      );
+    }
+
     const periodIds = periodIdsFor(ageStartMa, ageEndMa, periods);
+    // Catalog / hand non-schedule facts may remain; schedule chip always syncs.
+    const seedFacts = hand.facts ?? (isBestMatch ? fromCatalog?.result?.facts : null);
+    const facts = syncScheduleFact(seedFacts, ageStartMa, ageEndMa, periodIds, periods);
+
     const doc = {
       scientificName: genus,
       commonName: hand.commonName ?? null,
@@ -452,11 +408,7 @@ async function buildTaxa(periods, report) {
       ageEnvelope,
       ageCore,
       reviewed: false,
-      // Catalog facts are shared by every candidate in a result, so only the
-      // best match's are accurate; other genera get their computed age instead.
-      facts: hand.facts ?? (isBestMatch
-        ? fromCatalog.result.facts
-        : [ageFact(ageStartMa, ageEndMa, periodIds, periods)]),
+      facts,
       funFacts: hand.funFacts ?? [],
       tip: hand.tip ?? fromCatalog?.result.tip ?? '',
       imageAsset: hand.imageAsset ?? fromCatalog?.candidate.thumbnail,
@@ -471,7 +423,7 @@ async function buildTaxa(periods, report) {
         occurrences: record.noc ?? null,
         certainOccurrences: ranges?.certainOccurrences ?? null,
         formationsUsed: ranges?.formationsUsed ?? [],
-        extant: record.ext === '1' || record.ext === 1,
+        extant,
       },
     };
 

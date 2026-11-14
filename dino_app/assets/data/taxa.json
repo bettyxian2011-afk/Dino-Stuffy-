@@ -66,12 +66,11 @@
     ],
     "realm": "land",
     "periodIds": [
-      "cretaceous",
-      "paleogene"
+      "cretaceous"
     ],
-    "ageStartMa": 72.2,
-    "ageEndMa": 63.5,
-    "ageSource": "macrostrat",
+    "ageStartMa": 70,
+    "ageEndMa": 66,
+    "ageSource": "manual",
     "ageEnvelope": {
       "startMa": 72.2,
       "endMa": 63.5
@@ -84,8 +83,8 @@
     "facts": [
       {
         "icon": "schedule",
-        "value": "72–64Ma",
-        "label": "Cretaceous–Paleogene"
+        "value": "70–66Ma",
+        "label": "Cretaceous"
       }
     ],
     "funFacts": [],
@@ -593,8 +592,8 @@
     "facts": [
       {
         "icon": "schedule",
-        "value": "80Ma",
-        "label": "Late Cretaceous"
+        "value": "86–66Ma",
+        "label": "Cretaceous"
       },
       {
         "icon": "straighten",
@@ -929,13 +928,12 @@
     ],
     "realm": "ocean",
     "periodIds": [
-      "paleogene",
       "neogene",
       "quaternary"
     ],
-    "ageStartMa": 59.24,
+    "ageStartMa": 20,
     "ageEndMa": 0,
-    "ageSource": "pbdb-core",
+    "ageSource": "manual",
     "ageEnvelope": {
       "startMa": 85.7,
       "endMa": 0
@@ -948,8 +946,8 @@
     "facts": [
       {
         "icon": "schedule",
-        "value": "59–0Ma",
-        "label": "Paleogene–Quaternary"
+        "value": "20–0Ma",
+        "label": "Neogene–Quaternary"
       }
     ],
     "funFacts": [],
@@ -1152,9 +1150,9 @@
     "periodIds": [
       "jurassic"
     ],
-    "ageStartMa": 201.4,
-    "ageEndMa": 161.5,
-    "ageSource": "pbdb-core",
+    "ageStartMa": 190,
+    "ageEndMa": 174,
+    "ageSource": "manual",
     "ageEnvelope": {
       "startMa": 201.4,
       "endMa": 161.5
@@ -1167,8 +1165,8 @@
     "facts": [
       {
         "icon": "schedule",
-        "value": "180Ma",
-        "label": "Early Jurassic"
+        "value": "190–174Ma",
+        "label": "Jurassic"
       },
       {
         "icon": "straighten",
@@ -1384,8 +1382,8 @@
     "facts": [
       {
         "icon": "schedule",
-        "value": "150Ma",
-        "label": "Late Jurassic"
+        "value": "155–143Ma",
+        "label": "Jurassic"
       },
       {
         "icon": "straighten",
@@ -1431,9 +1429,9 @@
     "periodIds": [
       "cambrian"
     ],
-    "ageStartMa": 509.7,
-    "ageEndMa": 486.85,
-    "ageSource": "pbdb-core",
+    "ageStartMa": 507,
+    "ageEndMa": 505,
+    "ageSource": "manual",
     "ageEnvelope": {
       "startMa": 509.7,
       "endMa": 486.85
@@ -1446,8 +1444,8 @@
     "facts": [
       {
         "icon": "schedule",
-        "value": "505Ma",
-        "label": "Middle Cambrian"
+        "value": "507–505Ma",
+        "label": "Cambrian"
       },
       {
         "icon": "straighten",
@@ -1534,8 +1532,8 @@
     "facts": [
       {
         "icon": "schedule",
-        "value": "420Ma",
-        "label": "Silurian"
+        "value": "458–359Ma",
+        "label": "Ordovician–Devonian"
       },
       {
         "icon": "straighten",
@@ -1942,12 +1940,11 @@
     "realm": "land",
     "periodIds": [
       "carboniferous",
-      "permian",
-      "triassic"
+      "permian"
     ],
-    "ageStartMa": 358.86,
-    "ageEndMa": 201.4,
-    "ageSource": "pbdb-core",
+    "ageStartMa": 300,
+    "ageEndMa": 252,
+    "ageSource": "manual",
     "ageEnvelope": {
       "startMa": 358.86,
       "endMa": 161.5
@@ -1960,8 +1957,8 @@
     "facts": [
       {
         "icon": "schedule",
-        "value": "260Ma",
-        "label": "Late Permian"
+        "value": "300–252Ma",
+        "label": "Carboniferous–Permian"
       },
       {
         "icon": "straighten",
@@ -2757,8 +2754,8 @@
     "facts": [
       {
         "icon": "schedule",
-        "value": "390Ma",
-        "label": "Middle Devonian"
+        "value": "393–359Ma",
+        "label": "Devonian"
       },
       {
         "icon": "straighten",
@@ -2968,14 +2965,12 @@
     ],
     "realm": "ocean",
     "periodIds": [
-      "cretaceous",
       "paleogene",
-      "neogene",
-      "quaternary"
+      "neogene"
     ],
-    "ageStartMa": 83.6,
-    "ageEndMa": 0,
-    "ageSource": "pbdb-core",
+    "ageStartMa": 65,
+    "ageEndMa": 3.6,
+    "ageSource": "manual",
     "ageEnvelope": {
       "startMa": 83.6,
       "endMa": 0
@@ -2988,8 +2983,8 @@
     "facts": [
       {
         "icon": "schedule",
-        "value": "15Ma",
-        "label": "Miocene"
+        "value": "65–4Ma",
+        "label": "Paleogene–Neogene"
       },
       {
         "icon": "straighten",
@@ -3266,12 +3261,11 @@
     ],
     "realm": "land",
     "periodIds": [
-      "cretaceous",
-      "paleogene"
+      "cretaceous"
     ],
-    "ageStartMa": 72.2,
-    "ageEndMa": 64.915,
-    "ageSource": "macrostrat",
+    "ageStartMa": 70,
+    "ageEndMa": 66,
+    "ageSource": "manual",
     "ageEnvelope": {
       "startMa": 83.6,
       "endMa": 64.915
@@ -3284,8 +3278,8 @@
     "facts": [
       {
         "icon": "schedule",
-        "value": "72–65Ma",
-        "label": "Cretaceous–Paleogene"
+        "value": "70–66Ma",
+        "label": "Cretaceous"
       }
     ],
     "funFacts": [],
@@ -4050,12 +4044,11 @@
     ],
     "realm": "land",
     "periodIds": [
-      "cretaceous",
-      "paleogene"
+      "cretaceous"
     ],
-    "ageStartMa": 83.6,
-    "ageEndMa": 64.915,
-    "ageSource": "macrostrat",
+    "ageStartMa": 68,
+    "ageEndMa": 66,
+    "ageSource": "manual",
     "ageEnvelope": {
       "startMa": 83.6,
       "endMa": 64.915
@@ -4068,8 +4061,8 @@
     "facts": [
       {
         "icon": "schedule",
-        "value": "84–65Ma",
-        "label": "Cretaceous–Paleogene"
+        "value": "68–66Ma",
+        "label": "Cretaceous"
       }
     ],
     "funFacts": [],
@@ -4113,12 +4106,11 @@
     ],
     "realm": "land",
     "periodIds": [
-      "cretaceous",
-      "paleogene"
+      "cretaceous"
     ],
-    "ageStartMa": 83.6,
-    "ageEndMa": 64.915,
-    "ageSource": "macrostrat",
+    "ageStartMa": 68,
+    "ageEndMa": 66,
+    "ageSource": "manual",
     "ageEnvelope": {
       "startMa": 83.6,
       "endMa": 64.915
@@ -4131,8 +4123,8 @@
     "facts": [
       {
         "icon": "schedule",
-        "value": "68Ma",
-        "label": "Late Cretaceous"
+        "value": "68–66Ma",
+        "label": "Cretaceous"
       },
       {
         "icon": "straighten",
@@ -4242,9 +4234,9 @@
     "periodIds": [
       "cretaceous"
     ],
-    "ageStartMa": 83.6,
-    "ageEndMa": 72.2,
-    "ageSource": "pbdb-core",
+    "ageStartMa": 75,
+    "ageEndMa": 71,
+    "ageSource": "manual",
     "ageEnvelope": {
       "startMa": 83.6,
       "endMa": 72.2
@@ -4257,8 +4249,8 @@
     "facts": [
       {
         "icon": "schedule",
-        "value": "75Ma",
-        "label": "Late Cretaceous"
+        "value": "75–71Ma",
+        "label": "Cretaceous"
       },
       {
         "icon": "straighten",

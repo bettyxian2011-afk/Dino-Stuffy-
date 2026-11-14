@@ -2,14 +2,16 @@ import 'package:material_ui/material_ui.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../data/repositories/fossil_knowledge_repository.dart';
 import '../../data/repositories/taxon_repository.dart';
 import '../../data/services/taxon_fact_mapper.dart';
 import '../../data/strata_services.dart';
+import '../../models/fossil_taxon.dart';
 import '../../models/pbdb_taxon.dart';
 import '../../theme/strata_theme.dart';
 import '../../widgets/gradient_cta_button.dart';
 
-/// Species profile backed by Paleobiology Database taxon records.
+/// Species profile: curated catalog ages when a taxon exists, PBDB as fallback.
 class SpeciesProfileScreen extends StatefulWidget {
   const SpeciesProfileScreen({
     super.key,
@@ -17,12 +19,15 @@ class SpeciesProfileScreen extends StatefulWidget {
     this.commonGroup,
     this.family,
     TaxonRepository? taxonRepository,
-  }) : taxonRepository = taxonRepository ?? const _DefaultTaxonRepo();
+    FossilKnowledgeRepository? knowledgeRepository,
+  }) : taxonRepository = taxonRepository ?? const _DefaultTaxonRepo(),
+       knowledgeRepository = knowledgeRepository;
 
   final String genus;
   final String? commonGroup;
   final String? family;
   final TaxonRepository taxonRepository;
+  final FossilKnowledgeRepository? knowledgeRepository;
 
   @override
   State<SpeciesProfileScreen> createState() => _SpeciesProfileScreenState();
@@ -32,14 +37,25 @@ class _ProfileLoad {
   const _ProfileLoad({
     required this.taxon,
     required this.taxonomy,
+    this.catalog,
   });
 
   final PbdbTaxon taxon;
   final List<String> taxonomy;
+  final FossilTaxon? catalog;
 }
 
 class _SpeciesProfileScreenState extends State<SpeciesProfileScreen> {
   late Future<_ProfileLoad?> _future;
+
+  FossilKnowledgeRepository? get _knowledge {
+    if (widget.knowledgeRepository != null) return widget.knowledgeRepository;
+    try {
+      return StrataServices.fossilKnowledgeRepository;
+    } catch (_) {
+      return null;
+    }
+  }
 
   @override
   void initState() {
@@ -48,18 +64,28 @@ class _SpeciesProfileScreenState extends State<SpeciesProfileScreen> {
   }
 
   Future<_ProfileLoad?> _load() async {
+    final catalog = await _knowledge?.getTaxon(widget.genus.toLowerCase());
     final taxon = await widget.taxonRepository.findTaxon(widget.genus);
-    if (taxon == null) return null;
+    if (taxon == null && catalog == null) return null;
 
-    var taxonomy = <String>[];
-    try {
-      final chain =
-          await widget.taxonRepository.getTimelineChain(widget.genus);
-      taxonomy = TaxonFactMapper.taxonomyLabelsFromChain(chain);
-    } catch (_) {
-      taxonomy = const [];
+    var taxonomy = catalog?.taxonomy ?? <String>[];
+    if (taxonomy.isEmpty) {
+      try {
+        final chain =
+            await widget.taxonRepository.getTimelineChain(widget.genus);
+        taxonomy = TaxonFactMapper.taxonomyLabelsFromChain(chain);
+      } catch (_) {
+        taxonomy = const [];
+      }
     }
-    return _ProfileLoad(taxon: taxon, taxonomy: taxonomy);
+
+    final pbdb = taxon ??
+        PbdbTaxon(
+          name: catalog!.scientificName,
+          rank: 'genus',
+          occurrenceCount: catalog.pbdb?.occurrences,
+        );
+    return _ProfileLoad(taxon: pbdb, taxonomy: taxonomy, catalog: catalog);
   }
 
   void _retry() {
@@ -103,8 +129,9 @@ class _SpeciesProfileScreenState extends State<SpeciesProfileScreen> {
           return _ProfileBody(
             taxon: data.taxon,
             taxonomy: data.taxonomy,
-            commonGroup: widget.commonGroup,
-            family: widget.family,
+            catalog: data.catalog,
+            commonGroup: widget.commonGroup ?? data.catalog?.commonGroup,
+            family: widget.family ?? data.catalog?.family,
           );
         },
       ),
@@ -292,14 +319,24 @@ class _ProfileBody extends StatelessWidget {
   const _ProfileBody({
     required this.taxon,
     required this.taxonomy,
+    this.catalog,
     this.commonGroup,
     this.family,
   });
 
   final PbdbTaxon taxon;
   final List<String> taxonomy;
+  final FossilTaxon? catalog;
   final String? commonGroup;
   final String? family;
+
+  String get _ageLabel {
+    final catalogAge = catalog?.ageRangeLabel;
+    if (catalogAge != null) return catalogAge;
+    final schedule = catalog?.scheduleFactValue;
+    if (schedule != null) return schedule;
+    return taxon.ageRangeLabel;
+  }
 
   String get _subtitle {
     final parts = <String>[
@@ -402,8 +439,8 @@ class _ProfileBody extends StatelessWidget {
         const SizedBox(height: 12),
         _FactCard(
           icon: Icons.timeline,
-          label: 'Age range',
-          value: taxon.ageRangeLabel,
+          label: catalog != null ? 'Age range (catalog)' : 'Age range',
+          value: _ageLabel,
         ),
         const SizedBox(height: 12),
         _FactCard(
@@ -425,8 +462,12 @@ class _ProfileBody extends StatelessWidget {
             ),
           ),
           child: Text(
-            'PBDB record for this name — a double-check and fact source, '
-            'not proof that the photo is this taxon.',
+            catalog != null
+                ? 'Ages come from the Strata catalog (same data as Deep Time). '
+                    'PBDB is a double-check for occurrences, not proof the photo '
+                    'is this taxon.'
+                : 'PBDB record for this name — a double-check and fact source, '
+                    'not proof that the photo is this taxon.',
             style: GoogleFonts.dmSans(
               color: StrataColors.teal,
               fontSize: 12,

@@ -75,6 +75,7 @@ class StrataServices {
               : null,
         );
     _catalog ??= await _loadIdentifyCatalog(
+      localKnowledge: localKnowledge,
       identifyCloudTaxa: identifyCloudTaxa,
       firestoreKnowledge: firestoreKnowledge,
     );
@@ -131,22 +132,36 @@ class StrataServices {
   }
 
   static Future<IdCatalog> _loadIdentifyCatalog({
+    required AssetFossilKnowledgeRepository localKnowledge,
     Future<List<FossilTaxon>> Function()? identifyCloudTaxa,
     FirestoreFossilKnowledgeRepository? firestoreKnowledge,
   }) async {
-    final local = await IdCatalog.load();
+    // Precedence: id_results.json < bundled taxa.json < Firestore taxa.
+    // One curated age path for Identify, Deep Time, and Kids Mode.
+    var catalog = await IdCatalog.load();
+    try {
+      final assetTaxa = await localKnowledge.taxaForIdentify();
+      if (assetTaxa.isNotEmpty) {
+        catalog = catalog.mergedWith(assetTaxa);
+        debugPrint(
+          'StrataServices: Identify catalog merged ${assetTaxa.length} asset taxa',
+        );
+      }
+    } catch (e) {
+      debugPrint('StrataServices: asset taxa merge skipped ($e)');
+    }
     final loadCloud = identifyCloudTaxa ?? firestoreKnowledge?.taxaForIdentify;
-    if (loadCloud == null) return local;
+    if (loadCloud == null) return catalog;
     try {
       final cloud = await loadCloud();
-      if (cloud.isEmpty) return local;
+      if (cloud.isEmpty) return catalog;
       debugPrint(
         'StrataServices: Identify catalog merged ${cloud.length} cloud taxa',
       );
-      return local.mergedWith(cloud);
+      return catalog.mergedWith(cloud);
     } catch (e) {
-      debugPrint('StrataServices: Identify catalog using local JSON ($e)');
-      return local;
+      debugPrint('StrataServices: Identify catalog using local merge ($e)');
+      return catalog;
     }
   }
 

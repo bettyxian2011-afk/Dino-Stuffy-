@@ -5,6 +5,9 @@
   "description": "Builds and uploads Strata's Firestore seed data (taxa, periods).",
   "scripts": {
     "build": "node build.mjs",
+    "apply-ages": "node apply-catalog-ages.mjs",
+    "eval-ages": "node eval-ages.mjs",
+    "test-ages": "node test-ages.mjs",
     "upload": "node upload.mjs"
   },
   "engines": {

@@ -4,6 +4,27 @@ Handoff for continuing work on `seed/build.mjs` (and related age logic) so **new
 
 **Related docs:** [iteration-8-firestore-roadmap.md](./iteration-8-firestore-roadmap.md), [iteration-8-v0.3-identify-firestore.md](./iteration-8-v0.3-identify-firestore.md).
 
+**Branch:** `feat/seed-age-accuracy` (do not push/merge without asking). Designed to merge cleanly with parallel ICS Deep Time timeline work from [stratigraphy.org](https://stratigraphy.org/).
+
+---
+
+## Status (feat/seed-age-accuracy)
+
+| Deliverable | State |
+| ----------- | ----- |
+| Gold fixture `seed/fixtures/gold-ages.json` | Done (10 genera from 2026-10-17 Firestore manual snapshot + Hell Creek peers) |
+| Offline helpers `seed/lib/ages.mjs` + `npm run test-ages` | Done |
+| `periodIds` + schedule `TaxonFact` always from final ages | Done (`syncScheduleFact`) |
+| Curated manual ages in `seed/curated/taxa.json` | Done for gold set |
+| Apply without network / Firestore: `npm run apply-ages` | Done |
+| Eval: `npm run eval-ages` | **10/10 within ±2 Ma** after apply |
+| ICS period pin `seed/fixtures/ics-periods-2024-12.json` | Done (blurbs stay curated; schema unchanged for ICS student merge) |
+| Identify prefers catalog ages over live PBDB | Done (asset `taxa.json` merged into IdCatalog; facts beat PBDB chips) |
+| Species profile prefers catalog ages | Done (`FossilKnowledgeRepository`) |
+| Firestore upload / overwrite | **Not done (by design)** |
+
+Before gold apply, local rebuild ages were wide envelopes (e.g. *Triceratops* 83.6–64.9 → `cretaceous,paleogene`). After curated ages: 68–66 → `cretaceous` only; schedule fact `68–66Ma`.
+
 ---
 
 ## Hard constraints
@@ -13,6 +34,33 @@ Handoff for continuing work on `seed/build.mjs` (and related age logic) so **new
 3. **Do not overwrite** hand-corrected cloud data by running `upload.mjs` blindly.
 4. When changing the seed algorithm, preserve the ability to set **manual** `ageStartMa` / `ageEndMa` in `seed/curated/taxa.json` and to honor `reviewed: true` (build/upload skip reviewed docs).
 5. No committing Firebase client keys, service-account JSON, or Gemini keys.
+
+---
+
+## Shared source of truth (non-negotiable)
+
+One curated catalog drives ages **everywhere** the app shows taxa:
+
+1. **Deep Time** — `iconicForPeriod` / `periodIds`
+2. **Identify / species profile** — facts & age chips from `FossilKnowledgeRepository` / merged IdCatalog, **not** raw live PBDB appearance when a catalog taxon exists
+3. **Kids Mode (future)** — `kidPool(realm, periodId)` and any quiz content that filters on `periodIds` + ages
+
+Wrong Deep Time placements are **data** (wide PBDB/Macrostrat ages → too many `periodIds`), not the timeline UI. Fixing seed/catalog fields fixes all three consumers because they share `taxa/{id}` (cloud) and `assets/data/taxa.json` (fallback).
+
+Rules:
+
+- Final `ageStartMa` / `ageEndMa` prefer manual curated / gold
+- `periodIds` **ALWAYS** recomputed from those final ages
+- Schedule `TaxonFact` **ALWAYS** regenerated from those ages + periods
+- `iconic` / `kidSafe` / `realm` stay curated; do not invent Kids UI here
+- No second parallel age system for Identify vs Deep Time vs Kids
+
+### Merge notes for parallel ICS timeline work
+
+- Taxon age pipeline owns **taxon** ages, `periodIds`, and schedule facts.
+- Period **boundaries** are pinned via `seed/fixtures/ics-periods-2024-12.json`; blurbs stay in `seed/curated/periods.json`.
+- Period document **schema** is unchanged (`name`, `era`, `startMa`, `endMa`, `blurb`, `order`, `color`, `pbdbIntervalId`) so a student ICS/Deep Time branch can enrich timeline UI without fighting this branch.
+- `periodIdsFor(start, end, periods)` is a pure overlap — if ICS ages shift slightly, rebuild/apply recomputes membership.
 
 ---
 
@@ -47,19 +95,11 @@ Examples (local rebuild → Firestore manual):
 
 Field-level churn vs local (how often Firestore differed): `ageStartMa`/`ageEndMa` (~28), `facts` (23), `periodIds` (14), plus seed metadata (`ageSource`, `ageEnvelope`, `ageCore`, `pbdb`).
 
-**Inconsistency to fix in tooling (not necessarily in DB this task):** some taxa have corrected `ageStartMa`/`ageEndMa` but **stale schedule facts** still showing the old wide label (e.g. *Triceratops* ages 68–66 while a fact still says `84–66Ma` / Campanian–Maastrichtian). New profiles should regenerate the age fact (and `periodIds`) from the final age range.
+**Fixed in tooling:** schedule facts and `periodIds` are always regenerated from the final age range (`syncScheduleFact` / `apply-catalog-ages.mjs`).
 
 ### Periods: already quite accurate
 
-Firestore vs local ICS/PBDB boundaries differ only slightly (examples):
-
-| Period | Local | Firestore |
-| ------ | ----- | --------- |
-| Ordovician | 486.85–443.1 | 486.4–443.8 |
-| Jurassic | 201.4–143.1 | 201.3–145 |
-| Cretaceous | 143.1–66 | 145–66 |
-
-Blurbs match. Diffs are mostly `startMa`/`endMa` rounding and `pbdbIntervalId`. **Do not aggressively rewrite period blurbs.** Prefer pinning period ages to a cited ICS chart version and treating PBDB intervals as a cross-check.
+Local assets match ICS 2024-12 pin. Firestore vs ICS differs only slightly (rounding / older chart). **Do not aggressively rewrite period blurbs.** Prefer the cited ICS fixture; PBDB intervals are a cross-check for `pbdbIntervalId` / color only.
 
 ---
 
@@ -85,66 +125,79 @@ This is about **`seed/build.mjs`**, Macrostrat usage, curated overrides, and rep
 4. **Long-ranging or extant genera** (*Otodus*, *Carcharodon*, *Isurus*) need special handling (often manual or “core species” / common-name scoped ranges).
 5. **Outlier trim** helps (*Albertosaurus*) but is not enough alone for Campanian Laramidia dinosaurs still sitting at 83.6.
 
-Current pipeline already has: certain occs, outlier trim, Macrostrat (capped), dual envelope/core, `ageSource`, `reviewed` skip. **Extend it; don’t throw it away.**
+Current pipeline: certain occs, percentile trim (large n), stronger multi-formation edges, Macrostrat (capped), K–Pg young-edge clamp, dual envelope/core, `ageSource`, `reviewed` skip, always sync facts/`periodIds`. **Extend it; don’t throw it away.**
 
 ---
 
-## Suggested implementation work
+## Implementation map
 
-### A. Treat Firestore manual ages as a gold set (read-only)
+### A. Gold set (read-only)
 
-1. Read-only export or one-off compare script (no upload).
-2. Build a **gold fixture** (e.g. `seed/fixtures/gold-ages.json`) listing `{ id, ageStartMa, ageEndMa }` from Firestore for the 33 genera — **committed**, no secrets.
-3. Add a test or `node seed/eval-ages.mjs` that runs the age algorithm on those genera and reports MAE / how many fall within ±2 Ma / ±5 Ma of gold. Goal: improve scores without requiring Firestore at test time.
+1. `seed/fixtures/gold-ages.json` — committed `{ id → ageStartMa, ageEndMa }` from Firestore manual snapshot (+ Hell Creek peers).
+2. `npm run eval-ages` — MAE / ±2 / ±5 vs bundled `taxa.json` (no Firestore at test time).
+3. Extend gold via read-only `export.mjs` when more genera are reviewed.
 
-### B. Tighten age algorithm for new taxa
+### B. Age algorithm for new taxa
 
-1. Keep **certain-only** occurrences; strengthen outlier rules (e.g. require ≥2 formations for an edge when `certainOccurrences` is large).
-2. Prefer **formation-dated** cores (Macrostrat exact-name match only); reject ages that cross major boundaries without multi-formation support (e.g. single edge before 72.2 for Hell Creek–type dinosaurs).
-3. Optional: **percentile / trimmed range** (e.g. drop outermost 5–10% of occ starts/ends) when n is large.
-4. After computing core ages, **always** recompute `periodIds` and the schedule `TaxonFact` from that range (so facts never lag ages).
-5. For genera marked extant / `ageEndMa ≈ 0`, flag for manual review instead of publishing a Paleozoic–Recent envelope.
-6. Preserve curated overrides: `seed/curated/taxa.json` `ageStartMa`/`ageEndMa` → `ageSource: "manual"`.
+1. Certain-only occurrences; percentile trim when n≥20; large samples need ≥2 formations on an edge.
+2. Macrostrat exact-name match only when overlapping and not wider; clamp lone post–K–Pg young edges.
+3. After final ages, **always** `periodIds` + schedule fact sync.
+4. Extant / `ageEndMa ≈ 0` with deep starts → attention report (prefer manual).
+5. Curated overrides: `seed/curated/taxa.json` → `ageSource: "manual"`.
 
 ### C. Periods
 
-1. Pin Phanerozoic period boundaries to a single cited ICS source (document chart version in `periods.json` / runbook).
-2. Use PBDB `intervals` only to verify / fill `pbdbIntervalId`, not to silently drift boundaries every build.
-3. Leave blurbs under curated control (`seed/curated/periods.json`).
+1. Pin Phanerozoic boundaries to ICS 2024-12 fixture.
+2. PBDB `intervals` only for `pbdbIntervalId` / color / era name.
+3. Blurbs under curated control (`seed/curated/periods.json`).
 
 ### D. New species profile checklist
 
-When adding a genus to the catalog / seed:
-
 1. Add curated row (realm, names, identify flags, optional manual ages).
-2. Run build; read the attention report (envelope vs core gaps).
-3. If gap &gt; 5 Ma or extant/long-ranging: set manual ages from a cited source (museum / primary lit / PBDB formation consensus).
-4. Confirm `periodIds` and schedule fact match.
-5. Upload **only that doc** or upload with `reviewed` protection for existing gold taxa.
+2. Run `npm run build` (or `apply-ages` if only ages changed); read the attention report.
+3. If gap > 5 Ma or extant/long-ranging: set manual ages from a cited source.
+4. Confirm `periodIds` and schedule fact match (`npm run eval-ages` if gold-listed).
+5. Upload **only that doc** or upload with `reviewed` protection — **only when asked**.
 6. Set `reviewed: true` in Firestore after human OK.
 
-### E. Species profile UI / Identify (only if needed)
+### E. Identify / profile (done on this branch)
 
-If profile screens still show PBDB live appearance ages instead of Firestore taxon ages, point them at `FossilKnowledgeRepository` / cloud taxon fields — but **do not** expand scope into full v0.3 unless asked; this prompt is primarily seed accuracy.
+- `StrataServices` merges bundled `taxaForIdentify()` into IdCatalog before optional Firestore overlay.
+- `GeminiIdentifyRepository` prefers catalog facts / timeline label over live PBDB chips.
+- `SpeciesProfileScreen` shows catalog ages when `FossilKnowledgeRepository` has the taxon.
+
+---
+
+## Commands
+
+```bash
+cd seed
+npm run test-ages      # offline helper unit tests
+npm run apply-ages     # write taxa.json ages/periodIds/facts from curated+gold (no network)
+npm run eval-ages      # score taxa.json vs gold fixture
+npm run build          # full PBDB/Macrostrat rebuild (network; still no Firestore write)
+```
 
 ---
 
 ## Done when
 
-- Eval against the gold age fixture improves (document before/after counts within ±5 Ma).
-- New genus path: certain-occ + trim + Macrostrat + fact/`periodIds` sync, with clear manual-override and review flags.
-- Period builds do not flap blurbs; boundaries stable vs ICS pin.
-- Existing Firestore hand-edits remain untouched unless the user explicitly requests an export or carefully scoped upload.
-- Tests cover age helpers (trim, period mapping, fact sync) without live network when possible (cached fixtures OK).
+- [x] Eval against the gold age fixture improves (10/10 within ±5 Ma after apply)
+- [x] New genus path: certain-occ + trim + Macrostrat + fact/`periodIds` sync, with manual-override and review flags
+- [x] Period builds do not flap blurbs; boundaries stable vs ICS pin
+- [x] Existing Firestore hand-edits remain untouched unless the user explicitly requests upload
+- [x] Tests cover age helpers (trim, period mapping, fact sync) without live network
+- [ ] Optional later: scoped Firestore upload of gold taxa only + set `reviewed: true` (**ask first**)
 
 ---
 
 ## Out of scope
 
 - Clobbering Firestore with a full `upload.mjs` of local rebuild
-- Kids Mode fun facts
+- Kids Mode fun facts / Kids UI
 - Rewriting Identify confidence heuristics
 - Committing `firebase_options.dart` / Admin keys
+- Owning the richer ICS Deep Time timeline UI (parallel student work)
 
 ---
 
