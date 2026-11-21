@@ -1,11 +1,15 @@
+import 'dart:math' as math;
+
 import 'package:dino_app/data/repositories/fossil_knowledge_repository.dart';
 import 'package:dino_app/data/repositories/period_repository.dart';
 import 'package:dino_app/data/catalog/knowledge_assets.dart';
 import 'package:dino_app/models/fossil_taxon.dart';
 import 'package:dino_app/models/geologic_period.dart';
+import 'package:dino_app/models/geologic_eon.dart';
 import 'package:dino_app/models/id_result.dart';
 import 'package:dino_app/screens/timeline/period_detail_screen.dart';
 import 'package:dino_app/screens/timeline/timeline_screen.dart';
+import 'package:dino_app/screens/timeline/deep_time_clock.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
@@ -89,9 +93,17 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Deep Time'), findsOneWidget);
-      expect(find.text('Mesozoic'), findsOneWidget);
-      expect(find.text('Cretaceous'), findsOneWidget);
-      await tester.tap(find.text('Cretaceous'));
+      expect(
+        find.descendant(
+          of: find.byType(DeepTimeClock),
+          matching: find.text('Cretaceous'),
+        ),
+        findsOneWidget,
+      );
+      await tester.drag(find.byType(CustomScrollView), const Offset(0, -2200));
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(find.text('Explore Cretaceous'));
+      await tester.tap(find.text('Explore Cretaceous'));
       await tester.pumpAndSettle();
 
       expect(find.text('145–66 million years ago'), findsOneWidget);
@@ -101,6 +113,94 @@ void main() {
       expect(find.text('Ceratopsidae'), findsOneWidget);
     },
   );
+
+  testWidgets('clock hand labels every period under its colored arc', (
+    tester,
+  ) async {
+    final periods = await tester.runAsync(() => KnowledgeAssets.loadPeriods());
+    final router = GoRouter(
+      initialLocation: '/timeline',
+      routes: [
+        GoRoute(
+          path: '/timeline',
+          builder: (_, _) => TimelineScreen(
+            periodRepository: AssetPeriodRepository(periods: periods!),
+            knowledgeRepository: _Knowledge(),
+          ),
+        ),
+      ],
+    );
+    await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+    await tester.pumpAndSettle();
+
+    final clockFinder = find.byType(DeepTimeClock);
+    final clockRect = tester.getRect(clockFinder);
+    final oldestMa = GeologicEon.hadean.startMa;
+    final radius = math.min(clockRect.width, clockRect.height) * .72 / 2;
+
+    for (final period in periods!) {
+      final age = (period.startMa + period.endMa) / 2;
+      final progressAngle = deepTimeClockProgressAngleForAge(
+        age,
+        oldestMa: oldestMa,
+        youngestMa: 0,
+      );
+      final angle = -math.pi / 2 + progressAngle;
+      final point =
+          clockRect.center + Offset(math.cos(angle), math.sin(angle)) * radius;
+
+      await tester.tapAt(point);
+      await tester.pumpAndSettle();
+      expect(
+        find.descendant(of: clockFinder, matching: find.text(period.name)),
+        findsOneWidget,
+        reason: '${period.name} arc should select ${period.name}',
+      );
+    }
+  });
+
+  testWidgets('clock hand and age selection use the same angular scale', (
+    tester,
+  ) async {
+    final periods = await tester.runAsync(() => KnowledgeAssets.loadPeriods());
+    const selectedMa = 572.3;
+    double? ageReadFromHand;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: DeepTimeClock(
+            periods: periods!,
+            eons: GeologicEon.all,
+            selectedLabel: 'Proterozoic',
+            selectedMa: selectedMa,
+            extinctions: const [],
+            activeExtinctionId: null,
+            onAgeChanged: (age) => ageReadFromHand = age,
+            onExtinctionSelected: (_) {},
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final clockRect = tester.getRect(find.byType(DeepTimeClock));
+    final handAngle =
+        -math.pi / 2 +
+        deepTimeClockProgressAngleForAge(
+          selectedMa,
+          oldestMa: GeologicEon.hadean.startMa,
+          youngestMa: 0,
+        );
+    final handTip =
+        clockRect.center +
+        Offset(math.cos(handAngle), math.sin(handAngle)) *
+            math.min(clockRect.width, clockRect.height) *
+            .58 /
+            2;
+
+    await tester.tapAt(handTip);
+    expect(ageReadFromHand, closeTo(selectedMa, 0.01));
+  });
 
   testWidgets('Cretaceous detail includes the five seeded land genera', (
     tester,
